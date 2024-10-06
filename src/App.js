@@ -1,106 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, NavLink, Navigate } from 'react-router-dom';
-import SyncTransactions from './components/SyncTransactions';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
+import { Layout, Menu, Typography, Button } from 'antd';
 import TransactionsList from './components/TransactionsList';
 import GoalsList from './components/GoalsList';
-import { Drawer, List, ListItem, ListItemText, CssBaseline, Divider, ListItemIcon, Typography } from '@mui/material';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import FlagIcon from '@mui/icons-material/Flag';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { ThemeProvider, styled } from '@mui/material/styles';
-import { theme } from './styles/CommonStyles'
 import ManageAccounts from './components/ManageAccounts';
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
+import { BankOutlined, FlagOutlined, MenuOutlined, UnorderedListOutlined, LogoutOutlined, DashboardOutlined } from '@ant-design/icons';
 
-const drawerWidth = 240;
-
-const AppContainer = styled('div')(({ theme }) => ({
-    display: 'flex',
-}));
-
-const AppContent = styled('main')(({ theme }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  
-}));
-
-const DrawerStyled = styled(Drawer)(({ theme }) => ({
-    width: drawerWidth,
-    flexShrink: 0,
-    '& .MuiDrawer-paper': {
-        width: drawerWidth,
-        boxSizing: 'border-box',
-    },
-}));
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-    ...theme.mixins.toolbar,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-}));
-
-const StyledNavLink = styled(NavLink)(({ theme }) => ({
-    textDecoration: 'none',
-    color: theme.palette.text.primary,
-    '&.active': {
-        backgroundColor: theme.palette.action.selected,
-    },
-}));
-
-const drawer = (
-    <div>
-        <DrawerHeader>
-            <Typography variant="h6" noWrap>
-                FINANCE TRACKER
-            </Typography>
-        </DrawerHeader>
-        <Divider />
-        <List>
-            <ListItem button component={StyledNavLink} to="/accounts">
-                <ListItemIcon><CloudUploadIcon /></ListItemIcon>
-                <ListItemText primary="ACCOUNTS" />
-            </ListItem>
-            <ListItem button component={StyledNavLink} to="/csv-uploader">
-                <ListItemIcon><CloudUploadIcon /></ListItemIcon>
-                <ListItemText primary="SYNC" />
-            </ListItem>
-            <ListItem button component={StyledNavLink} to="/transactions" exact>
-                <ListItemIcon><ListAltIcon /></ListItemIcon>
-                <ListItemText primary="EXPENSES" />
-            </ListItem>
-            <ListItem button component={StyledNavLink} to="/goals">
-                <ListItemIcon><FlagIcon /></ListItemIcon>
-                <ListItemText primary="GOALS" />
-            </ListItem>
-
-        </List>
-    </div>
-);
+const { Header, Sider, Content } = Layout;
+const { Title } = Typography;
 
 const App = () => {
-    return (
-        <ThemeProvider theme={theme}>
-            <Router>
-                <AppContainer>
-                    <CssBaseline />
-                    <DrawerStyled variant="permanent" open>
-                        {drawer}
-                    </DrawerStyled>
-                    <AppContent>
-                        <Routes>
-                            <Route path="/" element={<Navigate to="/accounts" />} />
-                            <Route path="/csv-uploader" element={
-                                <SyncTransactions/>
-                            } />
-                            <Route path="/transactions" element={<TransactionsList />} />
-                            <Route path="/goals" element={<GoalsList />} />
-                            <Route path="/accounts" element={<ManageAccounts />} />
-                        </Routes>
-                    </AppContent>
-                </AppContainer>
-            </Router>
-        </ThemeProvider>
-    );
+  const [collapsed, setCollapsed] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <Router>
+      <Layout style={{ minHeight: '100vh', background: '#fff' }}>
+        {isAuthenticated && (
+          <Sider 
+            collapsible 
+            collapsed={collapsed} 
+            onCollapse={setCollapsed} 
+            breakpoint="lg"
+            collapsedWidth="0"
+            zeroWidthTriggerStyle={{ top: '10px' }}
+            style={{
+              overflow: 'auto',
+              background: '#fff',
+              height: '100vh',
+              position: 'fixed',
+              left: 0,
+              top: 0,
+              bottom: 0,
+            }}
+          >
+            <Menu mode="inline" defaultSelectedKeys={['1']}>
+              <Menu.Item key="1" icon={<DashboardOutlined />}>
+                <Link to="/">DASHBOARD</Link>
+              </Menu.Item>
+              <Menu.Item key="2" icon={<BankOutlined />}>
+                <Link to="/accounts">ACCOUNTS</Link>
+              </Menu.Item>
+              <Menu.Item key="3" icon={<UnorderedListOutlined />}>
+                <Link to="/transactions">EXPENSES</Link>
+              </Menu.Item>
+              <Menu.Item key="4" icon={<FlagOutlined />}>
+                <Link to="/goals">GOALS</Link>
+              </Menu.Item>
+            </Menu>
+          </Sider>
+        )}
+        <Layout style={{ marginLeft: isAuthenticated ? (collapsed ? 0 : 200) : 0, transition: 'all 0.2s' }}>
+          {isAuthenticated && (
+            <Header style={{ background: '#fff', padding: 0, position: 'sticky', top: 0, zIndex: 1, width: '100%' }}>
+              <Button
+                type="text"
+                icon={collapsed ? <MenuOutlined /> : <MenuOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{
+                  fontSize: '16px',
+                  width: 64,
+                  height: 64,
+                }}
+              />
+              <Button
+                type="text"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                style={{
+                  float: 'right',
+                  margin: '16px',
+                }}
+              >
+                Logout
+              </Button>
+            </Header>
+          )}
+          <Content style={{ margin: '24px 16px 0', overflow: 'initial', background: '#fff' }}>
+            <div style={{ padding: 24, minHeight: 360, background: '#fff' }}>
+            <Routes>
+              <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
+              <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
+              <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+              <Route path="/transactions" element={isAuthenticated ? <TransactionsList /> : <Navigate to="/login" />} />
+              <Route path="/goals" element={isAuthenticated ? <GoalsList /> : <Navigate to="/login" />} />
+              <Route path="/accounts" element={isAuthenticated ? <ManageAccounts /> : <Navigate to="/login" />} />
+            </Routes>
+            </div>
+          </Content>
+        </Layout>
+      </Layout>
+    </Router>
+  );
 };
 
 export default App;

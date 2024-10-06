@@ -1,54 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Select, Upload, Form, Input, DatePicker, message } from 'antd';
-import { UploadOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import { Table, Button, Select, Upload, Form, Input, DatePicker, message, Popconfirm } from 'antd';
+import { UploadOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import Papa from 'papaparse';
 import moment from 'moment';
-import { width } from '@fortawesome/free-solid-svg-icons/fa0';
+import { getAuthHeaders } from '../utils/auth';
 
 const { Option } = Select;
 
-const SyncTransactions = () => {
+export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
     const [data, setData] = useState([]);
-    const [accounts, setAccounts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [accountId, setAccountId] = useState('');
     const [form] = Form.useForm();
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8080/account')
-            .then(response => response.json())
-            .then(data => {
-                setAccounts(data);
-            })
-            .catch(error => console.error('Error fetching accounts:', error));
+        fetchCategories();
+        if (syncType === 'splitwise') {
+            fetchSplitwiseTransactions();
+        }
+    }, [syncType, selectedAccount]);
 
-        fetch('http://localhost:8080/categories')
-            .then(response => response.json())
-            .then(data => {
-                setCategories(data);
-            })
-            .catch(error => console.error('Error fetching categories:', error));
-    }, []);
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/categories', {
+                headers: getAuthHeaders()
+            });
+            const data = await response.json();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
 
-    const syncSplitwiseTransactions = () => {
+    const fetchSplitwiseTransactions = () => {
         fetch('http://localhost:8080/sync-splitwise', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ account: accountId }),
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ account: selectedAccount }),
         })
             .then(response => response.json())
             .then(data => {
-                const camelCase = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-                const formattedData = data.map(item => ({
-                    ...item,
-                    key: item.id.toString(),
-                    type: camelCase(item.type),
-                    category: camelCase(item.category),
-                    date: moment(item.date),
-                }));
+                const formattedData = formatTransactions(data);
                 setData(formattedData);
                 form.setFieldsValue(formattedData.reduce((acc, item) => {
                     acc[item.key] = item;
@@ -62,16 +54,9 @@ const SyncTransactions = () => {
         Papa.parse(file, {
             header: true,
             complete: (results) => {
-                const processedData = results.data.map((row, index) => ({
-                    key: index.toString(),
-                    date: moment(row.Date),
-                    description: row.Description,
-                    type: row['Type of Transaction'],
-                    amount: row.Amount,
-                    category: 'General',
-                }));
-                setData(processedData);
-                form.setFieldsValue(processedData.reduce((acc, item) => {
+                const formattedData = formatTransactions(results.data);
+                setData(formattedData);
+                form.setFieldsValue(formattedData.reduce((acc, item) => {
                     acc[item.key] = item;
                     return acc;
                 }, {}));
@@ -80,26 +65,40 @@ const SyncTransactions = () => {
         return false;
     };
 
+    const formatTransactions = (transactions) => {
+        return transactions.map((item, index) => ({
+            key: index.toString(),
+            date: moment(item.date || item.Date),
+            description: item.description || item.Description,
+            type: item.type || item['Type of Transaction'],
+            amount: item.amount || item.Amount,
+            category: item.category || 'General',
+        }));
+    };
+
     const handleSaveAll = async () => {
         try {
             const values = await form.validateFields();
-            const formattedData = Object.keys(values).map(key => ({
-                ...values[key],
-                occurredOn: values[key].date.format('YYYY-MM-DD'),
-                accountId: accountId,
-            }));
-
+            const formattedData = Object.keys(values).map(key => {
+                const item = values[key];
+                return {
+                    ...item,
+                    occurredOn: item.date.format('YYYY-MM-DD'),
+                    accountId: selectedAccount,
+                    category: item.type === 'Transfer' ? 'Transfer' : item.category,
+                    toAccount: item.type === 'Transfer' ? item.toAccount : undefined,
+                };
+            });
+            console.log(formattedData)
             fetch('http://localhost:8080/transactions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(formattedData)
             })
                 .then(response => {
                     if (response.ok) {
                         message.success('Transactions saved successfully');
-                        setEditMode(false);
+                        onClose();
                     } else {
                         message.error('Failed to save transactions');
                     }
@@ -118,17 +117,15 @@ const SyncTransactions = () => {
             title: 'Date',
             dataIndex: 'date',
             key: 'date',
-
+            width:'1',
             render: (_, record) => (
                 <Form.Item
                     name={[record.key, 'date']}
                     rules={[{ required: true, message: 'Date is required' }]}
                 >
-                    {editMode ? (
-                        <DatePicker format="YYYY-MM-DD" />
-                    ) : (
-                        moment(record.date).format('YYYY-MM-DD')
-                    )}
+                    
+                        {moment(record.date).format('YYYY-MM-DD')}
+                    
                 </Form.Item>
             ),
         },
@@ -136,7 +133,7 @@ const SyncTransactions = () => {
             title: 'Description',
             dataIndex: 'description',
             key: 'description',
-
+            width:'1',
             render: (_, record) => (
                 <Form.Item
                     name={[record.key, 'description']}
@@ -150,7 +147,7 @@ const SyncTransactions = () => {
             title: 'Type of Transaction',
             dataIndex: 'type',
             key: 'type',
-
+            width:'1',
             render: (_, record) => (
                 <Form.Item
                     name={[record.key, 'type']}
@@ -158,7 +155,7 @@ const SyncTransactions = () => {
                 >
                     {editMode ? (
                         <Select>
-                            {["Debit", "Credit", "Transfer"].map(type => (
+                            {["Debit", "Credit"].map(type => (
                                 <Option key={type} value={type}>
                                     {type}
                                 </Option>
@@ -167,7 +164,32 @@ const SyncTransactions = () => {
                     ) : (
                         record.type
                     )}
-                    {/* {editMode ? <Input /> : record.type} */}
+                </Form.Item>
+            ),
+        },
+        {
+            title: 'Category',
+            dataIndex: 'category',
+            key: 'category',
+            width:'1',
+            render: (_, record) => (
+                <Form.Item
+                    name={[record.key, 'category']}
+                    rules={[{ required: true, message: 'Category is required' }]}
+                >
+                    {editMode ? (
+                        (
+                            <Select>
+                                {categories.map(category => (
+                                    <Option key={category} value={category}>
+                                        {category}
+                                    </Option>
+                                ))}
+                            </Select>
+                        )
+                    ) : (
+                        record.category
+                    )}
                 </Form.Item>
             ),
         },
@@ -175,7 +197,7 @@ const SyncTransactions = () => {
             title: 'Amount',
             dataIndex: 'amount',
             key: 'amount',
-
+            width:'1',
             render: (_, record) => (
                 <Form.Item
                     name={[record.key, 'amount']}
@@ -184,64 +206,23 @@ const SyncTransactions = () => {
                     {editMode ? <Input type="number" /> : record.amount}
                 </Form.Item>
             ),
-        },
-        {
-            title: 'Category',
-            dataIndex: 'category',
-            key: 'category',
-
-            render: (_, record) => (
-                <Form.Item
-                    name={[record.key, 'category']}
-                    rules={[{ required: true, message: 'Category is required' }]}
-                >
-                    {editMode ? (
-                        <Select>
-                            {categories.map(category => (
-                                <Option key={category} value={category}>
-                                    {category}
-                                </Option>
-                            ))}
-                        </Select>
-                    ) : (
-                        record.category
-                    )}
-                </Form.Item>
-            ),
         }
     ];
 
-    const isAccountSelected = accountId !== '';
-
     return (
-
-        <div >
-            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                <Select
-                    style={{ width: '200px' }}
-                    placeholder="Select Account"
-                    onChange={setAccountId}
-                    value={accountId}
-                >
-                    {accounts.map(account => (
-                        <Option key={account.accountId} value={account.accountId}>
-                            {account.accountId}
-                        </Option>
-                    ))}
-                </Select>
-                <Upload
-                    beforeUpload={handleFileChange}
-                    showUploadList={false}
-                    disabled={!isAccountSelected}
-                    accept='.csv'
-                >
-                    <Button icon={<UploadOutlined />} disabled={!isAccountSelected}>
-                        Sync With CSV
-                    </Button>
-                </Upload>
-                <Button type="primary" onClick={syncSplitwiseTransactions} disabled={!isAccountSelected}>
-                    Sync Splitwise
-                </Button>
+        <div>
+            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-around' }}>
+                {syncType === 'csv' && (
+                    <Upload
+                        beforeUpload={handleFileChange}
+                        showUploadList={false}
+                        accept='.csv'
+                    >
+                        <Button icon={<UploadOutlined />}>
+                            Upload CSV
+                        </Button>
+                    </Upload>
+                )}
             </div>
             <Form form={form} component={false}>
                 <Table
@@ -250,13 +231,15 @@ const SyncTransactions = () => {
                     columns={columns}
                     rowClassName="editable-row"
                     pagination={false}
-                    scroll={{ y: 800 }}
+                    scroll={{  y: 400 }}
+
                 />
             </Form>
             <div style={{ marginTop: '20px', textAlign: 'right' }}>
                 <Button
                     onClick={() => setEditMode(!editMode)}
                     style={{ marginRight: '10px' }}
+                    disabled={!data.length}
                     icon={editMode ? <SaveOutlined /> : <EditOutlined />}
                 >
                     {editMode ? 'Cancel Edit' : 'Edit All'}
@@ -264,15 +247,12 @@ const SyncTransactions = () => {
                 <Button
                     type="primary"
                     onClick={handleSaveAll}
-                    disabled={!isAccountSelected || !editMode}
+                    disabled={!data.length}
                     icon={<SaveOutlined />}
                 >
                     Save All
                 </Button>
             </div>
         </div>
-
     );
 };
-
-export default SyncTransactions;
