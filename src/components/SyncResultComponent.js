@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Select, Upload, Form, Input, DatePicker, message, Popconfirm } from 'antd';
-import { UploadOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import { Table, Button, Select, Upload, Form, Input, DatePicker, message, Popconfirm, Modal } from 'antd';
+import { UploadOutlined, DeleteOutlined, EditOutlined, SaveOutlined, InboxOutlined } from '@ant-design/icons';
 import Papa from 'papaparse';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
@@ -12,6 +12,7 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
     const [categories, setCategories] = useState([]);
     const [form] = Form.useForm();
     const [editMode, setEditMode] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(syncType === 'csv');
 
     useEffect(() => {
         fetchCategories();
@@ -33,20 +34,12 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
     };
 
     const fetchSplitwiseTransactions = () => {
-        fetch('http://localhost:8080/sync-splitwise', {
+        fetch('http://localhost:8080/sync-transactions', {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ account: selectedAccount }),
+            body: JSON.stringify({ accountId: selectedAccount }),
         })
             .then(response => response.json())
-            .then(data => {
-                const formattedData = formatTransactions(data);
-                setData(formattedData);
-                form.setFieldsValue(formattedData.reduce((acc, item) => {
-                    acc[item.key] = item;
-                    return acc;
-                }, {}));
-            })
             .catch(error => console.error('Error syncing transactions:', error));
     };
 
@@ -209,50 +202,62 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
         }
     ];
 
+    const handleClose = () => {
+        setIsModalVisible(false);
+        onClose();
+    };
+
     return (
-        <div>
-            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-around' }}>
-                {syncType === 'csv' && (
-                    <Upload
+        <Modal
+            open={isModalVisible}
+            onCancel={handleClose}
+            footer={null}
+            width="1000px"
+            destroyOnClose={true}
+        >
+            {syncType === 'csv' && (
+                <div>
+                    <Upload.Dragger
                         beforeUpload={handleFileChange}
                         showUploadList={false}
                         accept='.csv'
                     >
-                        <Button icon={<UploadOutlined />}>
-                            Upload CSV
-                        </Button>
-                    </Upload>
-                )}
-            </div>
-            <Form form={form} component={false}>
-                <Table
-                    bordered
-                    dataSource={data}
-                    columns={columns}
-                    rowClassName="editable-row"
-                    pagination={false}
-                    scroll={{  y: 400 }}
+                        <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                    </Upload.Dragger>
+                    <Form form={form} component={false}>
+                        <Table
+                            bordered
+                            dataSource={data}
+                            columns={columns}
+                            rowClassName="editable-row"
+                            pagination={false}
+                            scroll={{  y: 400 }}
 
-                />
-            </Form>
-            <div style={{ marginTop: '20px', textAlign: 'right' }}>
-                <Button
-                    onClick={() => setEditMode(!editMode)}
-                    style={{ marginRight: '10px' }}
-                    disabled={!data.length}
-                    icon={editMode ? <SaveOutlined /> : <EditOutlined />}
-                >
-                    {editMode ? 'Cancel Edit' : 'Edit All'}
-                </Button>
-                <Button
-                    type="primary"
-                    onClick={handleSaveAll}
-                    disabled={!data.length}
-                    icon={<SaveOutlined />}
-                >
-                    Save All
-                </Button>
-            </div>
-        </div>
+                        />
+                    </Form>
+                    <div style={{ marginTop: '20px', textAlign: 'right' }}>
+                        <Button
+                            onClick={() => setEditMode(!editMode)}
+                            style={{ marginRight: '10px' }}
+                            disabled={!data.length}
+                            icon={editMode ? <SaveOutlined /> : <EditOutlined />}
+                        >
+                            {editMode ? 'Cancel Edit' : 'Edit All'}
+                        </Button>
+                        <Button
+                            type="primary"
+                            onClick={handleSaveAll}
+                            disabled={!data.length}
+                            icon={<SaveOutlined />}
+                        >
+                            Save All
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </Modal>
     );
 };

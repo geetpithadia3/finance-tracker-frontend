@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Table, DatePicker, Typography, Tabs } from 'antd';
-import { DollarOutlined, SaveOutlined, BankOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, Row, Col, Statistic, Table, Typography, Tabs, Button } from 'antd';
+import { DollarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
 
@@ -15,6 +15,7 @@ const Dashboard = () => {
     const [transactions, setTransactions] = useState([]);
     const [incomeTransactions, setIncomeTransactions] = useState([]);
     const [savingsTransactions, setSavingsTransactions] = useState([]);
+    const scrollRef = useRef(null);
 
     useEffect(() => {
         fetchDashboardData(); 
@@ -63,8 +64,35 @@ const Dashboard = () => {
         }
     };
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date || moment());
+    const handleDateChange = (year, month) => {
+        setSelectedDate(moment().year(year).month(month));
+    };
+
+    const scrollYearMonth = (direction) => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: direction * 200, behavior: 'smooth' });
+        }
+    };
+
+    const generateYearMonthButtons = () => {
+        const buttons = [];
+        const currentYear = selectedDate.year();
+        
+        for (let year = currentYear ; year <= currentYear + 1; year++) {
+            moment.months().forEach((month, index) => {
+                buttons.push(
+                    <Button 
+                        key={`${year}-${month}`}
+                        type={selectedDate.year() === year && selectedDate.month() === index ? 'primary' : 'default'}
+                        onClick={() => handleDateChange(year, index)}
+                        style={{ margin: '0 5px', minWidth: '150px', borderColor: '#000000' }}
+                    >
+                        {`${month} ${year}`}
+                    </Button>
+                );
+            });
+        }
+        return buttons;
     };
 
     const expenseColumns = [
@@ -114,17 +142,26 @@ const Dashboard = () => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <Row gutter={[16, 16]} align="middle" justify="space-between">
+            <Row gutter={[16, 16]} style={{ marginTop: '20px' }} align="middle" wrap={false}>
                 <Col>
-
+                    <Button icon={<LeftOutlined />} onClick={() => scrollYearMonth(-1)} />
+                </Col>
+                <Col flex="1">
+                    <div 
+                        ref={scrollRef} 
+                        style={{ 
+                            display: 'flex', 
+                            overflowX: 'auto', 
+                            scrollbarWidth: 'none', 
+                            msOverflowStyle: 'none',
+                            '&::-webkit-scrollbar': { display: 'none' }
+                        }}
+                    >
+                        {generateYearMonthButtons()}
+                    </div>
                 </Col>
                 <Col>
-                    <DatePicker
-                        picker="month"
-                        format="YYYY-MM"
-                        onChange={handleDateChange}
-                        allowClear={false}
-                    />
+                    <Button icon={<RightOutlined />} onClick={() => scrollYearMonth(1)} />
                 </Col>
             </Row>
 

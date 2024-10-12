@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, Row, Col, Button, Modal, Form, Input, Select, Upload, message, Tooltip, Space } from 'antd';
-import { AccountBookOutlined, WalletOutlined, UploadOutlined, SyncOutlined, PlusSquareOutlined, BankOutlined, DollarCircleOutlined, } from '@ant-design/icons';
+import { AccountBookOutlined, WalletOutlined, UploadOutlined, SyncOutlined, PlusSquareOutlined, BankOutlined, DollarCircleOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { SyncResultComponent } from './SyncResultComponent';
 import { getAuthHeaders } from '../utils/auth';
 import styled from 'styled-components';
@@ -42,6 +42,7 @@ const ManageAccounts = () => {
     const [syncModalVisible, setSyncModalVisible] = useState(false);
     const [syncType, setSyncType] = useState(null);
     const [syncAccount, setSyncAccount] = useState(null);
+    const [externalKey, setExternalKey] = useState('');
 
     useEffect(() => {
         fetchAccounts();
@@ -60,15 +61,36 @@ const ManageAccounts = () => {
         }
     };
 
-    const handleSyncOpen = (account, type) => {
-        setSyncAccount(account);
-        setSyncType(type);
-        setSyncModalVisible(true);
-        
+    const handleSync = (account, type) => {
+        if (type === 'splitwise') {
+            // Directly call the sync function for Splitwise
+            syncSplitwiseTransactions(account.accountId);
+        } else {
+            // Open the SyncResultComponent for CSV
+            setSyncAccount(account);
+            setSyncType(type);
+            setSyncModalVisible(true);
+        }
+    };
+
+    const syncSplitwiseTransactions = (accountId) => {
+        fetch('http://localhost:8080/sync-transactions', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ accountId: accountId }),
+        })
+            .then(data => {
+                message.success('Splitwise transactions synced successfully');
+                fetchAccounts();
+            })
+            .catch(error => {
+                console.error('Error syncing Splitwise transactions:', error);
+                message.error('Failed to sync Splitwise transactions');
+            });
     };
 
     const handleSyncClose = () => {
-        fetchAccounts()
+        fetchAccounts();
         setSyncModalVisible(false);
         setSyncAccount(null);
         setSyncType(null);
@@ -95,22 +117,69 @@ const ManageAccounts = () => {
     };
 
     const handleSave = async () => {
-        const url = 'http://localhost:8080/account';
-        const method = 'POST';
+        const accountUrl = 'http://localhost:8080/account';
+        const externalCredentialsUrl = 'http://localhost:8080/user/external-credentials';
 
         try {
-            await fetch(url, {
-                method: method,
+            const accountResponse = await fetch(accountUrl, {
+                method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(selectedAccount)
             });
+
+            if (!accountResponse.ok) {
+                throw new Error('Failed to save account');
+            }
+
+            if (selectedAccount.org === 'Splitwise') {
+                const externalCredentialsResponse = await fetch(externalCredentialsUrl, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ externalKey })
+                });
+
+                if (!externalCredentialsResponse.ok) {
+                    throw new Error('Failed to save Splitwise credentials');
+                }
+            }
+
             message.success('Account saved successfully');
             setTimeout(fetchAccounts, 500);
             setIsModalVisible(false);
+            setExternalKey('');
         } catch (error) {
             console.error('Error saving account:', error);
-            message.error('Failed to save account');
+            message.error(error.message);
         }
+    };
+
+    const handleDelete = async (accountId, accountName) => {
+        Modal.confirm({
+            title: 'Are you sure you want to delete this account?',
+            icon: <ExclamationCircleOutlined />,
+            content: `This will permanently delete the account "${accountName}" and all associated data.`,
+            okText: 'Yes, delete it',
+            okType: 'danger',
+            cancelText: 'No, keep it',
+            onOk: async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/account/${accountId}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to delete account');
+                    }
+
+                    message.success('Account deleted successfully');
+                    fetchAccounts();
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    message.error('Failed to delete account');
+                }
+            },
+        });
     };
 
     return (
@@ -129,20 +198,26 @@ const ManageAccounts = () => {
             </Row>
             <Row gutter={[16, 16]}>
                 {accounts.map(account => (
-                    <Col xs={24} sm={12} md={8} lg={6} key={account.id}>
+                    <Col xs={24} sm={12} md={8} lg={6} key={account.accountId}>
                         <StyledCard
                             title={account.name}
                             extra={
                                 <Space>
-                                   
-                                    {account.org !== 'SPLITWISE' && (
+                                    <Tooltip title="Delete Account">
+                                        <Button 
+                                            onClick={() => handleDelete(account.accountId, account.name)} 
+                                            icon={<DeleteOutlined />} 
+                                            danger
+                                        />
+                                    </Tooltip>
+                                    {account.org != 'Splitwise' && (
                                         <Tooltip title="Upload CSV">
-                                            <Button onClick={() => handleSyncOpen(account, 'csv')} icon={<UploadOutlined />} />
+                                            <Button onClick={() => handleSync(account, 'csv')} icon={<UploadOutlined />} />
                                         </Tooltip>
                                     )}
-                                    {account.org === 'SPLITWISE' && (
+                                    {account.org === 'Splitwise' && (
                                         <Tooltip title="Sync with Splitwise">
-                                            <Button onClick={() => handleSyncOpen(account, 'splitwise')} icon={<SyncOutlined />} />
+                                            <Button onClick={() => handleSync(account, 'splitwise')} icon={<SyncOutlined />} />
                                         </Tooltip>
                                     )}
                                 </Space>
@@ -200,6 +275,14 @@ const ManageAccounts = () => {
                             <Option value="Splitwise">Splitwise</Option>
                         </Select>
                     </Form.Item>
+                    {selectedAccount?.org === 'Splitwise' && (
+                        <Form.Item label="Splitwise Secret">
+                            <Input.Password
+                                value={externalKey}
+                                onChange={(e) => setExternalKey(e.target.value)}
+                            />
+                        </Form.Item>
+                    )}
                     <Form.Item label="Initial Balance">
                         <Input
                             type="number"
@@ -219,19 +302,13 @@ const ManageAccounts = () => {
                 </Form>
             </Modal>
 
-            <Modal
-                open={syncModalVisible}
-                onCancel={handleSyncClose}
-                footer={null}
-                width="1000px"
-                destroyOnClose={true}
-            >
+            {syncModalVisible && (
                 <SyncResultComponent
                     syncType={syncType}
                     selectedAccount={syncAccount?.accountId}
                     onClose={handleSyncClose}
                 />
-            </Modal>
+            )}
         </div>
     );
 };

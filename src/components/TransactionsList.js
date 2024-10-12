@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Table, DatePicker, Row, Col, Form, Input, Select, Button, message } from 'antd';
-import { DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { Table, DatePicker, Row, Col, Form, Input, Select, Button, message, Modal, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, SaveOutlined, ShareAltOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
 import styled from 'styled-components';
@@ -34,6 +34,76 @@ const ControlsContainer = styled(Row)`
   margin-bottom: 20px;
 `;
 
+
+const ShareModal = ({ visible, onCancel, onOk, transaction, friends }) => {
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [shares, setShares] = useState({});
+
+  const handleFriendSelect = (friendIds) => {
+    setSelectedFriends(friendIds);
+    const newShares = friendIds.reduce((acc, id) => {
+      acc[id] = shares[id] || { owedShare: 0 };
+      return acc;
+    }, {});
+    setShares(newShares);
+  };
+
+  const handleShareChange = (friendId, value) => {
+    setShares(prev => ({
+      ...prev,
+      [friendId]: { ...prev[friendId], owedShare: parseFloat(value) || 0 }
+    }));
+  };
+
+  const handleOk = () => {
+    const splitShares = Object.entries(shares).map(([userId, share]) => ({
+      userId,
+      owedShare: share.owedShare
+    }));
+    onOk(transaction.id, splitShares);
+  };
+
+  return (
+    <Modal
+      title="Share Expense"
+      visible={visible}
+      onCancel={onCancel}
+      onOk={handleOk}
+    >
+      <Select
+        style={{ width: '100%', marginBottom: 16 }}
+        placeholder="Select friends to share with"
+        mode="multiple"
+        onChange={handleFriendSelect}
+        value={selectedFriends}
+      >
+        {friends.map(friend => (
+          <Option key={friend.id} value={friend.id}>{friend.firstName} {friend.lastName}</Option>
+        ))}
+      </Select>
+      {selectedFriends.map(friendId => {
+        const friend = friends.find(f => f.id === friendId);
+        return (
+          <div key={friendId} style={{ marginBottom: 8, display: 'flex', alignItems: 'center' }}>
+            <Typography.Text style={{ width: '50%', paddingRight: '8px' }}>
+              {friend ? `${friend.firstName}` : ''}
+            </Typography.Text>
+            <Input
+              style={{ width: '50%' }}
+              placeholder="Owed Share"
+              type="number"
+              value={shares[friendId]?.owedShare || ''}
+              onChange={(e) => handleShareChange(friendId, e.target.value)}
+            />
+          </div>
+        );
+      })}
+    </Modal>
+  );
+};
+
+
+
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
   const [selectedDate, setSelectedDate] = useState(moment());
@@ -41,6 +111,27 @@ const TransactionsList = () => {
   const [form] = Form.useForm();
   const [categories, setCategories] = useState([]);
   const [sortedInfo, setSortedInfo] = useState({});
+  const [shareModalVisible, setShareModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    fetchFriends();
+  }, []);
+
+  const fetchFriends = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/user/friends', {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      setFriends(data);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+    }
+  };
 
   const handleChange = (pagination, filters, sorter) => {
     console.log(sorter)
@@ -175,15 +266,60 @@ const TransactionsList = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
+        <>
         <Button
           icon={<DeleteOutlined />}
           onClick={() => handleDelete(record.key)}
           danger={record.deleted}
           disabled={!editMode}
         />
+        {record.shareable && (
+          <Button
+            icon={<ShareAltOutlined />}
+            onClick={() => handleShareClick(record)}
+          />
+        )}
+        </>
       ),
     },
   ], [editMode, categories]);
+
+  const handleShareClick = (transaction) => {
+    setSelectedTransaction(transaction);
+    setShareModalVisible(true);
+  };
+
+  const handleShareModalOk = async (transactionId, splitShares) => {
+    try {
+      const response = await fetch('http://localhost:8080/transactions/share', {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: transactionId,
+          description: selectedTransaction.description,
+          amount: selectedTransaction.amount,
+          category: selectedTransaction.category,
+          occurredOn: selectedTransaction.occurredOn,
+          account: selectedTransaction.account,
+          splitShares: splitShares
+        })
+      });
+
+      if (response.ok) {
+        message.success('Transaction shared successfully');
+        setShareModalVisible(false);
+        fetchTransactions(selectedDate); // Refresh the transactions list
+      } else {
+        throw new Error('Failed to share transaction');
+      }
+    } catch (error) {
+      console.error('Error sharing transaction:', error);
+      message.error('Failed to share transaction');
+    }
+  };
 
   const handleDelete = (key) => {
     setTransactions(prevTransactions =>
@@ -195,9 +331,9 @@ const TransactionsList = () => {
     );
   };
 
-  const handleDateChange = useCallback((date) => {
-    setSelectedDate(date);
-  }, []);
+  const handleDateChange = (year, month) => {
+    setSelectedDate(moment().year(year).month(month));
+  };
 
   const handleSave = async () => {
     try {
@@ -238,17 +374,59 @@ const TransactionsList = () => {
     transaction.deleted ? sum : sum + parseFloat(transaction.amount), 0
   ), [transactions]);
 
+  const scrollYearMonth = (direction) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: direction * 200, behavior: 'smooth' });
+    }
+  };
+
+  const generateYearMonthButtons = () => {
+    const buttons = [];
+    const currentYear = selectedDate.year();
+    
+    for (let year = currentYear; year <= currentYear + 1; year++) {
+      moment.months().forEach((month, index) => {
+        buttons.push(
+          <Button 
+            key={`${year}-${month}`}
+            type={selectedDate.year() === year && selectedDate.month() === index ? 'primary' : 'default'}
+            onClick={() => handleDateChange(year, index)}
+            style={{ margin: '0 5px', minWidth: '150px', borderColor: '#000000' }}
+          >
+            {`${month} ${year}`}
+          </Button>
+        );
+      });
+    }
+    return buttons;
+  };
+
   return (
     <div>
       <ControlsContainer gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <DatePicker
-            picker="month"
-            onChange={handleDateChange}
-            format="YYYY-MM"
-            allowClear={false}
-            style={{ width: '100%' }}
-          />
+        <Col span={24}>
+          <Row gutter={[16, 16]} align="middle" wrap={false}>
+            <Col>
+              <Button icon={<LeftOutlined />} onClick={() => scrollYearMonth(-1)} />
+            </Col>
+            <Col flex="1">
+              <div 
+                ref={scrollRef} 
+                style={{ 
+                  display: 'flex', 
+                  overflowX: 'auto', 
+                  scrollbarWidth: 'none', 
+                  msOverflowStyle: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' }
+                }}
+              >
+                {generateYearMonthButtons()}
+              </div>
+            </Col>
+            <Col>
+              <Button icon={<RightOutlined />} onClick={() => scrollYearMonth(1)} />
+            </Col>
+          </Row>
         </Col>
         <Col xs={24} sm={12} md={8} lg={6}>
           {transactions.length != 0 && <ActionButton
@@ -286,6 +464,13 @@ const TransactionsList = () => {
           rowClassName={(record) => (record.deleted ? 'deleted-row' : '')}
         />
       </Form>
+      <ShareModal
+        visible={shareModalVisible}
+        onCancel={() => setShareModalVisible(false)}
+        onOk={handleShareModalOk}
+        transaction={selectedTransaction}
+        friends={friends}
+      />
     </div>
   );
 };

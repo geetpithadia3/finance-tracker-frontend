@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Button } from 'antd';
+import { Layout, Menu, Typography, Button, Avatar, Dropdown } from 'antd';
 import TransactionsList from './components/TransactionsList';
 import GoalsList from './components/GoalsList';
 import ManageAccounts from './components/ManageAccounts';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
-import { BankOutlined, FlagOutlined, MenuOutlined, UnorderedListOutlined, LogoutOutlined, DashboardOutlined } from '@ant-design/icons';
+import { BankOutlined, FlagOutlined, MenuOutlined, UnorderedListOutlined, LogoutOutlined, DashboardOutlined, UserOutlined } from '@ant-design/icons';
+import Profile from './components/Profile';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -31,12 +32,11 @@ const App = () => {
       <Layout style={{ minHeight: '100vh', background: '#fff' }}>
         {isAuthenticated && (
           <Sider 
-            collapsible 
-            collapsed={collapsed} 
-            onCollapse={setCollapsed} 
-            breakpoint="lg"
-            collapsedWidth="0"
-            zeroWidthTriggerStyle={{ top: '10px' }}
+            // collapsed={collapsed} 
+            // onCollapse={setCollapsed} 
+            // breakpoint="lg"
+            // collapsedWidth="0"
+            // zeroWidthTriggerStyle={{ top: '10px' }}
             style={{
               overflow: 'auto',
               background: '#fff',
@@ -47,26 +47,29 @@ const App = () => {
               bottom: 0,
             }}
           >
+            <div style={{ padding: '16px', textAlign: 'center' }}>
+              <Title level={4} style={{ color: '#1890ff', margin: 0 }}>Nest.</Title>
+            </div>
             <Menu mode="inline" defaultSelectedKeys={['1']}>
               <Menu.Item key="1" icon={<DashboardOutlined />}>
-                <Link to="/">DASHBOARD</Link>
+                <Link to="/">Dashboard</Link>
               </Menu.Item>
               <Menu.Item key="2" icon={<BankOutlined />}>
-                <Link to="/accounts">ACCOUNTS</Link>
+                <Link to="/accounts">Accounts</Link>
               </Menu.Item>
               <Menu.Item key="3" icon={<UnorderedListOutlined />}>
-                <Link to="/transactions">EXPENSES</Link>
+                <Link to="/transactions">Expenses</Link>
               </Menu.Item>
               <Menu.Item key="4" icon={<FlagOutlined />}>
-                <Link to="/goals">GOALS</Link>
+                <Link to="/goals">Goals</Link>
               </Menu.Item>
             </Menu>
           </Sider>
         )}
         <Layout style={{ marginLeft: isAuthenticated ? (collapsed ? 0 : 200) : 0, transition: 'all 0.2s' }}>
           {isAuthenticated && (
-            <Header style={{ background: '#fff', padding: 0, position: 'sticky', top: 0, zIndex: 1, width: '100%' }}>
-              <Button
+            <Header style={{ background: '#fff', padding: 0, position: 'sticky', top: 0, zIndex: 1, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {/* <Button
                 type="text"
                 icon={collapsed ? <MenuOutlined /> : <MenuOutlined />}
                 onClick={() => setCollapsed(!collapsed)}
@@ -75,18 +78,23 @@ const App = () => {
                   width: 64,
                   height: 64,
                 }}
-              />
-              <Button
-                type="text"
-                icon={<LogoutOutlined />}
-                onClick={handleLogout}
-                style={{
-                  float: 'right',
-                  margin: '16px',
-                }}
+              /> */}
+              <Title></Title>
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item key="profile">
+                      <Link to="/profile">Profile</Link>
+                    </Menu.Item>
+                    <Menu.Item key="logout" onClick={handleLogout}>
+                      Logout
+                    </Menu.Item>
+                  </Menu>
+                }
+                placement="bottomRight"
               >
-                Logout
-              </Button>
+                <Avatar style={{ backgroundColor: '#1890ff', cursor: 'pointer', marginRight: '10px' }} icon={<UserOutlined />} />
+              </Dropdown>
             </Header>
           )}
           <Content style={{ margin: '24px 16px 0', overflow: 'initial', background: '#fff' }}>
@@ -98,6 +106,7 @@ const App = () => {
               <Route path="/transactions" element={isAuthenticated ? <TransactionsList /> : <Navigate to="/login" />} />
               <Route path="/goals" element={isAuthenticated ? <GoalsList /> : <Navigate to="/login" />} />
               <Route path="/accounts" element={isAuthenticated ? <ManageAccounts /> : <Navigate to="/login" />} />
+              <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
             </Routes>
             </div>
           </Content>
