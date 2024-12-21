@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { Table, DatePicker, Row, Col, Form, Input, Select, Button, message, Modal, Typography } from 'antd';
 import { DeleteOutlined, EditOutlined, SaveOutlined, ShareAltOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { getAuthHeaders } from '../utils/auth';
+import { getAuthHeaders } from '../lib/utils';
 import styled from 'styled-components';
 
 const { Option } = Select;
@@ -13,6 +13,9 @@ const StyledTable = styled(Table)`
   }
   .ant-table-cell {
     vertical-align: top;
+    padding: 2px 8px !important;
+    height: 24px !important;
+    line-height: 20px !important;
   }
   .amount-cell {
     text-align: right;
@@ -24,14 +27,33 @@ const StyledTable = styled(Table)`
     background-color: #ffcccb;
     text-decoration: line-through;
   }
+  @media (max-width: 768px) {
+    .ant-table {
+      font-size: 12px;
+    }
+  }
 `;
 
 const ActionButton = styled(Button)`
   margin-right: 8px;
+  @media (max-width: 768px) {
+    padding: 0 8px;
+    font-size: 12px;
+  }
 `;
 
 const ControlsContainer = styled(Row)`
   margin-bottom: 20px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const ResponsiveCol = styled(Col)`
+  @media (max-width: 768px) {
+    margin-bottom: 10px;
+  }
 `;
 
 
@@ -106,7 +128,7 @@ const ShareModal = ({ visible, onCancel, onOk, transaction, friends }) => {
 
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(moment());
+  const [selectedDate, setSelectedDate] = useState(moment().subtract(1,'months' ));
   const [editMode, setEditMode] = useState(false);
   const [form] = Form.useForm();
   const [categories, setCategories] = useState([]);
@@ -115,6 +137,7 @@ const TransactionsList = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [friends, setFriends] = useState([]);
   const scrollRef = useRef(null);
+  const [filteredInfo, setFilteredInfo] = useState({});
 
   useEffect(() => {
     fetchFriends();
@@ -134,7 +157,7 @@ const TransactionsList = () => {
   };
 
   const handleChange = (pagination, filters, sorter) => {
-    console.log(sorter)
+    setFilteredInfo(filters);
     setSortedInfo(sorter);
   };
 
@@ -142,7 +165,7 @@ const TransactionsList = () => {
     const month = date.format('MM').toUpperCase();
     const year = date.year();
 
-    fetch('http://localhost:8080/expenses', {
+    fetch('http://localhost:8080/transactions/list', {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({"yearMonth":year+"-"+month}),
@@ -194,8 +217,14 @@ const TransactionsList = () => {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a, b) => a.date - b.date,
-      sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+      sorter: (a, b) => moment(a.occurredOn).valueOf() - moment(b.occurredOn).valueOf(),
+      sortOrder: sortedInfo.columnKey === 'date' ? sortedInfo.order : null,
+      filters: [...new Set(transactions.map(t => moment(t.occurredOn).format('YYYY-MM-DD')))].map(date => ({
+        text: date,
+        value: date,
+      })),
+      filteredValue: filteredInfo.date || null,
+      onFilter: (value, record) => moment(record.occurredOn).format('YYYY-MM-DD') === value,
       render: (_, record) => (
         <Form.Item
           name={[record.key, 'date']}
@@ -206,11 +235,40 @@ const TransactionsList = () => {
       ),
     },
     {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      sorter: (a, b) => (a.type || '').localeCompare(b.type || ''),
+      sortOrder: sortedInfo.columnKey === 'type' ? sortedInfo.order : null,
+      filters: [...new Set(transactions.map(t => t.type))].map(type => ({
+        text: type.charAt(0).toUpperCase() + type.slice(1).toLowerCase(),
+        value: type,
+      })),
+      filteredValue: filteredInfo.type || null,
+      onFilter: (value, record) => record.type === value,
+      render: (_, record) => (
+        <Form.Item
+          name={[record.key, 'type']}
+          rules={[{ required: true, message: 'Type is required' }]}
+        >
+          
+            {record.type.charAt(0).toUpperCase() + record.type.slice(1).toLowerCase()}
+          
+        </Form.Item>
+      ),
+    },
+    {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
-      sorter: (a, b) => a.category.localeCompare(b.category),
-      sortOrder: sortedInfo.columnKey === 'category' && sortedInfo.order,
+      sorter: (a, b) => (a.category || '').localeCompare(b.category || ''),
+      sortOrder: sortedInfo.columnKey === 'category' ? sortedInfo.order : null,
+      filters: categories.map(category => ({
+        text: category.charAt(0).toUpperCase() + category.slice(1).toLowerCase(),
+        value: category,
+      })),
+      filteredValue: filteredInfo.category || null,
+      onFilter: (value, record) => record.category === value,
       render: (_, record) => (
         <Form.Item
           name={[record.key, 'category']}
@@ -234,8 +292,8 @@ const TransactionsList = () => {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      sorter: (a, b) => a.description.localeCompare(b.description),
-      sortOrder: sortedInfo.columnKey === 'description' && sortedInfo.order,
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || ''),
+      sortOrder: sortedInfo.columnKey === 'description' ? sortedInfo.order : null,
       render: (_, record) => (
         <Form.Item
           name={[record.key, 'description']}
@@ -249,8 +307,8 @@ const TransactionsList = () => {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      sorter: (a, b) => a.amount - b.amount,
-      sortOrder: sortedInfo.columnKey === 'amount' && sortedInfo.order,
+      sorter: (a, b) => parseFloat(a.amount || 0) - parseFloat(b.amount || 0),
+      sortOrder: sortedInfo.columnKey === 'amount' ? sortedInfo.order : null,
       render: (_, record) => (
         <Form.Item
           name={[record.key, 'amount']}
@@ -282,7 +340,7 @@ const TransactionsList = () => {
         </>
       ),
     },
-  ], [editMode, categories]);
+  ], [editMode, categories, sortedInfo, filteredInfo, transactions]);
 
   const handleShareClick = (transaction) => {
     setSelectedTransaction(transaction);
@@ -401,10 +459,14 @@ const TransactionsList = () => {
     return buttons;
   };
 
+  const clearFilters = () => {
+    setFilteredInfo({});
+  };
+
   return (
     <div>
       <ControlsContainer gutter={[16, 16]}>
-        <Col span={24}>
+        <ResponsiveCol span={24}>
           <Row gutter={[16, 16]} align="middle" wrap={false}>
             <Col>
               <Button icon={<LeftOutlined />} onClick={() => scrollYearMonth(-1)} />
@@ -427,22 +489,27 @@ const TransactionsList = () => {
               <Button icon={<RightOutlined />} onClick={() => scrollYearMonth(1)} />
             </Col>
           </Row>
-        </Col>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          {transactions.length != 0 && <ActionButton
-            onClick={() => setEditMode(!editMode)}
-            icon={editMode ? <SaveOutlined /> : <EditOutlined />}
-          >
-            {editMode ? 'Cancel Edit' : 'Edit Transactions'}
-          </ActionButton>}
-        </Col>
+        </ResponsiveCol>
+        <ResponsiveCol xs={24} sm={12} md={8} lg={6}>
+          {transactions.length !== 0 && (
+            <ActionButton
+              onClick={() => setEditMode(!editMode)}
+              icon={editMode ? <SaveOutlined /> : <EditOutlined />}
+            >
+              {editMode ? 'Cancel Edit' : 'Edit Transactions'}
+            </ActionButton>
+          )}
+        </ResponsiveCol>
         {editMode && (
-          <Col xs={24} sm={12} md={8} lg={6}>
+          <ResponsiveCol xs={24} sm={12} md={8} lg={6}>
             <Button type="primary" onClick={handleSave} icon={<SaveOutlined />}>
               Save Changes
             </Button>
-          </Col>
+          </ResponsiveCol>
         )}
+        <ResponsiveCol xs={24} sm={12} md={8} lg={6}>
+          <Button onClick={clearFilters}>Clear filters</Button>
+        </ResponsiveCol>
       </ControlsContainer>
       <Form form={form} component={false}>
         <StyledTable
