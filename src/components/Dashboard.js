@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, Row, Col, Statistic, Table, Typography, Tabs, Button } from 'antd';
 import { DollarOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { getAuthHeaders } from '../lib/utils';
+import { getAuthHeaders } from '../utils/auth';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { text } from '@fortawesome/fontawesome-svg-core';
 

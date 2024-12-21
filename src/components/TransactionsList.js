@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { Table, DatePicker, Row, Col, Form, Input, Select, Button, message, Modal, Typography } from 'antd';
 import { DeleteOutlined, EditOutlined, SaveOutlined, ShareAltOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { getAuthHeaders } from '../lib/utils';
+import { getAuthHeaders } from '../utils/auth';
 import styled from 'styled-components';
 
 const { Option } = Select;
