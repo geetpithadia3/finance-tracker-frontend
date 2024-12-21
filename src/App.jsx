@@ -1,55 +1,119 @@
+// App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Button, Avatar, Dropdown } from 'antd';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+// Import your components
 import TransactionsList from './components/TransactionsList';
 import GoalsList from './components/GoalsList';
 import ManageAccounts from './components/ManageAccounts';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
-import { BankOutlined, FlagOutlined, MenuOutlined, UnorderedListOutlined, LogoutOutlined, DashboardOutlined, UserOutlined } from '@ant-design/icons';
 import Profile from './components/Profile';
-import styled from 'styled-components';
 
-const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
+import { 
+  Menu,
+  LayoutDashboard, 
+  Wallet,
+  ListOrdered,
+  Target,
+  LogOut,
+} from 'lucide-react';
 
-const ResponsiveSider = styled(Sider)`
-  @media (max-width: 768px) {
-    position: absolute;
-    z-index: 1;
-    height: 100%;
-    left: ${props => (props.collapsed ? '-80px' : '0')};
-    transition: left 0.3s ease-in-out;
-  }
-`;
+const MainNav = ({ collapsed, className, ...props }) => {
+  const NavItem = ({ icon: Icon, children, to }) => (
+    <Link
+      to={to}
+      className={cn(
+        "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
+        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        collapsed && "justify-center px-2"
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      {!collapsed && <span>{children}</span>}
+    </Link>
+  );
 
-const ResponsiveLayout = styled(Layout)`
-  @media (max-width: 768px) {
-    margin-left: 0 !important;
-    filter: ${props => (props.blurred ? 'blur(5px)' : 'none')};
-    transition: filter 0.3s ease-in-out;
-    
-  }
-`;
+  return (
+    <nav className={cn("flex flex-col gap-1", className)} {...props}>
+      <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
+      <NavItem icon={Wallet} to="/accounts">Accounts</NavItem>
+      <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
+      <NavItem icon={Target} to="/goals">Goals</NavItem>
+    </nav>
+  );
+};
 
-const OverlaySider = styled(ResponsiveSider)`
-  @media (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 1000;
-  }
-`;
+const UserNav = ({ onLogout }) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end">
+        <DropdownMenuItem onClick={onLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const Sidebar = ({ collapsed, className }) => {
+  return (
+    <div
+      className={cn(
+        "flex h-screen flex-col border-r bg-background",
+        collapsed ? "w-16" : "w-64",
+        className
+      )}
+    >
+      <div className="flex h-14 items-center border-b px-3">
+        {!collapsed && (
+          <Link to="/" className="flex items-center gap-2 font-semibold">
+            Track
+          </Link>
+        )}
+      </div>
+      <ScrollArea className="flex-1 p-3">
+        <MainNav collapsed={collapsed} />
+      </ScrollArea>
+    </div>
+  );
+};
 
 const App = () => {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleLogout = () => {
@@ -57,86 +121,73 @@ const App = () => {
     setIsAuthenticated(false);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
+    );
+  }
+
   return (
     <Router>
-      <Layout style={{ minHeight: '100vh' }}>
-        {isAuthenticated && (
-          <OverlaySider
-            collapsed={collapsed}
-            onCollapse={setCollapsed}
-            breakpoint="lg"
-            collapsedWidth="0"
-            style={{ background: '#fff' }}
-            zeroWidthTriggerStyle={{ top: '10px' }}
-          >
-            <div style={{ padding: '30px', textAlign: 'center' }}>
-              {/* <Title level={4} style={{ color: '#1890ff', margin: 0 }}>Nest.</Title> */}
-              <Title level={4} style={{ color: '#1890ff', margin: 0 }}></Title>
-            </div>
-            <Menu mode="inline" defaultSelectedKeys={['1']}>
-              <Menu.Item key="1" icon={<DashboardOutlined />}>
-                <Link to="/">Dashboard</Link>
-              </Menu.Item>
-              <Menu.Item key="2" icon={<BankOutlined />}>
-                <Link to="/accounts">Accounts</Link>
-              </Menu.Item>
-              <Menu.Item key="3" icon={<UnorderedListOutlined />}>
-                <Link to="/transactions">Transactions</Link>
-              </Menu.Item>
-              <Menu.Item key="4" icon={<FlagOutlined />}>
-                <Link to="/goals">Goals</Link>
-              </Menu.Item>
-            </Menu>
-          </OverlaySider>
+      <div className="flex h-screen">
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <div className={cn("hidden lg:block", collapsed ? "w-16" : "w-64")}>
+            <Sidebar collapsed={collapsed} />
+          </div>
         )}
-        <ResponsiveLayout blurred={!collapsed && window.innerWidth <= 768}>
-          {isAuthenticated && (
-            <Header style={{ background: '#fff', padding: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button
-                type="text"
-                icon={<MenuOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
-                style={{
-                  fontSize: '16px',
-                  width: 64,
-                  height: 64,
-                }}
-              />
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Title level={4} style={{ color: '#1890ff', margin: 0 }}>Track</Title>
-              </div>
-              <Dropdown
-                overlay={
-                  <Menu>
-                    {/* <Menu.Item key="profile">
-                      <Link to="/profile">Profile</Link>
-                    </Menu.Item> */}
-                    <Menu.Item key="logout" onClick={handleLogout}>
-                      Logout
-                    </Menu.Item>
-                  </Menu>
-                }
-                placement="bottomRight"
-              >
-                <Avatar style={{ backgroundColor: '#1890ff', cursor: 'pointer', marginRight: '10px' }} icon={<UserOutlined />} />
-              </Dropdown>
-            </Header>
-          )}
-          <Content style={{ margin: '24px 16px 0', overflow: 'initial', background: '#fff' }}>
-            <div style={{ padding: 24, minHeight: 360 }}>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          {/* Header */}
+          <header className="h-14 border-b bg-background px-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isMobile ? (
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-6 w-6" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="p-0 w-64">
+                    <Sidebar collapsed={false} />
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCollapsed(!collapsed)}
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              )}
+              
+            </div>
+            <UserNav onLogout={handleLogout} />
+          </header>
+
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto p-6">
               <Routes>
-                <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-                <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
-                <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
-                <Route path="/transactions" element={isAuthenticated ? <TransactionsList /> : <Navigate to="/login" />} />
-                <Route path="/goals" element={isAuthenticated ? <GoalsList /> : <Navigate to="/login" />} />
-                <Route path="/accounts" element={isAuthenticated ? <ManageAccounts /> : <Navigate to="/login" />} />
-                <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/transactions" element={<TransactionsList />} />
+                <Route path="/goals" element={<GoalsList />} />
+                <Route path="/accounts" element={<ManageAccounts />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </div>
-          </Content>
-        </ResponsiveLayout>
-      </Layout>
+          </main>
+        </div>
+      </div>
     </Router>
   );
 };

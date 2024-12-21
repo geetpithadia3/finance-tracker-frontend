@@ -1,437 +1,319 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, Row, Col, Statistic, Table, Typography, Tabs, Button } from 'antd';
-import { DollarOutlined } from '@ant-design/icons';
-import moment from 'moment';
-import { getAuthHeaders } from '../utils/auth';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { text } from '@fortawesome/fontawesome-svg-core';
+import { getAuthHeaders } from '../utils/auth';
+import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import moment from 'moment';
 
-const { Title } = Typography;
-const { TabPane } = Tabs;
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
+const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
 
 const Dashboard = () => {
-    const [expenses, setExpenses] = useState(0);
-    const [savings, setSavings] = useState(0);
-    const [income, setIncome] = useState(0);
-    const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'months'));
-    const [transactions, setTransactions] = useState([]);
-    const [incomeTransactions, setIncomeTransactions] = useState([]);
-    const [savingsTransactions, setSavingsTransactions] = useState([]);
-    const [expensesByCategory, setExpensesByCategory] = useState([]);
-    const scrollRef = useRef(null);
-    const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'months'));
+  const [expenses, setExpenses] = useState(0);
+  const [savings, setSavings] = useState(0);
+  const [income, setIncome] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [incomeTransactions, setIncomeTransactions] = useState([]);
+  const [savingsTransactions, setSavingsTransactions] = useState([]);
+  const [expensesByCategory, setExpensesByCategory] = useState([]);
 
-    useEffect(() => {
-        fetchDashboardData(); 
-    }, [selectedDate]);
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedDate]);
 
-    useEffect(() => {
-        const handleResize = () => setWindowHeight(window.innerHeight);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/dashboard?yearMonth=${selectedDate.format('YYYY-MM')}`,
+        { headers: getAuthHeaders() }
+      );
+      const data = await response.json();
 
-    const tableHeight = windowHeight - 500;
+      const formattedExpenses = (Array.isArray(data.expenses) ? data.expenses : [])
+        .map(item => ({
+          ...item,
+          key: item.id.toString(),
+          deleted: false,
+        }));
+      setTransactions(formattedExpenses);
+      setExpenses(formattedExpenses.reduce((acc, item) => acc + parseFloat(item.amount), 0).toFixed(2));
 
-    const fetchDashboardData = async () => {
-        try {
-            const response = await fetch(`http://localhost:8080/dashboard?yearMonth=${selectedDate.format('YYYY-MM')}`, {
-                method: "GET",
-                headers: getAuthHeaders()
-            });
-            const data = await response.json();
-            
-            const formattedExpenses = (Array.isArray(data.expenses) ? data.expenses : []).map((item) => ({
-                ...item,
-                key: item.id.toString(),
-                deleted: false,
-            }));
-            
-            setTransactions(formattedExpenses);
-            const totalExpenses = formattedExpenses.reduce((acc, item) => acc + parseFloat(item.amount), 0);
-            setExpenses(totalExpenses.toFixed(2));
+      const formattedIncome = (Array.isArray(data.income) ? data.income : [])
+        .map(item => ({
+          ...item,
+          key: item.id.toString(),
+          deleted: false,
+        }));
+      setIncomeTransactions(formattedIncome);
+      setIncome(formattedIncome.reduce((acc, item) => acc + parseFloat(item.amount), 0).toFixed(2));
 
-            const formattedIncome = (Array.isArray(data.income) ? data.income : []).map((item) => ({
-                ...item,
-                key: item.id.toString(),
-                deleted: false,
-            }));
-            setIncomeTransactions(formattedIncome);
-            const totalIncome = formattedIncome.reduce((acc, item) => acc + parseFloat(item.amount), 0);
-            setIncome(totalIncome.toFixed(2));
+      const formattedSavings = (Array.isArray(data.savings) ? data.savings : [])
+        .map(item => ({
+          ...item,
+          key: item.id.toString(),
+          deleted: false,
+        }));
+      setSavingsTransactions(formattedSavings);
+      setSavings(formattedSavings.reduce((acc, item) => acc + parseFloat(item.amount), 0).toFixed(2));
 
-            const formattedSavings = (Array.isArray(data.savings) ? data.savings : []).map((item) => ({
-                ...item,
-                key: item.id.toString(),
-                deleted: false,
-            }));
-            setSavingsTransactions(formattedSavings);
-            const totalSavings = formattedSavings.reduce((acc, item) => acc + parseFloat(item.amount), 0);
-            setSavings(totalSavings.toFixed(2));
+      // Calculate expenses by category
+      const categoryTotals = formattedExpenses.reduce((acc, item) => {
+        acc[item.category] = (acc[item.category] || 0) + parseFloat(item.amount);
+        return acc;
+      }, {});
 
-            // Calculate expenses by category
-            const categoryTotals = formattedExpenses.reduce((acc, item) => {
-                acc[item.category] = (acc[item.category] || 0) + parseFloat(item.amount);
-                return acc;
-            }, {});
+      setExpensesByCategory(
+        Object.entries(categoryTotals).map(([category, total]) => ({
+          category,
+          value: parseFloat(total.toFixed(2)),
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    }
+  };
 
-            const expensesByCategoryData = Object.entries(categoryTotals).map(([category, total]) => ({
-                category,
-                value: parseFloat(total.toFixed(2)),
-            }));
+  const handleMonthChange = (direction) => {
+    setSelectedDate(prev => prev.clone().add(direction, 'months'));
+  };
 
-            console.log(expensesByCategory)
+  const StatCard = ({ title, value, trend, icon: Icon }) => (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">${parseFloat(value).toFixed(2)}</div>
+      </CardContent>
+    </Card>
+  );
 
-            setExpensesByCategory(expensesByCategoryData);
+  const renderTransactionTable = (data, columns) => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columns.map((column, index) => (
+              <TableHead key={index}>{column.title}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow key={item.key}>
+              {columns.map((column, index) => (
+                <TableCell key={index}>
+                  {column.render ? column.render(item[column.dataIndex]) : item[column.dataIndex]}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
-        } catch (error) {
-            console.error('Error fetching dashboard data:', error);
-        }
-    };
+  const expenseColumns = [
+    {
+      title: 'Date',
+      dataIndex: 'occurredOn',
+      render: (date) => moment(date).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      render: (amount) => `$${parseFloat(amount).toFixed(2)}`,
+    },
+  ];
 
-    const handleDateChange = (year, month) => {
-        setSelectedDate(moment().year(year).month(month));
-    };
+  const incomeAndSavingsColumns = [
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      render: (date) => moment(date).format('YYYY-MM-DD'),
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      render: (amount) => `$${parseFloat(amount).toFixed(2)}`,
+    },
+  ];
 
-
-    const generateYearMonthButtons = () => {
-        const buttons = [];
-        const currentYear = selectedDate.year();
-        
-        for (let year = currentYear ; year <= currentYear + 1; year++) {
-            moment.months().forEach((month, index) => {
-                buttons.push(
-                    <Button 
-                        key={`${year}-${month}`}
-                        type={selectedDate.year() === year && selectedDate.month() === index ? 'primary' : 'default'}
-                        onClick={() => handleDateChange(year, index)}
-                        style={{ margin: '0 5px', minWidth: '120px', borderColor: '#000000' }}
-                    >
-                        {`${month} ${year}`}
-                    </Button>
-                );
-            });
-        }
-        return buttons;
-    };
-
-    const expenseColumns = [
-        {
-            title: 'Date',
-            dataIndex: 'occurredOn',
-            key: 'occurredOn',
-            render: (occurredOn) => moment(occurredOn).format('YYYY-MM-DD'),
-            sorter: (a, b) => moment(a.occurredOn).unix() - moment(b.occurredOn).unix(),
-            defaultSortOrder: 'descend'
-        },
-        {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
-            sorter: (a, b) => a.description.localeCompare(b.description)
-        },
-        {
-            title: 'Category',
-            dataIndex: 'category',
-            key: 'category',
-            sorter: (a, b) => a.category.localeCompare(b.category)
-        },
-        {
-            title: 'Amount',
-            dataIndex: 'amount',
-            key: 'amount',
-            render: (amount) => `$${parseFloat(amount).toFixed(2)}`,
-            sorter: (a, b) => parseFloat(a.amount) - parseFloat(b.amount)
-        },
-    ];
-
-    const incomeAndSavingsColumns = [
-        {
-            title: 'Date',
-            dataIndex: 'date',
-            key: 'date',
-            render: (occurredOn) => moment(occurredOn).format('YYYY-MM-DD'),
-            sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
-            defaultSortOrder: 'descend'
-        },
-        {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
-            sorter: (a, b) => a.description.localeCompare(b.description)
-        },
-        {
-            title: 'Amount',
-            dataIndex: 'amount',
-            key: 'amount',
-            render: (amount) => `$${parseFloat(amount).toFixed(2)}`,
-            sorter: (a, b) => parseFloat(a.amount) - parseFloat(b.amount)
-        },
-    ];
-
-    const categoryTableColumns = [
-        {
-            title: 'Category',
-            dataIndex: 'category',
-            key: 'category',
-            render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>
-        },
-        {
-            title: 'Amount',
-            dataIndex: 'value',
-            key: 'value',
-            render: (value) => `$${value.toFixed(2)}`,
-            sorter: (a, b) => a.value - b.value,
-            sortDirections: ['descend', 'ascend'],
-            defaultSortOrder: 'descend',
-        }
-    ];
-
-    const totalDistributionData = [
-        { name: 'Expenses', value: parseFloat(expenses) },
-        { name: 'Income', value: parseFloat(income) },
-        { name: 'Savings', value: parseFloat(savings) }
-    ];
-
-    // Add these helper functions
-    const formatCurrency = (value) => `$${parseFloat(value).toFixed(2)}`;
-
-    const calculateTotal = (data) => {
-        return data.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-    };
-
-    return (
-        <div style={{ padding: '20px' }}>
-            <Row gutter={[16, 16]} style={{ marginTop: '20px' }} align="middle" justify="space-between">
-                
-                <Col flex="1">
-                    <div 
-                        ref={scrollRef} 
-                        style={{ 
-                            display: 'flex', 
-                            overflowX: 'auto', 
-                            scrollbarWidth: 'none', 
-                            msOverflowStyle: 'none',
-                            '&::-webkit-scrollbar': { display: 'none' }
-                        }}
-                    >
-                        {generateYearMonthButtons()}
-                    </div>
-                </Col>
-                
-            </Row>
-
-            <Card title="Financial Distribution" style={{ marginTop: '20px' }}>
-            <Row gutter={[16, 16]} >
-                <Col xs={24} md={8}>
-                    
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie
-                                    data={totalDistributionData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius="60%"
-                                    outerRadius="80%"
-                                    dataKey="value"
-                                    nameKey="name"
-                                    label={false}
-                                >
-                                    {totalDistributionData.map((entry, index) => (
-                                        <Cell 
-                                            key={`cell-${index}`} 
-                                            fill={COLORS[index % COLORS.length]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip 
-                                    formatter={(value) => `$${value.toFixed(2)}`}
-                                />
-                                <Legend 
-                                    layout="vertical" 
-                                    verticalAlign="middle" 
-                                    align="right"
-                                    formatter={(value, entry) => `${value} ($${entry.payload.value.toFixed(2)})`}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    
-                </Col>
-                <Col xs={24} md={16}>
-                    <Row gutter={[16, 16]}>
-                        <Col span={24}>
-                            <Card>
-                                <Statistic
-                                    title="Income"
-                                    value={income}
-                                    precision={2}
-                                    valueStyle={{ color: '#096dd9' }}
-                                    prefix={<DollarOutlined />}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-                    <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-                        <Col span={12}>
-                            <Card>
-                                <Statistic
-                                    title="Expenses"
-                                    value={expenses}
-                                    precision={2}
-                                    valueStyle={{ color: '#cf1322' }}
-                                    prefix={<DollarOutlined />}
-                                />
-                            </Card>
-                        </Col>
-                        <Col span={12}>
-                            <Card>
-                                <Statistic
-                                    title="Savings"
-                                    value={savings}
-                                    precision={2}
-                                    valueStyle={{ color: '#3f8600' }}
-                                    prefix={<DollarOutlined />}
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-            </Card>
-
-            <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
-                <Col span={24}>
-                    <Card title="Expenses by Category">
-                        <Row gutter={[16, 16]}>
-                            <Col span={12}>
-                                <ResponsiveContainer width="100%" height={500}>
-                                    <PieChart>
-                                        <Pie
-                                            data={expensesByCategory}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius="55%"
-                                            outerRadius="75%"
-                                            dataKey="value"
-                                            nameKey="category"
-                                            label={false}
-                                        >
-                                            {
-                                                expensesByCategory.map((entry, index) => (
-                                                    <Cell 
-                                                        key={`cell-${index}`} 
-                                                        fill={COLORS[index % COLORS.length]}
-                                                    />
-                                                ))
-                                            }
-                                        </Pie>
-                                        <Tooltip 
-                                            formatter={(value) => `$${value.toFixed(2)}`}
-                                        />
-                                        <Legend 
-                                            layout="horizontal" 
-                                            verticalAlign="bottom" 
-                                            align="center"
-                                            wrapperStyle={{ fontSize: '12px' }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </Col>
-                            <Col span={12}>
-                                <div style={{ maxHeight: '500px', overflow: 'auto' }}>
-                                    <Table
-                                        columns={categoryTableColumns}
-                                        dataSource={expensesByCategory}
-                                        pagination={false}
-                                        size="middle"
-                                        scroll={{ y: 400 }}
-                                        summary={(pageData) => {
-                                            const total = pageData.reduce((acc, curr) => acc + curr.value, 0);
-                                            return (
-                                                <Table.Summary.Row>
-                                                    <Table.Summary.Cell>Total</Table.Summary.Cell>
-                                                    <Table.Summary.Cell>
-                                                        ${total.toFixed(2)}
-                                                    </Table.Summary.Cell>
-                                                </Table.Summary.Row>
-                                            );
-                                        }}
-                                    />
-                                </div>
-                            </Col>
-                        </Row>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Title level={4} style={{ marginTop: '20px' }}>
-                {selectedDate.format('MMMM YYYY')} Transactions
-            </Title>
-            <Row gutter={[16, 16]}>
-                <Col span={24}>
-                    <Tabs defaultActiveKey="1">
-                        <TabPane tab="Expenses" key="1">
-                            <Table
-                                columns={expenseColumns}
-                                dataSource={transactions}
-                                rowKey="id"
-                                pagination={false}
-                                scroll={{ x: 'max-content', y: tableHeight }}
-                                summary={() => (
-                                    <Table.Summary.Row>
-                                        <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
-                                        <Table.Summary.Cell index={1}></Table.Summary.Cell>
-                                        <Table.Summary.Cell index={2}></Table.Summary.Cell>
-                                        <Table.Summary.Cell index={3}>
-                                            <strong>{formatCurrency(calculateTotal(transactions))}</strong>
-                                        </Table.Summary.Cell>
-                                    </Table.Summary.Row>
-                                )}
-                            />
-                        </TabPane>
-                        <TabPane tab="Income" key="2">
-                            <Table
-                                columns={incomeAndSavingsColumns}
-                                dataSource={incomeTransactions}
-                                rowKey="id"
-                                pagination={false}
-                                scroll={{ x: 'max-content', y: tableHeight }}
-                                summary={() => (
-                                    <Table.Summary.Row>
-                                        <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
-                                        <Table.Summary.Cell index={1}></Table.Summary.Cell>
-                                        <Table.Summary.Cell index={2}>
-                                            <strong>{formatCurrency(calculateTotal(incomeTransactions))}</strong>
-                                        </Table.Summary.Cell>
-                                    </Table.Summary.Row>
-                                )}
-                            />
-                        </TabPane>
-                        <TabPane tab="Savings" key="3">
-                            <Table
-                                columns={incomeAndSavingsColumns}
-                                dataSource={savingsTransactions}
-                                rowKey="id"
-                                pagination={false}
-                                scroll={{ x: 'max-content', y: tableHeight }}
-                                summary={() => (
-                                    <Table.Summary.Row>
-                                        <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
-                                        <Table.Summary.Cell index={1}></Table.Summary.Cell>
-                                        <Table.Summary.Cell index={2}>
-                                            <strong>{formatCurrency(calculateTotal(savingsTransactions))}</strong>
-                                        </Table.Summary.Cell>
-                                    </Table.Summary.Row>
-                                )}
-                            />
-                        </TabPane>
-                    </Tabs>
-                </Col>
-            </Row>
+  return (
+    <div className="space-y-6 p-6">
+      {/* Date Navigation */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleMonthChange(-1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="min-w-[150px] text-center font-medium">
+            {selectedDate.format('MMMM YYYY')}
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleMonthChange(1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-    );
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard
+          title="Total Income"
+          value={income}
+          icon={TrendingUp}
+        />
+        <StatCard
+          title="Total Expenses"
+          value={expenses}
+          icon={TrendingDown}
+        />
+        <StatCard
+          title="Total Savings"
+          value={savings}
+          icon={Wallet}
+        />
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Income', value: parseFloat(income) },
+                      { name: 'Expenses', value: parseFloat(expenses) },
+                      { name: 'Savings', value: parseFloat(savings) },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="60%"
+                    outerRadius="80%"
+                    dataKey="value"
+                  >
+                    {COLORS.map((color, index) => (
+                      <Cell key={`cell-${index}`} fill={color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Expenses by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={expensesByCategory}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="60%"
+                    outerRadius="80%"
+                    dataKey="value"
+                    nameKey="category"
+                  >
+                    {expensesByCategory.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Transactions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="expenses" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="expenses">Expenses</TabsTrigger>
+              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="savings">Savings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="expenses">
+              <ScrollArea className="h-[400px]">
+                {renderTransactionTable(transactions, expenseColumns)}
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="income">
+              <ScrollArea className="h-[400px]">
+                {renderTransactionTable(incomeTransactions, incomeAndSavingsColumns)}
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="savings">
+              <ScrollArea className="h-[400px]">
+                {renderTransactionTable(savingsTransactions, incomeAndSavingsColumns)}
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default Dashboard;
