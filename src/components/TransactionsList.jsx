@@ -39,10 +39,19 @@ import {
   MoreHorizontal,
   X,
   SlidersHorizontal,
+  Scissors,
 } from 'lucide-react';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
@@ -54,6 +63,11 @@ const TransactionsList = () => {
   const [friends, setFriends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [splitModalVisible, setSplitModalVisible] = useState(false);
+  const [splitTransaction, setSplitTransaction] = useState(null);
+  const [splitItems, setSplitItems] = useState([]);
+  const [splitError, setSplitError] = useState(null);
+  const [remainingAmount, setRemainingAmount] = useState(0);
 
   const fetchTransactions = async (date) => {
     try {
@@ -182,6 +196,143 @@ const TransactionsList = () => {
     const value = parseFloat(amount);
     return isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
   };
+
+  const handleSplitInit = (transaction) => {
+    if (transaction.type.toLowerCase() !== 'debit') return;
+    setSplitTransaction(transaction);
+    setRemainingAmount(transaction.amount);
+    setSplitItems([{
+      id: Date.now(),
+      amount: '',
+      description: '',
+      category: transaction.category,
+      type: 'DEBIT',
+      occurredOn: transaction.occurredOn,
+      account: transaction.account
+    }]);
+    setSplitModalVisible(true);
+  };
+
+  const handleSplitItemChange = (itemId, field, value) => {
+    setSplitItems(prev => prev.map(item =>
+      item.id === itemId ? { ...item, [field]: value } : item
+    ));
+    setSplitError(null);
+
+    // Update remaining amount when split amounts change
+    if (field === 'amount') {
+      const totalSplit = splitItems.reduce((sum, item) => {
+        const itemAmount = item.id === itemId ? parseFloat(value) || 0 : parseFloat(item.amount) || 0;
+        return sum + itemAmount;
+      }, 0);
+      const newRemainingAmount = splitTransaction.amount - totalSplit;
+      setRemainingAmount(newRemainingAmount);
+    }
+  };
+
+  const addSplitItem = () => {
+    setSplitItems(prev => [...prev, {
+      id: Date.now(),
+      amount: '',
+      description: '',
+      category: splitTransaction.category,
+      type: 'DEBIT',
+      occurredOn: splitTransaction.occurredOn,
+      account: splitTransaction.account
+    }]);
+  };
+
+  const removeSplitItem = (itemId) => {
+    setSplitItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  const handleSaveSplit = async () => {
+    // Validate that splits don't exceed original amount
+    const totalSplit = splitItems.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    if (totalSplit > splitTransaction.amount) {
+      setSplitError(`Total split amount cannot exceed ${formatCurrency(splitTransaction.amount)}`);
+      return;
+    }
+
+    try {
+      // First update the parent transaction with remaining amount
+      const updateParentResponse = await fetch('http://localhost:8080/transactions', {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([{
+          id: splitTransaction.id,
+          description: splitTransaction.description,
+          amount: remainingAmount,
+          categoryId: splitTransaction.category.id,
+          occurredOn: splitTransaction.occurredOn,
+          deleted: false,
+          account: splitTransaction.account
+        }]),
+      });
+
+      if (!updateParentResponse.ok) {
+        throw new Error('Failed to update parent transaction');
+      }
+
+      // Then create the new split transactions
+      const createSplitsResponse = await fetch('http://localhost:8080/transactions', {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          splitItems.map(item => ({
+            amount: parseFloat(item.amount),
+            description: item.description || splitTransaction.description,
+            categoryId: item.category.id,
+            occurredOn: splitTransaction.occurredOn,
+            accountId: splitTransaction.account,
+            type: 'DEBIT'
+          }))
+        ),
+      });
+
+      if (!createSplitsResponse.ok) {
+        throw new Error('Failed to create split transactions');
+      }
+
+      await fetchTransactions(selectedDate);
+      setSplitModalVisible(false);
+      setSplitTransaction(null);
+      setSplitItems([]);
+      setRemainingAmount(0);
+    } catch (error) {
+      console.error('Error splitting transaction:', error);
+      setSplitError('Failed to save split transactions');
+    }
+  };
+
+  const renderActionButtons = (transaction) => (
+    <div className="flex items-center gap-2">
+      <Button 
+        variant="ghost" 
+        size="icon"
+        disabled={!editMode}
+        onClick={() => handleDelete(transaction)}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+      {transaction.type.toLowerCase() === 'debit' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleSplitInit(transaction)}
+        >
+          <Scissors className="h-4 w-4" />
+        </Button>
+      )}
+      
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -319,28 +470,7 @@ const TransactionsList = () => {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      disabled={!editMode}
-                      onClick={() => handleDelete(transaction)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    {transaction.shareable && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedTransaction(transaction);
-                          setShareModalVisible(true);
-                        }}
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                  {renderActionButtons(transaction)}
                 </TableCell>
               </TableRow>
             ))}
@@ -348,34 +478,91 @@ const TransactionsList = () => {
         </Table>
       </div>
 
-      {/* Share Dialog */}
-      <Dialog open={shareModalVisible} onOpenChange={setShareModalVisible}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Transaction</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select friends" />
-              </SelectTrigger>
-              <SelectContent>
-                {friends.map(friend => (
-                  <SelectItem key={friend.id} value={friend.id}>
-                    {friend.firstName} {friend.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Add Split Transaction Sheet */}
+      <Sheet open={splitModalVisible} onOpenChange={setSplitModalVisible}>
+        <SheetContent 
+          className="w-[400px] sm:w-[540px]"
+          description="Split a transaction into multiple parts"
+        >
+          <SheetHeader>
+            <SheetTitle>Split Transaction</SheetTitle>
+            <SheetDescription>
+              Divide this transaction into multiple parts while maintaining the total amount.
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="py-4">
+            <div className="flex justify-between mb-4">
+              <div>Original Amount: {formatCurrency(splitTransaction?.amount)}</div>
+              <div className={remainingAmount < 0 ? 'text-red-500' : 'text-green-500'}>
+                Remaining: {formatCurrency(remainingAmount)}
+              </div>
+            </div>
+            
+            {splitError && (
+              <div className="mb-4 text-red-500 text-sm">{splitError}</div>
+            )}
+
+            <div className="space-y-4">
+              {splitItems.map((item, index) => (
+                <div key={item.id} className="space-y-2 p-4 border rounded-lg">
+                  <Input
+                    type="number"
+                    placeholder="Amount"
+                    value={item.amount}
+                    onChange={(e) => handleSplitItemChange(item.id, 'amount', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Description"
+                    value={item.description}
+                    onChange={(e) => handleSplitItemChange(item.id, 'description', e.target.value)}
+                  />
+                  <Select
+                    value={item.category.name}
+                    onValueChange={(value) => handleSplitItemChange(item.id, 'category', 
+                      categories.find(c => c.name === value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {splitItems.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeSplitItem(item.id)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              className="mt-4 w-full"
+              onClick={addSplitItem}
+            >
+              Add Split
+            </Button>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShareModalVisible(false)}>
+
+          <SheetFooter>
+            <Button variant="outline" onClick={() => setSplitModalVisible(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setShareModalVisible(false)}>Share</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <Button onClick={handleSaveSplit}>Save</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
