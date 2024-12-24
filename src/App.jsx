@@ -21,6 +21,10 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Profile from './components/Profile';
+import Configuration from './components/configuration/Configuration';
+import { Toaster } from "@/components/ui/toaster"
+import Budget from './components/Budget';
+import BudgetConfiguration from './components/configuration/BudgetConfiguration';
 
 import { 
   Menu,
@@ -29,7 +33,11 @@ import {
   ListOrdered,
   Target,
   LogOut,
+  Settings,
+  PiggyBank,
 } from 'lucide-react';
+
+import moment from 'moment';
 
 const MainNav = ({ collapsed, className, ...props }) => {
   const NavItem = ({ icon: Icon, children, to }) => (
@@ -51,7 +59,8 @@ const MainNav = ({ collapsed, className, ...props }) => {
       <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
       <NavItem icon={Wallet} to="/accounts">Accounts</NavItem>
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
-      <NavItem icon={Target} to="/goals">Goals</NavItem>
+      {/* <NavItem icon={Target} to="/goals">Goals</NavItem> */}
+      <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
     </nav>
   );
 };
@@ -67,6 +76,12 @@ const UserNav = ({ onLogout }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
+        <DropdownMenuItem asChild>
+          <Link to="/configuration">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configuration</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
@@ -136,6 +151,7 @@ const App = () => {
   return (
     <Router>
       <div className="flex h-screen">
+      
         {/* Desktop Sidebar */}
         {!isMobile && (
           <div className={cn("hidden lg:block", collapsed ? "w-16" : "w-64")}>
@@ -179,15 +195,20 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<TransactionsList />} />
-                <Route path="/goals" element={<GoalsList />} />
+                {/* <Route path="/goals" element={<GoalsList />} /> */}
                 <Route path="/accounts" element={<ManageAccounts />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/configuration" element={<Configuration />} />
+                <Route path="/budget" element={<Budget />} />
+                <Route path="/budget/configure" element={<BudgetConfiguration selectedDate={moment()} />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </div>
           </main>
         </div>
+        
       </div>
+      <Toaster />
     </Router>
   );
 };

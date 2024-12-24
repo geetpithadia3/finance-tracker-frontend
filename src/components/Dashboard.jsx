@@ -10,18 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getAuthHeaders } from '../utils/auth';
 import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import moment from 'moment';
+import { Progress } from "@/components/ui/progress";
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
 
@@ -34,6 +28,7 @@ const Dashboard = () => {
   const [incomeTransactions, setIncomeTransactions] = useState([]);
   const [savingsTransactions, setSavingsTransactions] = useState([]);
   const [expensesByCategory, setExpensesByCategory] = useState([]);
+  const [budgets, setBudgets] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -86,6 +81,16 @@ const Dashboard = () => {
           value: parseFloat(total.toFixed(2)),
         }))
       );
+
+      if (Array.isArray(data.budgets)) {
+        const budgetProgress = data.budgets.map(budget => ({
+          ...budget,
+          spent: formattedExpenses
+            .filter(expense => expense.category === budget.category)
+            .reduce((acc, expense) => acc + parseFloat(expense.amount), 0),
+        }));
+        setBudgets(budgetProgress);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     }
@@ -169,6 +174,27 @@ const Dashboard = () => {
       render: (amount) => `$${parseFloat(amount).toFixed(2)}`,
     },
   ];
+
+  const BudgetProgressCard = ({ budget }) => {
+    const percentage = (budget.spent / budget.amount) * 100;
+    const isOverBudget = percentage > 100;
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="font-medium">{budget.category}</span>
+          <span className={`text-sm ${isOverBudget ? 'text-red-500' : ''}`}>
+            ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
+          </span>
+        </div>
+        <Progress
+          value={Math.min(percentage, 100)}
+          className={isOverBudget ? "bg-red-200" : ""}
+          indicatorClassName={isOverBudget ? "bg-red-500" : ""}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -278,6 +304,22 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add this new section before the Transactions card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Budget Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {budgets.length === 0 ? (
+            <p className="text-muted-foreground text-center">No budgets set for this month</p>
+          ) : (
+            budgets.map((budget, index) => (
+              <BudgetProgressCard key={index} budget={budget} />
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* Transactions */}
       <Card>

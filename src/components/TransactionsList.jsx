@@ -95,15 +95,18 @@ const TransactionsList = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8080/categories',{
-        method:'GET',
+      const response = await fetch('http://localhost:8080/categories', {
+        method: 'GET',
         headers: getAuthHeaders()
       });
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
       const data = await response.json();
-      setCategories(data || []);
+      setCategories(data.map(category => ({
+        name: typeof category === 'string' ? category : category.name,
+        id: typeof category === 'string' ? category : category.id
+      })));
     } catch (error) {
       console.error('Error fetching categories:', error);
       setCategories([]);
@@ -118,7 +121,7 @@ const TransactionsList = () => {
     setTransactions(prev =>
       prev.map(t =>
         t.key === transaction.key
-          ? { ...t, deleted: !t.deleted }
+          ? { ...t, deleted: !t.deleted, modified: true }
           : t
       )
     );
@@ -128,10 +131,50 @@ const TransactionsList = () => {
     setTransactions(prev =>
       prev.map(t =>
         t.key === transaction.key
-          ? { ...t, [field]: value }
+          ? {
+              ...t,
+              [field]: field === 'category' 
+                ? categories.find(c => c.name === value)
+                : value,
+              modified: true
+            }
           : t
       )
     );
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const updatedTransactions = transactions
+        .filter(t => t.deleted || t.modified)
+        .map(transaction => ({
+          id: transaction.id,
+          description: transaction.description,
+          amount: transaction.amount,
+          categoryId: transaction.category.id,
+          occurredOn: transaction.occurredOn,
+          deleted: transaction.deleted || false,
+          account: transaction.account
+        }));
+
+      const response = await fetch('http://localhost:8080/transactions', {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTransactions),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update transactions');
+      }
+
+      await fetchTransactions(selectedDate);
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error updating transactions:', error);
+    }
   };
 
   // Safe formatting helper
@@ -182,7 +225,7 @@ const TransactionsList = () => {
             )}
           </Button>
           {editMode && (
-            <Button>
+            <Button onClick={handleSaveChanges}>
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
@@ -236,26 +279,26 @@ const TransactionsList = () => {
                 <TableCell>
                   {editMode ? (
                     <Select
-                      defaultValue={transaction.category.toLowerCase()}
+                      defaultValue={transaction.category.name}
                       onValueChange={(value) => handleEdit(transaction, 'category', value)}
                     >
                       <SelectTrigger className="h-8">
-                        <SelectValue />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map(category => (
                           <SelectItem 
-                            key={category} 
-                            value={category.toLowerCase()}
+                            key={category.id} 
+                            value={category.name}
                           >
-                            {category}
+                            {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
                     <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-100">
-                      {transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1).toLowerCase()}
+                      {transaction.category.name}
                     </span>
                   )}
                 </TableCell>
