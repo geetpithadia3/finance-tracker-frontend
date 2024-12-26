@@ -8,5 +8,30 @@ export const transactionsApi = {
   update: (transactions) => apiClient.put('/transactions', transactions),
   
   getDashboardData: (yearMonth) => 
-    apiClient.get(`/dashboard?yearMonth=${yearMonth}`)
+    apiClient.get(`/dashboard?yearMonth=${yearMonth}`),
+
+  updateParentAndCreateSplits: async (parentTransaction, parentUpdate, newSplits) => {
+    // Update parent transaction
+    await apiClient.put('/transactions', [{
+      id: parentTransaction.id,
+      description: parentTransaction.description,
+      amount: parentUpdate.amount,
+      categoryId: parentTransaction.category.id,
+      occurredOn: parentTransaction.occurredOn,
+      deleted: false,
+      account: parentTransaction.account
+    }]);
+
+    // Create split transactions
+    return apiClient.post('/transactions', 
+      newSplits.map(split => ({
+        amount: parseFloat(split.amount),
+        description: split.description || parentTransaction.description,
+        categoryId: split.category.id,
+        occurredOn: parentTransaction.occurredOn,
+        accountId: parentTransaction.account,
+        type: 'DEBIT'
+      }))
+    );
+  }
 };

@@ -58,14 +58,19 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
     };
 
     const formatTransactions = (transactions) => {
-        return transactions.map((item, index) => ({
-            key: index.toString(),
-            date: moment(item.date || item.Date),
-            description: item.description || item.Description,
-            type: item.type || item['Type of Transaction'],
-            amount: item.amount || item.Amount,
-            category: item.category || 'General',
-        }));
+        console.log(categories)
+        return transactions.map((item, index) => {
+            const category = categories.find(cat => cat.name === (item.category || 'General')) || { id: null };
+            console.log(category)
+            return {
+                key: index.toString(),
+                date: moment(item.date || item.Date),
+                description: item.description || item.Description,
+                type: item.type || item['Type of Transaction'],
+                amount: item.amount || item.Amount,
+                categoryId: category.id || null,
+            };
+        });
     };
 
     const handleSaveAll = async () => {
@@ -160,14 +165,14 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
                         (
                             <Select>
                                 {categories.map(category => (
-                                    <Option key={category} value={category}>
-                                        {category}
+                                    <Option key={category.id} value={category.id}>
+                                        {category.name}
                                     </Option>
                                 ))}
                             </Select>
                         )
                     ) : (
-                        record.category
+                        record.category ? record.category.name : 'N/A'
                     )}
                 </Form.Item>
             ),
