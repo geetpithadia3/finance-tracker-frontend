@@ -16,6 +16,7 @@ import { getAuthHeaders } from '../utils/auth';
 import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import moment from 'moment';
 import { Progress } from "@/components/ui/progress";
+import { budgetsApi } from '../api/budgets';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
 
@@ -36,11 +37,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/dashboard?yearMonth=${selectedDate.format('YYYY-MM')}`,
-        { headers: getAuthHeaders() }
-      );
-      const data = await response.json();
+      const data = await budgetsApi.getDashboardData(selectedDate.format('YYYY-MM'));
 
       const formattedExpenses = (Array.isArray(data.expenses) ? data.expenses : [])
         .map(item => ({
@@ -304,22 +301,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Add this new section before the Transactions card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Budget Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {budgets.length === 0 ? (
-            <p className="text-muted-foreground text-center">No budgets set for this month</p>
-          ) : (
-            budgets.map((budget, index) => (
-              <BudgetProgressCard key={index} budget={budget} />
-            ))
-          )}
-        </CardContent>
-      </Card>
 
       {/* Transactions */}
       <Card>

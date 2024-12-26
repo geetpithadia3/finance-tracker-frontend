@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { getAuthHeaders } from '../utils/auth';
 import { SyncResultComponent } from './SyncResultComponent';
+import { accountsApi } from '../api/accounts';
 
 const ManageAccounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -60,10 +61,7 @@ const ManageAccounts = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/account', {
-        headers: getAuthHeaders()
-      });
-      const data = await response.json();
+      const data = await accountsApi.getAll();
       setAccounts(data);
     } catch (error) {
       console.error('Error fetching accounts:', error);
@@ -82,11 +80,7 @@ const ManageAccounts = () => {
 
   const syncSplitwiseTransactions = async (accountId) => {
     try {
-      await fetch('http://localhost:8080/sync-transactions', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ accountId }),
-      });
+      await accountsApi.syncTransactions(accountId);
       fetchAccounts();
     } catch (error) {
       console.error('Error syncing Splitwise transactions:', error);
@@ -113,28 +107,12 @@ const ManageAccounts = () => {
 
   const handleSave = async () => {
     try {
-      const accountResponse = await fetch('http://localhost:8080/account', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(selectedAccount)
-      });
-
-      if (!accountResponse.ok) {
-        throw new Error('Failed to save account');
-      }
-
+      await accountsApi.create(selectedAccount);
+      
       if (selectedAccount.org === 'Splitwise') {
-        const externalResponse = await fetch('http://localhost:8080/user/external-credentials', {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ externalKey })
-        });
-
-        if (!externalResponse.ok) {
-          throw new Error('Failed to save Splitwise credentials');
-        }
+        await accountsApi.saveExternalCredentials(externalKey);
       }
-
+      
       fetchAccounts();
       setIsModalOpen(false);
       setExternalKey('');
@@ -145,15 +123,7 @@ const ManageAccounts = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/account/${accountToDelete.accountId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete account');
-      }
-
+      await accountsApi.delete(accountToDelete.accountId);
       fetchAccounts();
       setDeleteDialogOpen(false);
       setAccountToDelete(null);

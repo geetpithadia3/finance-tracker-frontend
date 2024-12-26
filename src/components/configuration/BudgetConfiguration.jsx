@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import moment from 'moment';
+import { budgetsApi } from '@/api/budgets';
 
 const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   const navigate = useNavigate();
@@ -100,11 +101,7 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
 
   const fetchEstimatedIncome = async () => {
     try {
-      const response = await fetch('http://localhost:8080/income-sources', {
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) throw new Error('Failed to fetch income');
-      const data = await response.json();
+      const data = await budgetsApi.getEstimatedIncome();
       
       const monthlyTotal = data.reduce((total, income) => {
         const amount = parseFloat(income.payAmount) || 0;
@@ -142,16 +139,7 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
         }))
       };
 
-      const response = await fetch('http://localhost:8080/budgets', {
-        method: 'POST',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(budgetData)
-      });
-
-      if (!response.ok) throw new Error('Failed to save budgets');
+      await budgetsApi.create(budgetData);
 
       toast({
         title: "Success",

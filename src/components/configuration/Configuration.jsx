@@ -17,20 +17,12 @@ const Configuration = () => {
       component: <IncomeConfiguration />
     },
     {
-      id: 'expenses',
-      title: 'Expense Categories',
-      icon: <PiggyBank className="h-6 w-6" />,
-      description: 'Set up your expense categories and budgets',
-      component: <ExpenseConfiguration />
-    },
-    {
       id: 'categories',
       title: 'Categories',
       icon: <ListChecks className="h-6 w-6" />,
       description: 'Manage your expense categories',
       component: <CategoryConfiguration />
     },
-    // Add more configuration widgets as needed
   ];
 
   return (

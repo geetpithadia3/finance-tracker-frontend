@@ -4,6 +4,8 @@ import { UploadOutlined, DeleteOutlined, EditOutlined, SaveOutlined, InboxOutlin
 import Papa from 'papaparse';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
+import { categoriesApi } from '../api/categories';
+import { transactionsApi } from '../api/transactions';
 
 const { Option } = Select;
 
@@ -23,10 +25,7 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:8080/categories', {
-                headers: getAuthHeaders()
-            });
-            const data = await response.json();
+            const data = await categoriesApi.getAll();
             setCategories(data);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -82,26 +81,13 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
                     toAccount: item.type === 'Transfer' ? item.toAccount : undefined,
                 };
             });
-            console.log(formattedData)
-            fetch('http://localhost:8080/transactions', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(formattedData)
-            })
-                .then(response => {
-                    if (response.ok) {
-                        message.success('Transactions saved successfully');
-                        onClose();
-                    } else {
-                        message.error('Failed to save transactions');
-                    }
-                })
-                .catch(error => {
-                    message.error('Error saving transactions');
-                    console.error('Error:', error);
-                });
-        } catch (errorInfo) {
-            console.error('Validate Failed:', errorInfo);
+
+            await transactionsApi.create(formattedData);
+            message.success('Transactions saved successfully');
+            onClose();
+        } catch (error) {
+            console.error('Error saving transactions:', error);
+            message.error('Failed to save transactions');
         }
     };
 

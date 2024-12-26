@@ -52,6 +52,7 @@ import {
   SheetFooter,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { transactionsApi } from '../api/transactions';
 
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
@@ -76,17 +77,7 @@ const TransactionsList = () => {
       const month = date.format('MM');
       const year = date.year();
 
-      const response = await fetch('http://localhost:8080/transactions/list', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ "yearMonth": `${year}-${month}` }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch transactions');
-      }
-
-      const data = await response.json();
+      const data = await transactionsApi.getAll(`${year}-${month}`);
       const formattedData = (Array.isArray(data) ? data : []).map(item => ({
         ...item,
         key: item.id.toString(),
@@ -171,19 +162,7 @@ const TransactionsList = () => {
           account: transaction.account
         }));
 
-      const response = await fetch('http://localhost:8080/transactions', {
-        method: 'PUT',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedTransactions),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update transactions');
-      }
-
+      await transactionsApi.update(updatedTransactions);
       await fetchTransactions(selectedDate);
       setEditMode(false);
     } catch (error) {

@@ -8,6 +8,7 @@ import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { use } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { budgetsApi } from '../api/budgets';
 
 const Budget = () => {
   const { toast } = useToast();
@@ -69,11 +70,7 @@ const Budget = () => {
 
   const fetchBudgets = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/budgets?yearMonth=${currentYearMonth}`,
-        { headers: getAuthHeaders() }
-      );
-      const data = await response.json();
+      const data = await budgetsApi.get(currentYearMonth);
       
       if (data && data.categories && data.categories.length > 0) {
         const filteredCategories = data.categories.filter(cat => cat.categoryName !== 'Income');
