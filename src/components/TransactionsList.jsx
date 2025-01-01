@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -64,6 +64,7 @@ const TransactionsList = () => {
   const [splitError, setSplitError] = useState(null);
   const [remainingAmount, setRemainingAmount] = useState(0);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const inputRef = useRef(null);
 
   const fetchTransactions = async (date) => {
     try {
@@ -150,7 +151,9 @@ const TransactionsList = () => {
       await transactionsApi.update(updatedTransactions);
       await fetchTransactions(selectedDate);
       setEditMode(false);
+      toast.success('Transactions updated successfully');
     } catch (error) {
+      toast.error('Failed to update transactions');
       console.error('Error updating transactions:', error);
     }
   };
@@ -165,6 +168,12 @@ const TransactionsList = () => {
     setSelectedTransaction(transaction);
     setTransactionModalOpen(true);
   };
+
+  useEffect(() => {
+    if (transactionModalOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [transactionModalOpen]);
 
   return (
     <div className="space-y-6">
@@ -287,7 +296,8 @@ const TransactionsList = () => {
                 <TableCell>
                   {editMode ? (
                     <Input
-                      defaultValue={transaction.description}
+                      ref={inputRef}
+                      value={transaction.description}
                       onChange={(e) => handleEdit(transaction, 'description', e.target.value)}
                       className="h-8"
                     />
@@ -309,10 +319,8 @@ const TransactionsList = () => {
       {/* Add new Action Dialog */}
       <Dialog open={transactionModalOpen} onOpenChange={setTransactionModalOpen}>
         <DialogContent className="sm:max-w-[625px]">
-          {/* Transaction Manager */}
           {selectedTransaction && (
             <TransactionManager
-              open={transactionModalOpen}
               onClose={() => {
                 setTransactionModalOpen(false);
                 setSelectedTransaction(null);
@@ -328,6 +336,7 @@ const TransactionsList = () => {
                   await fetchTransactions(selectedDate);
                   setTransactionModalOpen(false);
                   setSelectedTransaction(null);
+                  toast.success('Splits saved successfully');
                 } catch (error) {
                   console.error('Error saving splits:', error);
                   toast.error('Error saving splits');

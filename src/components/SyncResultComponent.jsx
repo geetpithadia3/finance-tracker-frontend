@@ -68,7 +68,7 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
                 description: item.description || item.Description,
                 type: item.type || item['Type of Transaction'],
                 amount: item.amount || item.Amount,
-                categoryId: category.id || null,
+                category: category || null,
             };
         });
     };
@@ -82,8 +82,7 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
                     ...item,
                     occurredOn: item.date.format('YYYY-MM-DD'),
                     accountId: selectedAccount,
-                    category: item.type === 'Transfer' ? 'Transfer' : item.category,
-                    toAccount: item.type === 'Transfer' ? item.toAccount : undefined,
+                    categoryId: item.category?.id || null,
                 };
             });
 

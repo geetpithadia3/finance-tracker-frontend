@@ -20,7 +20,14 @@ class ApiClient {
         throw new Error(`API call failed: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      // Check if the response is JSON
+      const contentType = response.headers.get('Content-Type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text(); // Handle non-JSON response
+      }
       return data;
     } catch (error) {
       console.error('API request failed:', error);
