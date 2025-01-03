@@ -87,10 +87,13 @@ const IncomeConfiguration = () => {
     try {
       // Delete removed incomes
       for (const id of deletedIncomes) {
-        await fetch(`http://localhost:8080/income-sources/${id}`, {
+        const response = await fetch(`http://localhost:8080/income-sources/${id}`, {
           method: 'DELETE',
           headers: getAuthHeaders()
         });
+        if (!response.ok) {
+          throw new Error(`Failed to delete income source with id ${id}`);
+        }
       }
 
       // Update or create income sources
@@ -125,19 +128,21 @@ const IncomeConfiguration = () => {
       const response = await fetch('http://localhost:8080/income-sources', {
         headers: getAuthHeaders()
       });
-      if (response.ok) {
-        const data = await response.json();
-        setIncomes(data);
+      if (!response.ok) {
+        throw new Error('Failed to fetch updated income sources');
       }
+      const data = await response.json();
+      setIncomes(data);
 
       toast({
         title: "Success",
         description: "Income sources saved successfully",
       });
     } catch (error) {
+      console.error('Error saving income sources:', error);
       toast({
         title: "Error",
-        description: "Failed to save income sources",
+        description: error.message || "Failed to save income sources",
         variant: "destructive",
       });
     }
