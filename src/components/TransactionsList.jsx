@@ -34,6 +34,8 @@ import {
   Save,
   X,
   SlidersHorizontal,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
@@ -65,6 +67,25 @@ const TransactionsList = () => {
   const [remainingAmount, setRemainingAmount] = useState(0);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const inputRef = useRef(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'ascending' });
+
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const fetchTransactions = async (date) => {
     try {
@@ -242,15 +263,25 @@ const TransactionsList = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead onClick={() => requestSort('occurredOn')}>
+                Date {sortConfig.key === 'occurredOn' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+              </TableHead>
+              <TableHead onClick={() => requestSort('type')}>
+                Type {sortConfig.key === 'type' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+              </TableHead>
+              <TableHead onClick={() => requestSort('category')}>
+                Category {sortConfig.key === 'category' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+              </TableHead>
+              <TableHead onClick={() => requestSort('description')}>
+                Description {sortConfig.key === 'description' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+              </TableHead>
+              <TableHead className="text-right" onClick={() => requestSort('amount')}>
+                Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map(transaction => (
+            {sortedTransactions.map(transaction => (
               <TableRow
                 key={transaction.key}
                 className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} cursor-pointer hover:bg-gray-50`}

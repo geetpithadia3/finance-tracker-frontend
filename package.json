@@ -45,6 +45,7 @@
     "react-table": "^7.8.0",
     "recharts": "^2.13.3",
     "rollup": "^2.79.2",
+    "shadcn-dropzone": "^0.2.1",
     "shadcn-ui": "^0.9.4",
     "styled-components": "^6.1.11",
     "tailwind-merge": "^2.5.5",
