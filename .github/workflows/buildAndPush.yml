@@ -78,7 +78,7 @@ jobs:
         id: register-task-def
         run: |
           echo "Registering task definition..."
-          output=$(aws ecs register-task-definition --cli-input-json "${{ steps.task-def.outputs.task-definition }}")
+          output=$(aws ecs register-task-definition --cli-input-json file://${{ steps.task-def.outputs.task-definition }})
           echo "Registered Task Definition: $output"
           echo "task-definition-arn=$(echo $output | jq -r '.taskDefinition.taskDefinitionArn')" >> $GITHUB_OUTPUT
 
