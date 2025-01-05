@@ -68,7 +68,9 @@ jobs:
         id: register-task-def
         run: |
           echo "Registering task definition..."
-          aws ecs register-task-definition --cli-input-json file://${{ steps.task-def.outputs.task-definition }}
+          output=$(aws ecs register-task-definition --cli-input-json "${{ steps.task-def.outputs.task-definition }}")
+          echo "Registered Task Definition: $output"
+          echo "task-definition-arn=$(echo $output | jq -r '.taskDefinition.taskDefinitionArn')" >> $GITHUB_OUTPUT
 
       - name: Output registered task definition
         run: |
@@ -94,7 +96,7 @@ jobs:
           aws ecs create-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service-name ${{ env.ECS_SERVICE }} \
-            --task-definition ${{ steps.register-task-def.outputs.task-definition-arn }} \
+            --task-definition "${{ steps.register-task-def.outputs.task-definition-arn }}" \
             --desired-count 1 \
             --launch-type EC2 \
             --network-configuration "awsvpcConfiguration={subnets=[${{ env.SUBNET_ID }}],securityGroups=[${{ env.SECURITY_GROUP_ID }}]}" \
