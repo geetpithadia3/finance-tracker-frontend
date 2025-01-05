@@ -80,6 +80,5 @@
     },
     "registeredAt": "2025-01-03T02:20:10.384Z",
     "registeredBy": "arn:aws:iam::626635427403:user/geetpithadia18",
-    "enableFaultInjection": false,
     "tags": []
 }
