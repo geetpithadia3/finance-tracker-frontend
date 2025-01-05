@@ -67,7 +67,7 @@ jobs:
       - name: Print task definition JSON
         run: |
           echo "Task Definition JSON:"
-          echo "${{ steps.task-def.outputs.task-definition }}"
+          cat "${{ steps.task-def.outputs.task-definition }}"
 
       - name: Validate task definition JSON
         id: validate-json
