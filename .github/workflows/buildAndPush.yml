@@ -64,6 +64,16 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
 
+      - name: Print task definition JSON
+        run: |
+          echo "Task Definition JSON:"
+          echo "${{ steps.task-def.outputs.task-definition }}"
+
+      - name: Validate task definition JSON
+        id: validate-json
+        run: |
+          echo "${{ steps.task-def.outputs.task-definition }}" | jq empty
+
       - name: Register the task definition
         id: register-task-def
         run: |
