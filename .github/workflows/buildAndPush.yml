@@ -8,10 +8,12 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECS_CLUSTER: DevCluster           # Replace with your cluster name
-  ECS_SERVICE: FinanceTracker        # Replace with your service name
+  ECS_CLUSTER: your-cluster-name
+  ECS_SERVICE: finance-tracker-service
   ECS_TASK_DEFINITION: task-definition.json
   CONTAINER_NAME: frontend
+  SUBNET_ID: subnet-009aa3f58ff8e8689        # Replace with your subnet ID
+  SECURITY_GROUP_ID: sg-0ef8c51a9e2a25aed    # Replace with your security group ID
 
 permissions:
   contents: read
@@ -62,7 +64,29 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
 
-      - name: Deploy Amazon ECS task definition
+      - name: Check if ECS service exists
+        id: check-service
+        run: |
+          if aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} | grep -q "MISSING"; then
+            echo "service_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "service_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create ECS service if it doesn't exist
+        if: steps.check-service.outputs.service_exists == 'false'
+        run: |
+          aws ecs create-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name ${{ env.ECS_SERVICE }} \
+            --task-definition ${{ steps.task-def.outputs.task-definition }} \
+            --desired-count 1 \
+            --launch-type EC2 \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ env.SUBNET_ID }}],securityGroups=[${{ env.SECURITY_GROUP_ID }}]}" \
+            --scheduling-strategy REPLICA
+
+      - name: Update existing service
+        if: steps.check-service.outputs.service_exists == 'true'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
