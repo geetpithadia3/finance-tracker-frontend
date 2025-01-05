@@ -65,7 +65,8 @@ jobs:
           image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
 
       - name: Output task definition
-        run: echo "Task Definition: ${{ steps.task-def.outputs.task-definition }}"
+        run: |
+          echo "Task Definition: ${{ steps.task-def.outputs.task-definition }}"
 
       - name: Check if ECS service exists
         id: check-service
