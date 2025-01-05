@@ -64,6 +64,15 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
 
+      - name: Register the task definition
+        id: register-task-def
+        run: |
+          echo "Registering task definition..."
+          aws ecs register-task-definition --cli-input-json file://${{ steps.task-def.outputs.task-definition }}
+
+      - name: Output registered task definition
+        run: echo "Registered Task Definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
+
       - name: Output task definition
         run: |
           echo "Task Definition: ${{ steps.task-def.outputs.task-definition }}"
@@ -80,11 +89,11 @@ jobs:
       - name: Create ECS service if it doesn't exist
         if: steps.check-service.outputs.service_exists == 'false'
         run: |
-          echo "Creating ECS service with task definition: ${{ steps.task-def.outputs.task-definition }}"
+          echo "Creating ECS service with task definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
           aws ecs create-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service-name ${{ env.ECS_SERVICE }} \
-            --task-definition ${{ steps.task-def.outputs.task-definition }} \
+            --task-definition ${{ steps.register-task-def.outputs.task-definition-arn }} \
             --desired-count 1 \
             --launch-type EC2 \
             --network-configuration "awsvpcConfiguration={subnets=[${{ env.SUBNET_ID }}],securityGroups=[${{ env.SECURITY_GROUP_ID }}]}" \
