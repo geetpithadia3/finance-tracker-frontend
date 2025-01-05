@@ -64,6 +64,9 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
 
+      - name: Output task definition
+        run: echo "Task Definition: ${{ steps.task-def.outputs.task-definition }}"
+
       - name: Check if ECS service exists
         id: check-service
         run: |
@@ -76,6 +79,7 @@ jobs:
       - name: Create ECS service if it doesn't exist
         if: steps.check-service.outputs.service_exists == 'false'
         run: |
+          echo "Creating ECS service with task definition: ${{ steps.task-def.outputs.task-definition }}"
           aws ecs create-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service-name ${{ env.ECS_SERVICE }} \
