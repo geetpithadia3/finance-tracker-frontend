@@ -71,7 +71,8 @@ jobs:
           aws ecs register-task-definition --cli-input-json file://${{ steps.task-def.outputs.task-definition }}
 
       - name: Output registered task definition
-        run: echo "Registered Task Definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
+        run: |
+          echo "Registered Task Definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
 
       - name: Output task definition
         run: |
