@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECS_CLUSTER: DevCluster
+  ECS_CLUSTER: finance-tracker-cluster
   ECS_SERVICE: finance-tracker-service
   ECS_TASK_DEFINITION: task-definition.json
   CONTAINER_NAME: frontend
