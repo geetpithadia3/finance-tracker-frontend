@@ -3,10 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
-import { getAuthHeaders } from '../utils/auth';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import { use } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { budgetsApi } from '../api/budgets';
 
@@ -15,8 +13,6 @@ const Budget = () => {
   const [budgets, setBudgets] = useState([]);
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
-  const [estimatedIncome, setEstimatedIncome] = useState(0);
-  const [actualIncome, setActualIncome] = useState(0);
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(moment());
   
@@ -27,46 +23,7 @@ const Budget = () => {
 
   useEffect(() => {
     fetchBudgets();
-    fetchEstimatedIncome();
   }, [selectedDate]);
-
-  const fetchEstimatedIncome = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/income-sources`,
-        { headers: getAuthHeaders() }
-      );
-      const data = await response.json();
-      
-      const monthlyTotal = data.reduce((acc, source) => {
-        if (source.isDeleted) return acc;
-        
-        switch (source.payFrequency) {
-          case 'MONTHLY':
-            return acc + source.payAmount;
-          case 'BI_WEEKLY':
-            // Bi-weekly (26 payments per year) to monthly conversion
-            return acc + (source.payAmount * 26 / 12);
-          case 'WEEKLY':
-            // Weekly (52 payments per year) to monthly conversion
-            return acc + (source.payAmount * 52 / 12);
-          case 'SEMI_MONTHLY':
-            // Semi-monthly (24 payments per year) to monthly conversion
-            return acc + (source.payAmount * 2);
-          default:
-            return acc;
-        }
-      }, 0);
-
-      setEstimatedIncome(monthlyTotal);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load estimated income",
-        variant: "destructive",
-      });
-    }
-  };
 
   const fetchBudgets = async () => {
     try {
@@ -78,15 +35,12 @@ const Budget = () => {
         const total = filteredCategories.reduce((acc, budget) => acc + budget.limit, 0);
         const spent = filteredCategories.reduce((acc, budget) => acc + budget.spent, 0);
         
-        const incomeCategory = data.categories.find(cat => cat.categoryName === 'Income');
         setTotalBudget(total);
         setTotalSpent(spent);
-        setActualIncome(incomeCategory ? incomeCategory.spent : (data.actualIncome || 0));
       } else {
         setBudgets([]);
         setTotalBudget(0);
         setTotalSpent(0);
-        setActualIncome(0);
       }
     } catch (error) {
       toast({
@@ -147,8 +101,6 @@ const Budget = () => {
     return <EmptyState />;
   }
 
-  const percentageSpent = (totalSpent / totalBudget) * 100;
-
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col bg-gray-50">
       <div className="flex-none p-6 bg-white border-b">
@@ -186,64 +138,16 @@ const Budget = () => {
             </Button>
           </div>
           
-          {budgets.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-sm font-medium">Monthly Income</span>
-                    <span className="text-sm text-gray-600">
-                      ${actualIncome.toFixed(2)} of ${estimatedIncome.toFixed(2)}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(actualIncome / estimatedIncome) * 100} 
-                    className="h-2 mb-1"
-                  />
-                  <div className="flex justify-end">
-                    <span className={`text-sm ${actualIncome >= estimatedIncome ? 'text-green-600' : 'text-yellow-600'}`}>
-                      ${Math.abs(estimatedIncome - actualIncome).toFixed(2)} 
-                      {actualIncome >= estimatedIncome ? ' over target' : ' below target'}
-                    </span>
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-sm font-medium">Total Progress</span>
-                    <span className="text-sm text-gray-600">
-                      ${totalSpent.toFixed(2)} of ${totalBudget.toFixed(2)}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={percentageSpent > 100 ? 100 : percentageSpent} 
-                    className={`h-2 mb-1 ${percentageSpent > 100 ? 'bg-red-100 [&>div]:bg-red-500' : ''}`}
-                  />
-                  <div className="flex justify-end">
-                    <span className={`text-sm ${percentageSpent > 100 ? 'text-red-600' : 'text-green-600'}`}>
-                      ${Math.abs(totalBudget - totalSpent).toFixed(2)} 
-                      {percentageSpent > 100 ? ' over budget' : ' remaining'}
-                    </span>
-                  </div>
-                </Card>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {budgets.map((budget) => (
-                    <BudgetCategory
-                      key={budget.categoryId}
-                      categoryName={budget.categoryName}
-                      limit={budget.limit}
-                      spent={budget.spent}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          <div className="grid grid-cols-2 gap-4">
+            {budgets.map((budget) => (
+              <BudgetCategory
+                key={budget.categoryId}
+                categoryName={budget.categoryName}
+                limit={budget.limit}
+                spent={budget.spent}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

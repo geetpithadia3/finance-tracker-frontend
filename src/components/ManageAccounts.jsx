@@ -51,7 +51,6 @@ const ManageAccounts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [accountToDelete, setAccountToDelete] = useState(null);
-  const [syncType, setSyncType] = useState(null);
   const [syncAccount, setSyncAccount] = useState(null);
   const [externalKey, setExternalKey] = useState('');
 
@@ -69,36 +68,19 @@ const ManageAccounts = () => {
   };
 
   const handleSync = (account, type) => {
-    if (type === 'splitwise') {
-      syncSplitwiseTransactions(account.accountId);
-    } else {
       setSyncAccount(account);
-      setSyncType(type);
       setSyncModalVisible(true);
-    }
-  };
-
-  const syncSplitwiseTransactions = async (accountId) => {
-    try {
-      await accountsApi.syncTransactions(accountId);
-      fetchAccounts();
-    } catch (error) {
-      console.error('Error syncing Splitwise transactions:', error);
-    }
   };
 
   const handleSyncClose = () => {
     fetchAccounts();
     setSyncModalVisible(false);
     setSyncAccount(null);
-    setSyncType(null);
   };
 
   const handleAddAccount = () => {
     setSelectedAccount({
       name: '',
-      type: 'Savings',
-      org: 'Scotia',
       initialBalance: '',
       currency: 'CAD',
     });
@@ -108,10 +90,6 @@ const ManageAccounts = () => {
   const handleSave = async () => {
     try {
       await accountsApi.create(selectedAccount);
-      
-      if (selectedAccount.org === 'Splitwise') {
-        await accountsApi.saveExternalCredentials(externalKey);
-      }
       
       fetchAccounts();
       setIsModalOpen(false);
@@ -152,7 +130,6 @@ const ManageAccounts = () => {
                 {account.name}
               </CardTitle>
               <div className="flex gap-2">
-                {account.org !== 'Splitwise' && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -160,16 +137,7 @@ const ManageAccounts = () => {
                   >
                     <Upload className="h-4 w-4" />
                   </Button>
-                )}
-                {account.org === 'Splitwise' && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleSync(account, 'splitwise')}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                )}
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -185,16 +153,6 @@ const ManageAccounts = () => {
             <CardContent>
               <div className="text-2xl font-bold">
                 ${account.balance.toFixed(2)}
-              </div>
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Wallet className="mr-2 h-4 w-4" />
-                  {account.type}
-                </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Building2 className="mr-2 h-4 w-4" />
-                  {account.org}
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -216,47 +174,6 @@ const ManageAccounts = () => {
                 onChange={(e) => setSelectedAccount(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
-            <div className="space-y-2">
-              <label>Type</label>
-              <Select
-                value={selectedAccount?.type}
-                onValueChange={(value) => setSelectedAccount(prev => ({ ...prev, type: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Savings">Savings</SelectItem>
-                  <SelectItem value="Checking">Checking</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label>Organization</label>
-              <Select
-                value={selectedAccount?.org}
-                onValueChange={(value) => setSelectedAccount(prev => ({ ...prev, org: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Scotia">Scotia</SelectItem>
-                  <SelectItem value="WealthSimple">WealthSimple</SelectItem>
-                  <SelectItem value="Splitwise">Splitwise</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {selectedAccount?.org === 'Splitwise' && (
-              <div className="space-y-2">
-                <label>Splitwise Secret</label>
-                <Input
-                  type="password"
-                  value={externalKey}
-                  onChange={(e) => setExternalKey(e.target.value)}
-                />
-              </div>
-            )}
             <div className="space-y-2">
               <label>Initial Balance</label>
               <Input
@@ -298,10 +215,8 @@ const ManageAccounts = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Sync Modal */}
       {syncModalVisible && (
         <SyncResultComponent
-          syncType={syncType}
           selectedAccount={syncAccount?.accountId}
           onClose={handleSyncClose}
         />

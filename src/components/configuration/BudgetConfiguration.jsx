@@ -30,7 +30,6 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   const [categories, setCategories] = useState([]);
   const [budgets, setBudgets] = useState({});
   const [totalBudget, setTotalBudget] = useState(0);
-  const [estimatedIncome, setEstimatedIncome] = useState(0);
   const [selectedDate, setSelectedDate] = useState(initialDate);
 
   useEffect(() => {
@@ -40,18 +39,17 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   useEffect(() => {
     if (categories.length > 0) {
       fetchExistingBudgets();
-      fetchEstimatedIncome();
     }
   }, [categories, selectedDate]);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8080/budgets/categories', {
+      const response = await fetch('http://localhost:8080/categories', {
         headers: getAuthHeaders()
       });
       if (!response.ok) throw new Error('Failed to fetch categories');
       const data = await response.json();
-      setCategories(data.filter(category => category.isActive));
+      setCategories(data);
     } catch (error) {
       toast({
         title: "Error",
@@ -96,27 +94,6 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
         description: "Failed to load existing budgets",
         variant: "destructive",
       });
-    }
-  };
-
-  const fetchEstimatedIncome = async () => {
-    try {
-      const data = await budgetsApi.getEstimatedIncome();
-      
-      const monthlyTotal = data.reduce((total, income) => {
-        const amount = parseFloat(income.payAmount) || 0;
-        switch (income.payFrequency) {
-          case 'WEEKLY': return total + (amount * 52) / 12;
-          case 'BI_WEEKLY': return total + (amount * 26) / 12;
-          case 'SEMI_MONTHLY': return total + (amount * 24) / 12;
-          case 'MONTHLY': return total + amount;
-          default: return total;
-        }
-      }, 0);
-      
-      setEstimatedIncome(monthlyTotal);
-    } catch (error) {
-      console.error('Error fetching income:', error);
     }
   };
 
@@ -201,44 +178,12 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
 
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="flex items-center gap-4">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <div>
-                <h3 className="font-semibold">Estimated Monthly Income</h3>
-                <p className="text-2xl font-bold">${estimatedIncome.toFixed(2)}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
               <PiggyBank className="h-5 w-5 text-primary" />
               <div>
                 <h3 className="font-semibold">Total Budgeted Amount</h3>
                 <p className="text-2xl font-bold">${totalBudget.toFixed(2)}</p>
               </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Budget Progress</span>
-              <span>{((totalBudget / estimatedIncome) * 100).toFixed(1)}%</span>
-            </div>
-            <div className="h-4 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full transition-all",
-                  totalBudget > estimatedIncome ? "bg-destructive" : "bg-primary"
-                )}
-                style={{ 
-                  width: `${Math.min((totalBudget / estimatedIncome) * 100, 100)}%`
-                }}
-              />
-            </div>
-            {totalBudget > estimatedIncome && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
-                <span>Budget exceeds estimated income</span>
-              </div>
-            )}
           </div>
         </Card>
 
@@ -250,11 +195,6 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
                 <div key={category.id} className="flex items-center justify-between py-2">
                   <div>
                     <h4 className="font-medium">{category.name}</h4>
-                    {budgets[category.name] > 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        {((budgets[category.name] / totalBudget) * 100).toFixed(1)}% of total budget
-                      </p>
-                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />

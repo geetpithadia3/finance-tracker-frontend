@@ -9,13 +9,13 @@ const Configuration = () => {
   const [openDialog, setOpenDialog] = useState('');
   
   const configurationWidgets = [
-    {
-      id: 'income',
-      title: 'Income Settings',
-      icon: <Wallet className="h-6 w-6" />,
-      description: 'Configure your income sources and payment schedules',
-      component: <IncomeConfiguration />
-    },
+    // {
+    //   id: 'income',
+    //   title: 'Income Settings',
+    //   icon: <Wallet className="h-6 w-6" />,
+    //   description: 'Configure your income sources and payment schedules',
+    //   component: <IncomeConfiguration />
+    // },
     {
       id: 'categories',
       title: 'Categories',

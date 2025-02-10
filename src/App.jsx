@@ -103,7 +103,7 @@ const Sidebar = ({ collapsed, className }) => {
       <div className="flex h-14 items-center border-b px-3">
         {!collapsed && (
           <Link to="/" className="flex items-center gap-2 font-semibold">
-            Track
+            CashCorner
           </Link>
         )}
       </div>

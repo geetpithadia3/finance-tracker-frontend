@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Edit, Save, Upload, FileUp } from 'lucide-react';
 import Papa from 'papaparse';
 import moment from 'moment';
-import { getAuthHeaders } from '../utils/auth';
 import { categoriesApi } from '../api/categories';
 import { transactionsApi } from '../api/transactions';
 import { toast } from "@/components/ui/use-toast";
@@ -33,19 +32,16 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import Dropzone from 'shadcn-dropzone';
 
-export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
+export const SyncResultComponent = ({ selectedAccount, onClose }) => {
   const [data, setData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editMode, setEditMode] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(syncType === 'csv');
+  const [isModalVisible, setIsModalVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
-    if (syncType === 'splitwise') {
-      fetchSplitwiseTransactions();
-    }
-  }, [syncType, selectedAccount]);
+  }, [selectedAccount]);
 
   const fetchCategories = async () => {
     try {
@@ -59,25 +55,6 @@ export const SyncResultComponent = ({ syncType, selectedAccount, onClose }) => {
         variant: "destructive",
       });
     }
-  };
-
-  const fetchSplitwiseTransactions = () => {
-    setIsLoading(true);
-    fetch('http://localhost:8080/sync-transactions', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ accountId: selectedAccount }),
-    })
-      .then(response => response.json())
-      .finally(() => setIsLoading(false))
-      .catch(error => {
-        console.error('Error syncing transactions:', error);
-        toast({
-          title: "Error",
-          description: "Failed to sync transactions",
-          variant: "destructive",
-        });
-      });
   };
 
   const handleFileChange = (file) => {
