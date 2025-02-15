@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Plus, MinusCircle, ChevronDown, ChevronUp, ArrowRight, Scissors } from 'lucide-react';
+import { X, Plus, MinusCircle, ChevronDown, ChevronUp, ArrowRight, Scissors, ShareIcon, CheckCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { transactionsApi } from "@/api/transactions";
+import { toast } from "@/components/ui/use-toast";
+import ShareView from './ShareView';
 
 const splitReducer = (state, action) => {
   switch (action.type) {
@@ -154,8 +157,9 @@ const SplitEntryStep = ({ transaction, categories }) => {
   const { state: { splits }, dispatch, calculations } = useSplitContext();
   
   return (
-    <div className="space-y-4">
-      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+    <div className="space-y-6">
+      {/* Transaction Info Card */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
         <div className="flex justify-between items-start">
           <div>
             <div className="text-base font-semibold">{transaction.description}</div>
@@ -164,45 +168,54 @@ const SplitEntryStep = ({ transaction, categories }) => {
             </Badge>
           </div>
           <div className="text-xl font-bold text-blue-700">
-            ${transaction.amount.toFixed(2)}
+            ${Math.abs(transaction.amount).toFixed(2)}
           </div>
         </div>
       </div>
 
-      <div className="space-y-2">
+      {/* Split List Section */}
+      <div className="space-y-3">
         <div className="text-sm font-medium text-gray-500">Split Transactions</div>
-        <ScrollArea className="h-[240px] rounded-md border">
-          <div className="space-y-2 p-4">
-            {splits.map((split, index) => (
-              <SplitItem key={index} split={split} index={index} categories={categories} />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="border rounded-lg">
+          <ScrollArea className="h-[240px]">
+            <div className="p-4 space-y-3">
+              {splits.map((split, index) => (
+                <SplitItem 
+                  key={index} 
+                  split={split} 
+                  index={index} 
+                  categories={categories} 
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
 
         <Button 
           variant="outline" 
-          className="w-full h-8 text-sm"
+          className="w-full h-9 text-sm"
           onClick={() => dispatch({ 
             type: 'ADD_SPLIT', 
             category: transaction.category 
           })}
         >
-          <Plus className="h-3 w-3 mr-1" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Split
         </Button>
       </div>
 
-      <div className="space-y-2 border-t pt-4">
-        <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm">
-          <span>Remaining Amount:</span>
-          <span className="font-semibold">
+      {/* Summary Section */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-sm">
+          <span className="text-gray-600">Remaining Amount:</span>
+          <span className="font-medium">
             ${calculations.remainingAmount.toFixed(2)}
           </span>
         </div>
 
-        <div className="flex justify-between items-center p-2 bg-blue-50 rounded-lg text-sm border border-blue-100">
-          <span>Total Split Amount:</span>
-          <span className="font-semibold">
+        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg text-sm border border-blue-100">
+          <span className="text-gray-600">Total Split Amount:</span>
+          <span className="font-medium">
             ${calculations.totalSplitAmount.toFixed(2)}
           </span>
         </div>
@@ -231,53 +244,155 @@ const SummaryStep = ({ transaction }) => {
   ].filter(t => t.amount > 0);
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+    <div className="space-y-6">
+      <div className="text-sm font-medium uppercase text-gray-500">
         Final Transactions
       </div>
       
-      <ScrollArea className="h-[320px]">
-        <div className="space-y-3 pr-4">
-          {finalTransactions.map((t, index) => (
-            <div 
-              key={index}
-              className={`p-3 rounded-lg border ${
-                t.isParent 
-                  ? 'bg-blue-50 border-blue-100' 
-                  : 'bg-green-50 border-green-100'
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-sm font-medium">
-                    {t.isParent ? 'Parent Transaction' : `Split ${t.splitIndex}`}
+      <div className="border rounded-lg">
+        <ScrollArea className="h-[320px]">
+          <div className="p-4 space-y-3">
+            {finalTransactions.map((t, index) => (
+              <div 
+                key={index}
+                className={`p-4 rounded-lg border ${
+                  t.isParent 
+                    ? 'bg-blue-50 border-blue-100' 
+                    : 'bg-green-50 border-green-100'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-sm font-medium">
+                      {t.isParent ? 'Parent Transaction' : `Split ${t.splitIndex}`}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {t.description || transaction.description}
+                    </div>
+                    <Badge 
+                      variant="outline" 
+                      className="mt-2 text-xs"
+                    >
+                      {t.category.name}
+                    </Badge>
                   </div>
-                  <div className="text-sm">
-                    {t.description || transaction.description}
+                  <div className="text-base font-bold">
+                    ${t.amount.toFixed(2)}
                   </div>
-                  <Badge 
-                    variant="outline" 
-                    className="mt-1 text-xs"
-                  >
-                    {t.category.name}
-                  </Badge>
-                </div>
-                <div className="text-base font-bold">
-                  ${t.amount.toFixed(2)}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
 
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-sm">
-          <span>Total Amount:</span>
-          <span className="font-semibold">
-            ${transaction.amount.toFixed(2)}
-          </span>
+      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-sm">
+        <span className="text-gray-600">Total Amount:</span>
+        <span className="font-medium">
+          ${transaction.amount.toFixed(2)}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) => {
+  const isDebit = transaction.type.toLowerCase() === 'debit';
+  const amountColor = isDebit ? 'text-red-600' : 'text-green-600';
+
+  const handleMarkAsRefunded = async () => {
+    try {
+      await transactionsApi.update([{
+        ...transaction,
+        refunded: !transaction.refunded,
+      }]);
+      transaction.refunded = !transaction.refunded;
+      toast({
+        title: transaction.refunded ? "Transaction Refunded" : "Refund Removed",
+        description: transaction.refunded 
+          ? "Transaction has been marked as refunded" 
+          : "Refund status has been removed from the transaction",
+        variant: "success",
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error updating refund status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update refund status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-6 flex-shrink-0">
+        <DialogHeader>
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-semibold">Transaction Details</DialogTitle>
+            <Badge variant={isDebit ? "destructive" : "success"}>
+              {transaction.type}
+            </Badge>
+          </div>
+        </DialogHeader>
+      </div>
+
+      <div className="p-6 pt-2 flex-1 overflow-y-auto space-y-6">
+        <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
+          <div>
+            <div className={`text-2xl font-bold ${amountColor}`}>
+              {isDebit ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date(transaction.occurredOn).toLocaleDateString()}
+            </div>
+          </div>
+          <Badge variant="outline" className="text-xs">
+            {transaction.category.name}
+          </Badge>
         </div>
+
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="text-sm font-medium text-gray-500">Description</div>
+          <div className="text-base mt-1">{transaction.description}</div>
+        </div>
+
+        {isDebit && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <Button 
+              className="h-10"
+              variant="default"
+              onClick={onSplitStart}
+            >
+              <Scissors className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Split Transaction</span>
+              <span className="sm:hidden">Split</span>
+            </Button>
+            <Button 
+              className="h-10"
+              variant="default"
+              onClick={onShareStart}
+            >
+              <ShareIcon className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Adjust Share</span>
+              <span className="sm:hidden">Share</span>
+            </Button>
+            <Button 
+              className="h-10"
+              variant={transaction.refunded ? "outline" : "default"}
+              onClick={handleMarkAsRefunded}
+            >
+              <CheckCircle className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">
+                {transaction.refunded ? 'Undo Refund' : 'Mark as Refunded'}
+              </span>
+              <span className="sm:hidden">
+                {transaction.refunded ? 'Undo' : 'Refund'}
+              </span>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -287,130 +402,80 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
   const { state: { step }, dispatch } = useSplitContext();
 
   return (
-    <div className="flex flex-col">
-      <DialogHeader className="flex-none pb-2">
-        <div className="flex justify-between items-center">
-          <DialogTitle>
-            {step === 1 ? 'Split Transaction' : 'Review Splits'}
-          </DialogTitle>
-        </div>
-      </DialogHeader>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="p-6 flex-shrink-0">
+        <DialogHeader>
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-semibold">
+              {step === 1 ? 'Split Transaction' : 'Review Splits'}
+            </DialogTitle>
+          </div>
+        </DialogHeader>
+      </div>
 
-      <div className="mt-2">
+      <ScrollArea className="flex-1 px-6">
         {step === 1 ? 
           <SplitEntryStep transaction={transaction} categories={categories} /> 
           : <SummaryStep transaction={transaction} />}
-      </div>
+      </ScrollArea>
 
-      <div className="flex gap-2 pt-4 mt-4 border-t">
-        <Button 
-          variant="outline" 
-          className="flex-1 h-9"
-          onClick={() => {
-            if (step === 1) {
-              onCancel();
-            } else {
-              dispatch({ type: 'SET_STEP', step: 1 });
-            }
-          }}
-        >
-          {step === 1 ? 'Cancel' : 'Back'}
-        </Button>
-        <Button 
-          className="flex-1 h-9"
-          onClick={() => {
-            if (step === 1) {
-              dispatch({ type: 'SET_STEP', step: 2 });
-            } else {
-              onSave();
-            }
-          }}
-        >
-          {step === 1 ? (
-            <>
-              Review
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            'Confirm Split'
-          )}
-        </Button>
+      <div className="p-6 pt-4 border-t flex-shrink-0">
+        <div className="flex w-full gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-1 h-10 text-base font-medium"
+            onClick={() => {
+              if (step === 1) {
+                onCancel();
+              } else {
+                dispatch({ type: 'SET_STEP', step: 1 });
+              }
+            }}
+          >
+            {step === 1 ? 'Cancel' : 'Back'}
+          </Button>
+          <Button 
+            className="flex-1 h-10 text-base font-medium bg-blue-600 hover:bg-blue-700"
+            onClick={() => {
+              if (step === 1) {
+                dispatch({ type: 'SET_STEP', step: 2 });
+              } else {
+                onSave();
+              }
+            }}
+          >
+            {step === 1 ? (
+              <>
+                Review
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </>
+            ) : (
+              'Confirm Split'
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
-const TransactionView = ({ transaction, onClose, onSplitStart }) => {
-  const isDebit = transaction.type.toLowerCase() === 'debit';
-  const amountColor = isDebit ? 'text-red-600' : 'text-green-600';
-
-  return (
-    <div className="space-y-4">
-      <DialogHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <DialogTitle>Transaction Details</DialogTitle>
-          <Badge variant={isDebit ? "destructive" : "success"}>
-            {transaction.type}
-          </Badge>
-        </div>
-      </DialogHeader>
-
-      <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-        <div>
-          <div className={`text-2xl font-bold ${amountColor}`}>
-            {isDebit ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
-          </div>
-          <div className="text-sm text-gray-500">
-            {new Date(transaction.occurredOn).toLocaleDateString()}
-          </div>
-        </div>
-        <Badge variant="outline" className="text-xs">
-          {transaction.category.name}
-        </Badge>
-      </div>
-
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="text-sm font-medium text-gray-500">Description</div>
-        <div className="text-base mt-1">{transaction.description}</div>
-      </div>
-
-      <div className="flex gap-2 pt-2">
-        <Button 
-          className="flex-1 h-9"
-          variant="outline"
-          onClick={onClose}
-        >
-          Close
-        </Button>
-        <Button 
-          className="flex-1 h-9"
-          variant="default"
-          onClick={onSplitStart}
-          disabled={!transaction || !isDebit}
-        >
-          <Scissors className="mr-2 h-4 w-4" />
-          Split Transaction
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const TransactionManager = ({ transaction, onSplitSave, categories = [], onClose }) => {
+const TransactionManager = ({ transaction, onSplitSave, onShareSave, categories = [], onClose }) => {
   const [isSplitView, setIsSplitView] = useState(false);
+  const [isShareView, setIsShareView] = useState(false);
   const [state, dispatch] = useReducer(splitReducer, {
     splits: [],
     openSplitIndex: 0,
     step: 1
   });
-  
+
   const calculations = useSplitCalculations(transaction, state.splits);
- 
+
   useEffect(() => {
     dispatch({ type: 'RESET' });
     setIsSplitView(false);
+    setIsShareView(false);
   }, [transaction]);
- 
+
   const handleSplitStart = () => {
     dispatch({ 
       type: 'ADD_SPLIT', 
@@ -418,19 +483,34 @@ const TransactionManager = ({ transaction, onSplitSave, categories = [], onClose
     });
     setIsSplitView(true);
   };
- 
+
   const handleSplitSave = () => {
     onSplitSave(
       { amount: calculations.remainingAmount },
       state.splits
     );
   };
- 
+
+  const handleShareStart = () => {
+    setIsShareView(true);
+  };
+
+  const handleShareSave = (shareData) => {
+    onShareSave(shareData);
+    setIsShareView(false);
+  };
+
   if (!transaction) return null;
- 
+
   return (
     <SplitContext.Provider value={{ state, dispatch, calculations }}>
-      {isSplitView ? (
+      {isShareView ? (
+        <ShareView
+          transaction={transaction}
+          onSave={handleShareSave}
+          onCancel={() => setIsShareView(false)}
+        />
+      ) : isSplitView ? (
         <SplitView
           transaction={transaction}
           onSave={handleSplitSave}
@@ -442,10 +522,11 @@ const TransactionManager = ({ transaction, onSplitSave, categories = [], onClose
           transaction={transaction}
           onClose={onClose}
           onSplitStart={handleSplitStart}
+          onShareStart={handleShareStart}
         />
       )}
     </SplitContext.Provider>
   );
- };
- 
- export default TransactionManager;
+};
+
+export default TransactionManager;

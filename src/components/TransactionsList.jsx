@@ -196,6 +196,33 @@ const TransactionsList = () => {
     }
   }, [transactionModalOpen]);
 
+  const handleShareSave = async (shareData) => {
+    try {
+      const updatedTransaction = {
+        id: selectedTransaction.id,
+        description: selectedTransaction.description,
+        amount: selectedTransaction.amount,
+        category: selectedTransaction.category,
+        occurredOn: selectedTransaction.occurredOn,
+        deleted: false,
+        account: selectedTransaction.account,
+        splitType: shareData.splitType,
+        personalShare: shareData.personalShare,
+        owedShare: shareData.owedShare,
+        shareMetadata: shareData.shareMetadata
+      };
+
+      await transactionsApi.update([updatedTransaction]);
+      await fetchTransactions(selectedDate);
+      setTransactionModalOpen(false);
+      setSelectedTransaction(null);
+      toast.success('Share saved successfully');
+    } catch (error) {
+      console.error('Error saving share:', error);
+      toast.error('Error saving share');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Controls */}
@@ -284,7 +311,7 @@ const TransactionsList = () => {
             {sortedTransactions.map(transaction => (
               <TableRow
                 key={transaction.key}
-                className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} cursor-pointer hover:bg-gray-50`}
+                className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} ${transaction.refunded ? 'bg-yellow-50' : ''} cursor-pointer hover:bg-gray-50`}
                 onClick={() => handleTransactionClick(transaction)}
               >
                 <TableCell>
@@ -349,32 +376,35 @@ const TransactionsList = () => {
 
       {/* Add new Action Dialog */}
       <Dialog open={transactionModalOpen} onOpenChange={setTransactionModalOpen}>
-        <DialogContent className="sm:max-w-[625px]">
+        <DialogContent className="sm:max-w-[425px] md:max-w-[625px] lg:max-w-[800px] w-[90vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
           {selectedTransaction && (
-            <TransactionManager
-              onClose={() => {
-                setTransactionModalOpen(false);
-                setSelectedTransaction(null);
-              }}
-              transaction={selectedTransaction}
-              onSplitSave={async (parentUpdate, newSplits) => {
-                try {
-                  await transactionsApi.updateParentAndCreateSplits(
-                    selectedTransaction,
-                    parentUpdate,
-                    newSplits
-                  );
-                  await fetchTransactions(selectedDate);
+            <div className="flex flex-col h-full">
+              <TransactionManager
+                onClose={() => {
                   setTransactionModalOpen(false);
                   setSelectedTransaction(null);
-                  toast.success('Splits saved successfully');
-                } catch (error) {
-                  console.error('Error saving splits:', error);
-                  toast.error('Error saving splits');
-                }
-              }}
-              categories={categories}
-            />
+                }}
+                transaction={selectedTransaction}
+                onSplitSave={async (parentUpdate, newSplits) => {
+                  try {
+                    await transactionsApi.updateParentAndCreateSplits(
+                      selectedTransaction,
+                      parentUpdate,
+                      newSplits
+                    );
+                    await fetchTransactions(selectedDate);
+                    setTransactionModalOpen(false);
+                    setSelectedTransaction(null);
+                    toast.success('Splits saved successfully');
+                  } catch (error) {
+                    console.error('Error saving splits:', error);
+                    toast.error('Error saving splits');
+                  }
+                }}
+                onShareSave={handleShareSave}
+                categories={categories}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
