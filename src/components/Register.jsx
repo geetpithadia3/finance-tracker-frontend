@@ -54,9 +54,9 @@ const Register = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50/30">
       <Card className="w-full max-w-sm mx-4">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Join the Money Party! 🎉</CardTitle>
           <CardDescription className="text-center">
-            Enter your information to get started
+            Let's get you set up for financial awesomeness
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,7 +73,7 @@ const Register = () => {
                 <Input
                   id="username"
                   name="username"
-                  placeholder="Choose a username"
+                  placeholder="Pick a cool username"
                   className="pl-9"
                   required
                 />
@@ -115,9 +115,9 @@ const Register = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
-            Already have an account?{' '}
+            Already part of the crew?{' '}
             <Link to="/login" className="font-medium text-primary hover:underline">
-              Sign in
+              Hop back in!
             </Link>
           </p>
         </CardFooter>

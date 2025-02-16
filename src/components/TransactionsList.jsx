@@ -36,6 +36,7 @@ import {
   SlidersHorizontal,
   ChevronUp,
   ChevronDown,
+  Plus,
 } from 'lucide-react';
 import moment from 'moment';
 import { getAuthHeaders } from '../utils/auth';
@@ -51,6 +52,7 @@ import {
 import { transactionsApi } from '../api/transactions';
 import TransactionManager from './TransactionManager';
 import { categoriesApi } from '../api/categories';
+import { toast } from "@/components/ui/use-toast";
 
 const TransactionsList = () => {
   const [transactions, setTransactions] = useState([]);
@@ -172,10 +174,16 @@ const TransactionsList = () => {
       await transactionsApi.update(updatedTransactions);
       await fetchTransactions(selectedDate);
       setEditMode(false);
-      toast.success('Transactions updated successfully');
+      toast({
+        title: "Changes Saved! 🎯",
+        description: "Your transactions are all tucked in and updated",
+      });
     } catch (error) {
-      toast.error('Failed to update transactions');
-      console.error('Error updating transactions:', error);
+      toast({
+        title: "Uh-oh! 🎭",
+        description: "Those changes played hide and seek. Let's try again!",
+        variant: "destructive",
+      });
     }
   };
 
@@ -216,15 +224,21 @@ const TransactionsList = () => {
       await fetchTransactions(selectedDate);
       setTransactionModalOpen(false);
       setSelectedTransaction(null);
-      toast.success('Share saved successfully');
+      toast({
+        title: "Share Saved! 🤝",
+        description: "Split it like a pro! Your share is locked in",
+      });
     } catch (error) {
-      console.error('Error saving share:', error);
-      toast.error('Error saving share');
+      toast({
+        title: "Share Snafu! 🎪",
+        description: "That share didn't make the cut. Another go?",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col">
       {/* Header Controls - Improved responsive layout */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
         <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -249,6 +263,7 @@ const TransactionsList = () => {
           </Button>
         </div>
 
+        { transactions.length > 0 && (
         <div className="flex items-center justify-center sm:justify-end gap-2">
           <Button
             variant={editMode ? "secondary" : "outline"}
@@ -276,143 +291,149 @@ const TransactionsList = () => {
               Save Changes
             </Button>
           )}
-        </div>
+        </div>)}
       </div>
 
-      {/* Transactions Table - Improved responsive design */}
-      <div className="rounded-md border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[110px] whitespace-nowrap">
-                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('occurredOn')}>
-                    Date
-                    {sortConfig.key === 'occurredOn' && (
-                      sortConfig.direction === 'ascending' ?
-                        <ChevronUp className="h-4 w-4" /> :
-                        <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead className="w-[90px] whitespace-nowrap">
-                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('type')}>
-                    Type
-                    {sortConfig.key === 'type' && (
-                      sortConfig.direction === 'ascending' ?
-                        <ChevronUp className="h-4 w-4" /> :
-                        <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead className="w-[120px] whitespace-nowrap">
-                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('category')}>
-                    Category
-                    {sortConfig.key === 'category' && (
-                      sortConfig.direction === 'ascending' ?
-                        <ChevronUp className="h-4 w-4" /> :
-                        <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead className="min-w-[200px] max-w-[400px] xl:max-w-[500px]">
-                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('description')}>
-                    Description
-                    {sortConfig.key === 'description' && (
-                      sortConfig.direction === 'ascending' ?
-                        <ChevronUp className="h-4 w-4" /> :
-                        <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead className="w-[100px] text-right whitespace-nowrap">
-                  <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={() => requestSort('amount')}>
-                    Amount
-                    {sortConfig.key === 'amount' && (
-                      sortConfig.direction === 'ascending' ?
-                        <ChevronUp className="h-4 w-4" /> :
-                        <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedTransactions.map(transaction => (
-                <TableRow
-                  key={transaction.key}
-                  className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} 
-                ${transaction.refunded ? 'bg-yellow-50' : ''} 
-                cursor-pointer hover:bg-gray-50`}
-                  onClick={() => handleTransactionClick(transaction)}
-                >
-                  <TableCell className="align-top py-4 text-sm whitespace-nowrap">
-                    {moment(transaction.occurredOn).format('YYYY-MM-DD')}
-                  </TableCell>
-                  <TableCell className="align-top py-4">
-                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium 
-                ${transaction.type.toLowerCase() === 'credit'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                      }`}>
-                      {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).toLowerCase()}
-                    </span>
-                  </TableCell>
-                  <TableCell className="align-top py-4">
-                    {editMode ? (
-                      <Select
-                        defaultValue={transaction.category.name}
-                        onValueChange={(value) => handleEdit(transaction, 'category', value)}
-                      >
-                        <SelectTrigger className="h-8 text-sm">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map(category => (
-                            <SelectItem
-                              key={category.id}
-                              value={category.name}
-                              className="text-sm"
-                            >
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-100">
-                        {transaction.category.name}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="min-w-[200px] max-w-[400px] xl:max-w-[500px] py-4">
-                    {editMode ? (
-                      <Input
-                        ref={inputRef}
-                        value={transaction.description}
-                        onChange={(e) => handleEdit(transaction, 'description', e.target.value)}
-                        className="h-8 text-sm"
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-600 break-words pr-4">
-                        {transaction.description}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="align-top py-4 text-right text-sm whitespace-nowrap">
-                    <span className={`font-medium ${transaction.type.toLowerCase() === 'credit'
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                      }`}>
-                      {formatCurrency(transaction.amount)}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {transactions.length === 0 ? (
+        <div className="text-center p-8">
+          <h3 className="text-lg font-semibold mb-2">No Transactions Yet! 🌱</h3>
+          <p className="text-muted-foreground mb-4">Start tracking your spending by providing transaction list for Accounts.</p>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-md border overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[110px] whitespace-nowrap">
+                    <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('occurredOn')}>
+                      Date
+                      {sortConfig.key === 'occurredOn' && (
+                        sortConfig.direction === 'ascending' ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap">
+                    <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('type')}>
+                      Type
+                      {sortConfig.key === 'type' && (
+                        sortConfig.direction === 'ascending' ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-[120px] whitespace-nowrap">
+                    <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('category')}>
+                      Category
+                      {sortConfig.key === 'category' && (
+                        sortConfig.direction === 'ascending' ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead className="min-w-[200px] max-w-[400px] xl:max-w-[500px]">
+                    <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('description')}>
+                      Description
+                      {sortConfig.key === 'description' && (
+                        sortConfig.direction === 'ascending' ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-[100px] text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={() => requestSort('amount')}>
+                      Amount
+                      {sortConfig.key === 'amount' && (
+                        sortConfig.direction === 'ascending' ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedTransactions.map(transaction => (
+                  <TableRow
+                    key={transaction.key}
+                    className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} 
+                  ${transaction.refunded ? 'bg-yellow-50' : ''} 
+                  cursor-pointer hover:bg-gray-50`}
+                    onClick={() => handleTransactionClick(transaction)}
+                  >
+                    <TableCell className="align-top py-4 text-sm whitespace-nowrap">
+                      {moment(transaction.occurredOn).format('YYYY-MM-DD')}
+                    </TableCell>
+                    <TableCell className="align-top py-4">
+                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium 
+                    ${transaction.type.toLowerCase() === 'credit'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                          }`}>
+                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).toLowerCase()}
+                      </span>
+                    </TableCell>
+                    <TableCell className="align-top py-4">
+                      {editMode ? (
+                        <Select
+                          defaultValue={transaction.category.name}
+                          onValueChange={(value) => handleEdit(transaction, 'category', value)}
+                        >
+                          <SelectTrigger className="h-8 text-sm">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(category => (
+                              <SelectItem
+                                key={category.id}
+                                value={category.name}
+                                className="text-sm"
+                              >
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-100">
+                          {transaction.category.name}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="min-w-[200px] max-w-[400px] xl:max-w-[500px] py-4">
+                      {editMode ? (
+                        <Input
+                          ref={inputRef}
+                          value={transaction.description}
+                          onChange={(e) => handleEdit(transaction, 'description', e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      ) : (
+                        <div className="text-sm text-gray-600 break-words pr-4">
+                          {transaction.description}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="align-top py-4 text-right text-sm whitespace-nowrap">
+                      <span className={`font-medium ${transaction.type.toLowerCase() === 'credit'
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                        }`}>
+                        {formatCurrency(transaction.amount)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
       {/* Transaction Dialog - Improved responsive sizing */}
       <Dialog open={transactionModalOpen} onOpenChange={setTransactionModalOpen}>
         <DialogContent className="sm:max-w-[400px] md:max-w-[475px] lg:max-w-[550px] xl:max-w-[700px] w-[90vw] max-h-[85vh] p-0 gap-0">
@@ -434,10 +455,17 @@ const TransactionsList = () => {
                     await fetchTransactions(selectedDate);
                     setTransactionModalOpen(false);
                     setSelectedTransaction(null);
-                    toast.success('Splits saved successfully');
+                    toast({
+                      title: "Splits Saved! 🎯",
+                      description: "Your splits are all tucked in and updated",
+                    });
                   } catch (error) {
                     console.error('Error saving splits:', error);
-                    toast.error('Error saving splits');
+                    toast({
+                      title: "Uh-oh! 🎭",
+                      description: "Those splits played hide and seek. Let's try again!",
+                      variant: "destructive",
+                    });
                   }
                 }}
                 onShareSave={handleShareSave}

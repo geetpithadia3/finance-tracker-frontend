@@ -308,18 +308,17 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
       }]);
       transaction.refunded = !transaction.refunded;
       toast({
-        title: transaction.refunded ? "Transaction Refunded" : "Refund Removed",
+        title: transaction.refunded ? "Refund Recorded! 💫" : "Refund Removed! 🔄",
         description: transaction.refunded 
-          ? "Transaction has been marked as refunded" 
-          : "Refund status has been removed from the transaction",
-        variant: "success",
+          ? "Ka-ching! This transaction is now marked as refunded" 
+          : "Back to its original state - no refund in sight!",
       });
       onClose();
     } catch (error) {
       console.error('Error updating refund status:', error);
       toast({
-        title: "Error",
-        description: "Failed to update refund status",
+        title: "Refund Riddle! 🎭",
+        description: "The refund status is playing hard to get. Shall we try again?",
         variant: "destructive",
       });
     }

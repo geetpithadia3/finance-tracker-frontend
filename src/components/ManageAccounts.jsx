@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,8 +95,17 @@ const ManageAccounts = () => {
       fetchAccounts();
       setIsModalOpen(false);
       setExternalKey('');
+      toast({
+        title: "Account Created! 🎉",
+        description: "Your money has a new home sweet home",
+      });
     } catch (error) {
       console.error('Error saving account:', error);
+      toast({
+        title: "Oopsie! 😅",
+        description: "Your account took a rain check. Let's try again!",
+        variant: "destructive",
+      });
     }
   };
 
@@ -105,8 +115,17 @@ const ManageAccounts = () => {
       fetchAccounts();
       setDeleteDialogOpen(false);
       setAccountToDelete(null);
+      toast({
+        title: "Account Deleted 👋",
+        description: "That account has sailed into the sunset",
+      });
     } catch (error) {
       console.error('Error deleting account:', error);
+      toast({
+        title: "Houston, We Have a Problem! 🚀",
+        description: "That account is being stubborn. Give it another shot!",
+        variant: "destructive",
+      });
     }
   };
 
@@ -220,6 +239,18 @@ const ManageAccounts = () => {
           selectedAccount={syncAccount?.accountId}
           onClose={handleSyncClose}
         />
+      )}
+
+      {/* Empty Accounts Message */}
+      {accounts.length === 0 && (
+        <div className="text-center p-8">
+          <h3 className="text-lg font-semibold mb-2">No accounts yet? No worries! 🌱</h3>
+          <p className="text-muted-foreground mb-4">Time to plant your money tree</p>
+          <Button onClick={handleAddAccount}>
+            <Plus className="mr-2 h-4 w-4" />
+            Plant Your First Account
+          </Button>
+        </div>
       )}
     </div>
   );

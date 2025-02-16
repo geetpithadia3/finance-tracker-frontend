@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { getAuthHeaders } from '../utils/auth';
+import { toast } from "@/components/ui/use-toast";
 
 const Profile = () => {
   const [payAmount, setPayAmount] = useState('');
@@ -32,13 +33,36 @@ const Profile = () => {
         body: JSON.stringify({ externalKey })
       });
       if (response.ok) {
-        message.success('Profile updated successfully');
+        toast({
+          title: "Profile Updated! ✨",
+          description: "Looking good! Your changes are saved and ready to roll",
+        });
       } else {
         throw new Error('Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      message.error('Failed to update profile');
+      toast({
+        title: "Whoopsie! 🙈",
+        description: "Your profile is camera shy. Let's try that again!",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePayDateUpdate = async () => {
+    try {
+      await updatePayDate(nextPayDate);
+      toast({
+        title: "Payday Updated! 💰",
+        description: "We've marked your money delivery date!",
+      });
+    } catch (error) {
+      toast({
+        title: "Date Drama! 📅",
+        description: "That date didn't stick. How about another try?",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,7 +125,7 @@ const Profile = () => {
               {payAmount && (
                 <div className="rounded-lg bg-muted p-4">
                   <p className="text-sm">
-                    Based on your bi-weekly income of ${payAmount}, your estimated monthly income is ${estimatedMonthlyIncome.toFixed(2)}
+                    🎯 Based on your bi-weekly hustle of ${payAmount}, you're looking at a monthly treasure of ${estimatedMonthlyIncome.toFixed(2)}
                   </p>
                 </div>
               )}
@@ -112,8 +136,8 @@ const Profile = () => {
         <TabsContent value="external">
           <Card>
             <CardHeader>
-              <CardTitle>External Services</CardTitle>
-              <CardDescription>Configure your external service connections</CardDescription>
+              <CardTitle>Connect Your Money Powers</CardTitle>
+              <CardDescription>Level up by linking your external superpowers</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">

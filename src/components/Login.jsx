@@ -49,16 +49,20 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50/30">
       <Card className="w-full max-w-sm mx-4">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Welcome Back, Friend! 👋</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Time to jump back into the action
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {error === 'Invalid username or password' 
+                    ? "Oops! Those credentials aren't ringing any bells 🤔" 
+                    : "Yikes! Something went wonky on our end 🛠️"}
+                </AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
@@ -96,9 +100,9 @@ const Login = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+            New around here?{' '}
             <Link to="/register" className="font-medium text-primary hover:underline">
-              Sign up
+              Come join the fun!
             </Link>
           </p>
         </CardFooter>

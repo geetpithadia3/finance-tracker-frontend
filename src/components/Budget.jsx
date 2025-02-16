@@ -37,15 +37,32 @@ const Budget = () => {
         
         setTotalBudget(total);
         setTotalSpent(spent);
+
+        // Add toast for over-budget categories
+        const overBudgetCategories = filteredCategories.filter(cat => cat.spent > cat.limit);
+        if (overBudgetCategories.length > 0) {
+          toast({
+            title: "Budget Alert! 🚨",
+            description: `Whoopsie! ${overBudgetCategories.length} ${
+              overBudgetCategories.length === 1 ? 'category is' : 'categories are'
+            } doing a little happy dance over their limits!`,
+            variant: "destructive",
+          });
+        }
       } else {
         setBudgets([]);
         setTotalBudget(0);
         setTotalSpent(0);
+        toast({
+          title: "Fresh Start! 🌱",
+          description: "Time to set up your first budget and make those money goals happen!",
+        });
       }
     } catch (error) {
+      console.error('Error loading budgets:', error);
       toast({
-        title: "Error",
-        description: "Failed to load budgets",
+        title: "Budget Hiccup! 🎪",
+        description: "Your budgets are playing hide and seek. Let's try again!",
         variant: "destructive",
       });
     }
@@ -97,6 +114,14 @@ const Budget = () => {
     setSelectedDate(moment().year(year).month(month - 1));
   };
 
+  const handleConfigureClick = () => {
+    toast({
+      title: "Budget Workshop Time! 🛠️",
+      description: "Let's craft the perfect budget for your money goals!",
+    });
+    navigate('/budget/configure');
+  };
+
   if (budgets.length === 0) {
     return <EmptyState />;
   }
@@ -132,7 +157,7 @@ const Budget = () => {
             <Button 
               variant="outline" 
               className="text-sm"
-              onClick={() => navigate('/budget/configure')}
+              onClick={handleConfigureClick}
             >
               Configure Budget
             </Button>

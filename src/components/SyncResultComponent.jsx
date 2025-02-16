@@ -66,15 +66,14 @@ export const SyncResultComponent = ({ selectedAccount, onClose }) => {
         setData(formattedData);
         setIsLoading(false);
         toast({
-          title: "Success",
-          description: "File uploaded successfully",
+          title: "File Uploaded! 📂✨",
+          description: `${formattedData.length} transactions ready for their debut!`,
         });
       },
       error: (error) => {
-        console.error('Error parsing file:', error);
         toast({
-          title: "Error",
-          description: "Failed to parse file",
+          title: "File Fumble! 📁💨",
+          description: "That file's playing hard to get. Try another?",
           variant: "destructive",
         });
         setIsLoading(false);
@@ -108,17 +107,16 @@ export const SyncResultComponent = ({ selectedAccount, onClose }) => {
       }));
 
       await transactionsApi.create(formattedData);
-      toast({ 
-        title: 'Success',
-        description: 'Transactions saved successfully'
+      toast({
+        title: "Transactions Saved! 🎊",
+        description: "All your transactions are safe and sound!",
       });
       onClose();
     } catch (error) {
-      console.error('Error saving transactions:', error);
-      toast({ 
-        title: 'Error',
-        description: 'Failed to save transactions',
-        variant: "destructive"
+      toast({
+        title: "Save Stumble! 🎪",
+        description: "Those transactions are being shy. Shall we try again?",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -156,10 +154,10 @@ export const SyncResultComponent = ({ selectedAccount, onClose }) => {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">
-                        {isDragAccept ? 'Drop to import!' : 'Upload Transaction Data'}
+                        {isDragAccept ? 'Drop it like it\'s hot! 🔥' : 'Feed Me Your Transactions!'}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        Drag and drop your CSV file or click to browse
+                        Drop your CSV here or click to browse (I don't bite!)
                       </p>
                     </div>
                   </div>
