@@ -109,10 +109,10 @@ const Sidebar = ({ collapsed, className, onNavClick }) => {
         className
       )}
     >
-      <div className="flex h-14 items-center border-b px-3">
+      <div className="flex h-14 items-center border-b px-3 justify-center">
         {!collapsed && (
           <Link to="/" className="flex items-center gap-2 font-semibold">
-            CashCorner
+            Cove
           </Link>
         )}
       </div>
