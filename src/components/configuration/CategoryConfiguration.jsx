@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { categoriesApi } from '@/api/categories';
 
 const CategoryConfiguration = () => {
   const { toast } = useToast();
@@ -26,21 +27,9 @@ const CategoryConfiguration = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8080/categories', {
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-      const data = await response.json();
-      setCategories(data.map(category => ({
-        id: category.id,
-        name: category.name || category,
-        isActive: category.isActive,
-        isEditable: category.isEditable
-      })));
+      const data = await categoriesApi.getAll();
+      setCategories(data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       toast({
         title: "Error",
         description: "Failed to load categories",
@@ -53,19 +42,7 @@ const CategoryConfiguration = () => {
     if (!newCategory.trim()) return;
 
     try {
-      const response = await fetch('http://localhost:8080/categories', {
-        method: 'POST',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: newCategory.trim() })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add category');
-      }
-
+      await categoriesApi.create({ name: newCategory.trim() });
       await fetchCategories();
       setNewCategory('');
       
@@ -97,19 +74,7 @@ const CategoryConfiguration = () => {
     if (!editingCategory || !editingCategory.name.trim()) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/categories/${categories[index].name}`, {
-        method: 'PUT',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ newName: editingCategory.name.trim() })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update category');
-      }
-
+      await categoriesApi.update(categories[index].id, { name: editingCategory.name.trim() });
       await fetchCategories();
       setEditingCategory(null);
 
@@ -130,22 +95,7 @@ const CategoryConfiguration = () => {
   const handleToggleCategory = async (index) => {
     try {
       const category = categories[index];
-      const response = await fetch(`http://localhost:8080/categories/${category.id}`, {
-        method: 'PUT',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: category.name,
-          isActive: !category.isActive,
-          isEditable: category.isEditable
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle category');
-      }
+      await categoriesApi.toggleStatus(category.id, !category.isActive);
 
       const updatedCategories = [...categories];
       updatedCategories[index].isActive = !category.isActive;

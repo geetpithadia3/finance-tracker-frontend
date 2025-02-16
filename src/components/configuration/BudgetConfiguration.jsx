@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import moment from 'moment';
 import { budgetsApi } from '@/api/budgets';
+import { categoriesApi } from '@/api/categories';
 
 const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   const navigate = useNavigate();
@@ -44,12 +45,9 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8080/categories', {
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      const data = await response.json();
-      setCategories(data);
+      const response = await categoriesApi.getAll();
+      const camelCaseList = list => list.map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
+      setCategories(camelCaseList(response));
     } catch (error) {
       toast({
         title: "Error",
@@ -63,10 +61,7 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
     try {
       if (categories.length === 0) return;
 
-      const response = await fetch(
-        `http://localhost:8080/budgets?yearMonth=${selectedDate.format('YYYY-MM')}`,
-        { headers: getAuthHeaders() }
-      );
+      const response = await budgetsApi.get(selectedDate.format('YYYY-MM'));
       if (!response.ok) throw new Error('Failed to fetch budgets');
       const data = await response.json();
       

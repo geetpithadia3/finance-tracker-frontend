@@ -4,6 +4,9 @@ import { UploadOutlined, Edit, Save } from 'lucide-react';
 import Papa from 'papaparse';
 import moment from 'moment';
 import { toast } from "@/components/ui/use-toast";
+import { accountsApi } from "@/services/accountsApi";
+import { categoriesApi } from "@/services/categoriesApi";
+import { transactionsApi } from "@/api/transactions";
 
 const { Option } = Select;
 
@@ -15,19 +18,27 @@ const SyncTransactions = () => {
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:8080/account')
-            .then(response => response.json())
-            .then(data => {
+        const fetchAccounts = async () => {
+            try {
+                const data = await accountsApi.getAll();
                 setAccounts(data);
-            })
-            .catch(error => console.error('Error fetching accounts:', error));
+            } catch (error) {
+                console.error('Error fetching accounts:', error);
+            }
+        };
 
-        fetch('http://localhost:8080/categories')
-            .then(response => response.json())
-            .then(data => {
+        fetchAccounts();
+
+        const fetchCategories = async () => {
+            try {
+                const data = await categoriesApi.getAll();
                 setCategories(data);
-            })
-            .catch(error => console.error('Error fetching categories:', error));
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategories();
     }, []);
 
     const syncSplitwiseTransactions = () => {
@@ -83,13 +94,7 @@ const SyncTransactions = () => {
                 accountId: accountId,
             }));
 
-            await fetch('http://localhost:8080/transactions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formattedData)
-            });
+            await transactionsApi.create(formattedData);
             toast({ title: 'Success', description: 'Transactions saved successfully' });
             setEditMode(false);
         } catch (error) {

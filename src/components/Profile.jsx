@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { getAuthHeaders } from '../utils/auth';
 import { toast } from "@/components/ui/use-toast";
+import { accountsApi } from '@/api/accounts';
 
 const Profile = () => {
   const [payAmount, setPayAmount] = useState('');
@@ -27,11 +28,7 @@ const Profile = () => {
 
   const onFinish = async (values) => {
     try {
-      const response = await fetch('http://localhost:8080/user/external-credentials', {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ externalKey })
-      });
+      const response = await accountsApi.saveExternalCredentials(externalKey);
       if (response.ok) {
         toast({
           title: "Profile Updated! ✨",

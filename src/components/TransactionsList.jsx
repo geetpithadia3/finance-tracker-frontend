@@ -93,10 +93,7 @@ const TransactionsList = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const month = date.format('MM');
-      const year = date.year();
-
-      const data = await transactionsApi.getAll(`${year}-${month}`);
+      const data = await transactionsApi.getAll(date.format('YYYY-MM'));
       const formattedData = (Array.isArray(data) ? data : []).map(item => ({
         ...item,
         key: item.id.toString(),

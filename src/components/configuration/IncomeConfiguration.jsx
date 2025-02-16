@@ -7,7 +7,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { getAuthHeaders } from '@/utils/auth';
+import { incomeApi } from '@/api/income';
 
 const IncomeConfiguration = () => {
   const { toast } = useToast();
@@ -23,12 +23,8 @@ const IncomeConfiguration = () => {
   useEffect(() => {
     const fetchIncomeSources = async () => {
       try {
-        const response = await fetch('http://localhost:8080/income-sources', {
-          headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to fetch income sources');
-        const data = await response.json();
-        setIncomes(data);
+        const response = await incomeApi.getSources();
+        setIncomes(response);
       } catch (error) {
         toast({
           title: "Error",
@@ -87,37 +83,23 @@ const IncomeConfiguration = () => {
     try {
       // Delete removed incomes
       for (const id of deletedIncomes) {
-        const response = await fetch(`http://localhost:8080/income-sources/${id}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        });
-        if (!response.ok) {
-          throw new Error(`Failed to delete income source with id ${id}`);
-        }
+        await incomeApi.delete(id);
       }
 
       // Update or create income sources
       for (const income of incomes) {
-        const method = income.id ? 'PUT' : 'POST';
-        const url = income.id 
-          ? `http://localhost:8080/income-sources/${income.id}`
-          : 'http://localhost:8080/income-sources';
-
-        const response = await fetch(url, {
-          method,
-          headers: {
-            ...getAuthHeaders(),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        if (income.id) {
+          await incomeApi.update(income.id, {
             payAmount: income.payAmount,
             nextPayDate: income.nextPayDate,
             payFrequency: income.payFrequency,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to ${income.id ? 'update' : 'create'} income source`);
+          });
+        } else {
+          await incomeApi.create({
+            payAmount: income.payAmount,
+            nextPayDate: income.nextPayDate,
+            payFrequency: income.payFrequency,
+          });
         }
       }
 
@@ -125,14 +107,8 @@ const IncomeConfiguration = () => {
       setDeletedIncomes([]);
       
       // Refresh data
-      const response = await fetch('http://localhost:8080/income-sources', {
-        headers: getAuthHeaders()
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch updated income sources');
-      }
-      const data = await response.json();
-      setIncomes(data);
+      const response = await incomeApi.getSources();
+      setIncomes(response);
 
       toast({
         title: "Success",

@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCut, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 import { IconButton, StyledButton, StyledButtonLabel } from '../styles/CommonStyles';
+import categoriesApi from '@/api/categories';
+import { transactionsApi } from '@/api/transactions';
 
 const TableContainer = styled.div`
   width: 100%;
@@ -64,16 +66,19 @@ const EditableTable = ({ data, setData, accounts, forAccount }) => {
   console.log(data)
 
   useEffect(() => {
-    fetch('http://localhost:8080/categories')
-      .then(response => response.json())
-      .then(data => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesApi.getAll();
         const camelCaseList = list => list.map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
         setCategories(camelCaseList(data));
-      })
-      .catch(error => console.error('Error fetching categories:', error));
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const mappedData = data.map(row => ({
       accountId: forAccount,
       amount: parseFloat(row.amount),
@@ -83,22 +88,14 @@ const EditableTable = ({ data, setData, accounts, forAccount }) => {
       type: row.type,
       toAccount: row.type === 'Transfer' ? row.transferAccount : null
     }));
-    console.log(mappedData);
-    fetch('http://localhost:8080/transactions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(mappedData)
-    })
-      .then(response => console.log(response))
-      .then(data => {
-        console.log('Success:', data);
-        setIsSaved(true);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+    
+    try {
+      const response = await transactionsApi.create(mappedData);
+      console.log('Success:', response);
+      setIsSaved(true);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const updateRowData = (rowIndex, columnId, value) => {

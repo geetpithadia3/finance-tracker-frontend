@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Lock, Loader2 } from 'lucide-react';
 import { sessionManager } from '@/utils/session';
+import { authApi } from '@/api/auth';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -25,22 +26,12 @@ const Login = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        sessionManager.setSession(data.token);
-        sessionStorage.setItem('username', values.username);
-        window.location.href = '/';
-      } else {
-        setError('Invalid username or password');
-      }
+      const data = await authApi.login(values.username, values.password);
+      sessionManager.setSession(data.token);
+      sessionStorage.setItem('username', values.username);
+      window.location.href = '/';
     } catch (error) {
-      setError('An error occurred during login');
+      setError('Invalid username or password');
     } finally {
       setLoading(false);
     }

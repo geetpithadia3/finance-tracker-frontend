@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Lock, Mail, Loader2 } from 'lucide-react';
+import { User, Lock, Loader2 } from 'lucide-react';
+import { authApi } from '@/api/auth';
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
@@ -31,20 +32,10 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (response.ok) {
-        navigate('/login');
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
-      }
+      await authApi.register(values.username, values.password);
+      navigate('/login');
     } catch (error) {
-      setError('An error occurred during registration');
+      setError('Registration failed');
     } finally {
       setLoading(false);
     }
