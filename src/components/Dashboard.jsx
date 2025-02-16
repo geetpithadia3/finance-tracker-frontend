@@ -120,15 +120,23 @@ const Dashboard = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item) => (
-            <TableRow key={item.key}>
-              {columns.map((column, index) => (
-                <TableCell key={index}>
-                  {column.render ? column.render(item[column.dataIndex]) : item[column.dataIndex]}
-                </TableCell>
-              ))}
+          {data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                No data available
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            data.map((item) => (
+              <TableRow key={item.key}>
+                {columns.map((column, index) => (
+                  <TableCell key={index}>
+                    {column.render ? column.render(item[column.dataIndex]) : item[column.dataIndex]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
@@ -248,28 +256,34 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Income', value: parseFloat(income) },
-                      { name: 'Expenses', value: parseFloat(expenses) },
-                      { name: 'Savings', value: parseFloat(savings) },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="80%"
-                    dataKey="value"
-                  >
-                    {COLORS.map((color, index) => (
-                      <Cell key={`cell-${index}`} fill={color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {parseFloat(income) === 0 && parseFloat(expenses) === 0 && parseFloat(savings) === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  No data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Income', value: parseFloat(income) },
+                        { name: 'Expenses', value: parseFloat(expenses) },
+                        { name: 'Savings', value: parseFloat(savings) },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="80%"
+                      dataKey="value"
+                    >
+                      {COLORS.map((color, index) => (
+                        <Cell key={`cell-${index}`} fill={color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -280,25 +294,31 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={expensesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="80%"
-                    dataKey="value"
-                    nameKey="category"
-                  >
-                    {expensesByCategory.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              {expensesByCategory.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  No data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expensesByCategory}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="60%"
+                      outerRadius="80%"
+                      dataKey="value"
+                      nameKey="category"
+                    >
+                      {expensesByCategory.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

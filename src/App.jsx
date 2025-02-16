@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 
 import moment from 'moment';
+import { sessionManager } from '@/utils/session';
 
 const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   const NavItem = ({ icon: Icon, children, to }) => {
@@ -129,19 +130,47 @@ const App = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
-
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const checkAuth = () => {
+      const token = sessionManager.getToken();
+      setIsAuthenticated(!!token);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // Check initial auth state
+    checkAuth();
+
+    // Set up activity listeners
+    const handleActivity = () => {
+      if (isAuthenticated) {
+        sessionManager.updateLastActivity();
+      }
+    };
+
+    // Listen for session expiration
+    const handleSessionExpired = () => {
+      setIsAuthenticated(false);
+    };
+
+    // Add event listeners
+    window.addEventListener('sessionExpired', handleSessionExpired);
+    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+      document.addEventListener(event, handleActivity);
+    });
+
+    // Check auth status periodically
+    const authCheck = setInterval(checkAuth, 60000); // Check every minute
+
+    // Clean up
+    return () => {
+      window.removeEventListener('sessionExpired', handleSessionExpired);
+      ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+      clearInterval(authCheck);
+    };
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    sessionManager.clearSession();
     setIsAuthenticated(false);
   };
 

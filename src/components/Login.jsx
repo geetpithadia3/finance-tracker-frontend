@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Lock, Loader2 } from 'lucide-react';
+import { sessionManager } from '@/utils/session';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
+        sessionManager.setSession(data.token);
         window.location.href = '/';
       } else {
         setError('Invalid username or password');
