@@ -25,6 +25,7 @@ import Configuration from './components/configuration/Configuration';
 import { Toaster } from "@/components/ui/toaster"
 import Budget from './components/Budget';
 import BudgetConfiguration from './components/configuration/BudgetConfiguration';
+import Avvvatars from 'avvvatars-react'
 
 import { 
   Menu,
@@ -75,16 +76,14 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   );
 };
 
-const UserNav = ({ onLogout }) => {
+const UserNav = ({ onLogout, username }) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
+<DropdownMenuTrigger asChild>
+  <div className="relative p-0 h-8 w-8 rounded-full overflow-hidden">
+    <Avvvatars value={username} style="shape" size={32} />
+  </div>
+</DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuItem asChild>
           <Link to="/configuration">
@@ -127,6 +126,7 @@ const Sidebar = ({ collapsed, className, onNavClick }) => {
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState(sessionStorage.getItem('username') || '');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -171,6 +171,7 @@ const App = () => {
 
   const handleLogout = () => {
     sessionManager.clearSession();
+    sessionStorage.removeItem('username');
     setIsAuthenticated(false);
   };
 
@@ -220,7 +221,7 @@ const App = () => {
                 </Button>
               )}
             </div>
-            <UserNav onLogout={handleLogout} />
+            <UserNav onLogout={handleLogout} username={username} />
           </header>
 
           {/* Main Content Area */}

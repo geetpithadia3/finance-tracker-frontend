@@ -91,7 +91,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+      <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
         <div className="flex justify-between items-start">
           <div>
             <div className="text-base font-semibold">{transaction.description}</div>
@@ -99,7 +99,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
               {transaction.category.name}
             </Badge>
           </div>
-          <div className="text-xl font-bold text-blue-700">
+          <div className="text-xl font-bold text-gray-700">
             ${Math.abs(transaction.amount).toFixed(2)}
           </div>
         </div>
@@ -341,7 +341,8 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
             {state.step === 1 ? 'Cancel' : 'Back'}
           </Button>
           <Button 
-            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700"
+            variant="default"
+            className="flex-1 h-10 text-base font-medium"
             onClick={() => {
               if (state.step === 1) {
                 dispatch({ type: 'SET_STEP', step: 2 });

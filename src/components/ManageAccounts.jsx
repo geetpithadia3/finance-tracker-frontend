@@ -133,7 +133,6 @@ const ManageAccounts = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Accounts</h2>
         <Button onClick={handleAddAccount}>
           <Plus className="mr-2 h-4 w-4" />
           Add Account

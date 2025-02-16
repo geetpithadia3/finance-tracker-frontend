@@ -21,7 +21,7 @@ const splitReducer = (state, action) => {
     case 'UPDATE_SPLIT':
       return {
         ...state,
-        splits: state.splits.map((split, i) => 
+        splits: state.splits.map((split, i) =>
           i === action.index ? { ...split, [action.field]: action.value } : split
         )
       };
@@ -29,8 +29,8 @@ const splitReducer = (state, action) => {
       return {
         ...state,
         splits: state.splits.filter((_, i) => i !== action.index),
-        openSplitIndex: state.openSplitIndex === action.index 
-          ? Math.max(0, action.index - 1) 
+        openSplitIndex: state.openSplitIndex === action.index
+          ? Math.max(0, action.index - 1)
           : state.openSplitIndex
       };
     case 'SET_OPEN_INDEX':
@@ -54,11 +54,11 @@ const useSplitContext = () => {
 
 const useSplitCalculations = (transaction, splits) => {
   return useMemo(() => ({
-    remainingAmount: transaction?.amount - splits.reduce((sum, split) => 
+    remainingAmount: transaction?.amount - splits.reduce((sum, split) =>
       sum + (parseFloat(split.amount) || 0), 0) || 0,
-    totalSplitAmount: splits.reduce((sum, split) => 
+    totalSplitAmount: splits.reduce((sum, split) =>
       sum + (parseFloat(split.amount) || 0), 0),
-    isValid: splits.length > 0 && splits.every(split => 
+    isValid: splits.length > 0 && splits.every(split =>
       parseFloat(split.amount) > 0 && split.category
     )
   }), [transaction?.amount, splits]);
@@ -67,7 +67,7 @@ const useSplitCalculations = (transaction, splits) => {
 const SplitItem = ({ split, index, categories }) => {
   const { dispatch, state: { openSplitIndex } } = useSplitContext();
   const isOpen = openSplitIndex === index;
-  
+
   const handleAmountChange = (value) => {
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       dispatch({ type: 'UPDATE_SPLIT', index, field: 'amount', value });
@@ -79,14 +79,14 @@ const SplitItem = ({ split, index, categories }) => {
       <div className="p-3 flex items-center justify-between">
         <button
           className="flex items-center gap-2 hover:text-blue-600"
-          onClick={() => dispatch({ 
-            type: 'SET_OPEN_INDEX', 
-            index: isOpen ? -1 : index 
+          onClick={() => dispatch({
+            type: 'SET_OPEN_INDEX',
+            index: isOpen ? -1 : index
           })}
         >
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           <span className="text-sm font-medium">
-            Split {index + 1} 
+            Split {index + 1}
             {split.amount && ` - $${parseFloat(split.amount).toFixed(2)}`}
           </span>
         </button>
@@ -110,7 +110,7 @@ const SplitItem = ({ split, index, categories }) => {
               placeholder="Amount"
               className="h-8"
             />
-            
+
             <Select
               value={split.category.name}
               onValueChange={(value) => dispatch({
@@ -155,11 +155,11 @@ const SplitItem = ({ split, index, categories }) => {
 
 const SplitEntryStep = ({ transaction, categories }) => {
   const { state: { splits }, dispatch, calculations } = useSplitContext();
-  
+
   return (
     <div className="space-y-6">
       {/* Transaction Info Card */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
         <div className="flex justify-between items-start">
           <div>
             <div className="text-base font-semibold">{transaction.description}</div>
@@ -167,7 +167,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
               {transaction.category.name}
             </Badge>
           </div>
-          <div className="text-xl font-bold text-blue-700">
+          <div className="text-xl font-bold text-gray-700">
             ${Math.abs(transaction.amount).toFixed(2)}
           </div>
         </div>
@@ -180,23 +180,23 @@ const SplitEntryStep = ({ transaction, categories }) => {
           <ScrollArea className="h-[240px]">
             <div className="p-4 space-y-3">
               {splits.map((split, index) => (
-                <SplitItem 
-                  key={index} 
-                  split={split} 
-                  index={index} 
-                  categories={categories} 
+                <SplitItem
+                  key={index}
+                  split={split}
+                  index={index}
+                  categories={categories}
                 />
               ))}
             </div>
           </ScrollArea>
         </div>
 
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full h-9 text-sm"
-          onClick={() => dispatch({ 
-            type: 'ADD_SPLIT', 
-            category: transaction.category 
+          onClick={() => dispatch({
+            type: 'ADD_SPLIT',
+            category: transaction.category
           })}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -213,7 +213,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
           </span>
         </div>
 
-        <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg text-sm border border-blue-100">
+        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-sm border border-gray-100">
           <span className="text-gray-600">Total Split Amount:</span>
           <span className="font-medium">
             ${calculations.totalSplitAmount.toFixed(2)}
@@ -226,7 +226,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
 
 const SummaryStep = ({ transaction }) => {
   const { state: { splits }, calculations } = useSplitContext();
-  
+
   const finalTransactions = [
     {
       ...transaction,
@@ -248,18 +248,17 @@ const SummaryStep = ({ transaction }) => {
       <div className="text-sm font-medium uppercase text-gray-500">
         Final Transactions
       </div>
-      
+
       <div className="border rounded-lg">
         <ScrollArea className="h-[320px]">
           <div className="p-4 space-y-3">
             {finalTransactions.map((t, index) => (
-              <div 
+              <div
                 key={index}
-                className={`p-4 rounded-lg border ${
-                  t.isParent 
-                    ? 'bg-blue-50 border-blue-100' 
+                className={`p-4 rounded-lg border ${t.isParent
+                    ? 'bg-gray-50 border-gray-100'
                     : 'bg-green-50 border-green-100'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start">
                   <div>
@@ -269,8 +268,8 @@ const SummaryStep = ({ transaction }) => {
                     <div className="text-sm text-gray-600 mt-1">
                       {t.description || transaction.description}
                     </div>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className="mt-2 text-xs"
                     >
                       {t.category.name}
@@ -309,8 +308,8 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
       transaction.refunded = !transaction.refunded;
       toast({
         title: transaction.refunded ? "Refund Recorded! 💫" : "Refund Removed! 🔄",
-        description: transaction.refunded 
-          ? "Ka-ching! This transaction is now marked as refunded" 
+        description: transaction.refunded
+          ? "Ka-ching! This transaction is now marked as refunded"
           : "Back to its original state - no refund in sight!",
       });
       onClose();
@@ -359,7 +358,7 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
 
         {isDebit && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <Button 
+            <Button
               className="h-10"
               variant="default"
               onClick={onSplitStart}
@@ -368,7 +367,7 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
               <span className="hidden sm:inline">Split Transaction</span>
               <span className="sm:hidden">Split</span>
             </Button>
-            <Button 
+            <Button
               className="h-10"
               variant="default"
               onClick={onShareStart}
@@ -377,7 +376,7 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
               <span className="hidden sm:inline">Adjust Share</span>
               <span className="sm:hidden">Share</span>
             </Button>
-            <Button 
+            <Button
               className="h-10"
               variant={transaction.refunded ? "outline" : "default"}
               onClick={handleMarkAsRefunded}
@@ -413,16 +412,16 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
       </div>
 
       <ScrollArea className="flex-1 px-6">
-        {step === 1 ? 
-          <SplitEntryStep transaction={transaction} categories={categories} /> 
+        {step === 1 ?
+          <SplitEntryStep transaction={transaction} categories={categories} />
           : <SummaryStep transaction={transaction} />}
       </ScrollArea>
 
       <div className="p-6 pt-4 border-t flex-shrink-0">
         <div className="flex w-full gap-2">
-          <Button 
-            variant="outline" 
-            className="flex-1 h-10 text-base font-medium"
+          <Button
+            className="flex-1 h-10"
+            variant="outline"
             onClick={() => {
               if (step === 1) {
                 onCancel();
@@ -433,8 +432,9 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </Button>
-          <Button 
-            className="flex-1 h-10 text-base font-medium bg-blue-600 hover:bg-blue-700"
+          <Button
+            variant="default"
+            className="flex-1 h-10 text-base font-medium"
             onClick={() => {
               if (step === 1) {
                 dispatch({ type: 'SET_STEP', step: 2 });
@@ -476,9 +476,9 @@ const TransactionManager = ({ transaction, onSplitSave, onShareSave, categories 
   }, [transaction]);
 
   const handleSplitStart = () => {
-    dispatch({ 
-      type: 'ADD_SPLIT', 
-      category: transaction.category 
+    dispatch({
+      type: 'ADD_SPLIT',
+      category: transaction.category
     });
     setIsSplitView(true);
   };

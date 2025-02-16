@@ -127,9 +127,9 @@ const Budget = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-gray-50">
-      <div className="flex-none p-6 bg-white border-b">
-        <div className="max-w-4xl mx-auto">
+    <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-white">
+      <div className="flex-none p-6 bg-white">
+        <div className="w-full">
           <div className="flex justify-between items-baseline mb-4">
             <div className="flex items-center gap-4">
               <Select
@@ -163,7 +163,7 @@ const Budget = () => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {budgets.map((budget) => (
               <BudgetCategory
                 key={budget.categoryId}

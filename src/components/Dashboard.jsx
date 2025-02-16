@@ -97,49 +97,52 @@ const Dashboard = () => {
     setSelectedDate(prev => prev.clone().add(direction, 'months'));
   };
 
-  const StatCard = ({ title, value, trend, icon: Icon }) => (
-    <Card>
+  const StatCard = ({ title, value, icon: Icon }) => (
+    <Card className="bg-white">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">${parseFloat(value).toFixed(2)}</div>
+        <div className="text-2xl font-semibold">${parseFloat(value).toFixed(2)}</div>
       </CardContent>
     </Card>
   );
 
   const renderTransactionTable = (data, columns) => (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          {columns.map((column, index) => (
+            <TableHead key={index} className="text-xs font-medium">
+              {column.title}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.length === 0 ? (
           <TableRow>
-            {columns.map((column, index) => (
-              <TableHead key={index}>{column.title}</TableHead>
-            ))}
+            <TableCell 
+              colSpan={columns.length} 
+              className="h-24 text-center text-sm text-gray-500"
+            >
+              Looks like there's nothing here! Time to add some transactions!
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                No data available
-              </TableCell>
+        ) : (
+          data.map((item) => (
+            <TableRow key={item.key}>
+              {columns.map((column, index) => (
+                <TableCell key={index} className="text-sm py-3">
+                  {column.render ? column.render(item[column.dataIndex]) : item[column.dataIndex]}
+                </TableCell>
+              ))}
             </TableRow>
-          ) : (
-            data.map((item) => (
-              <TableRow key={item.key}>
-                {columns.map((column, index) => (
-                  <TableCell key={index}>
-                    {column.render ? column.render(item[column.dataIndex]) : item[column.dataIndex]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+          ))
+        )}
+      </TableBody>
+    </Table>
   );
 
   const expenseColumns = [
@@ -202,35 +205,32 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Date Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleMonthChange(-1)}
-            className="h-8 w-8"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="min-w-[120px] text-center font-medium">
-            {selectedDate.format('MMM YYYY')}
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleMonthChange(1)}
-            className="h-8 w-8"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleMonthChange(-1)}
+          className="h-8 w-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="text-base font-medium">
+          {selectedDate.format('MMMM YYYY')}
         </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleMonthChange(1)}
+          className="h-8 w-8"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
-
+  
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         <StatCard
           title="Total Income"
           value={income}
@@ -247,18 +247,18 @@ const Dashboard = () => {
           icon={Wallet}
         />
       </div>
-
+  
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Distribution</CardTitle>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Financial Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {parseFloat(income) === 0 && parseFloat(expenses) === 0 && parseFloat(savings) === 0 ? (
-                <div className="h-full flex items-center justify-center text-muted-foreground">
-                  No data available
+                <div className="h-full flex items-center justify-center text-sm text-gray-500">
+                  Looks like there's no data here!
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -287,16 +287,16 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Expenses by Category</CardTitle>
+  
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Expenses by Category</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {expensesByCategory.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-muted-foreground">
-                  No data available
+                <div className="h-full flex items-center justify-center text-sm text-gray-500">
+                  Looks like there's no data here!
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -323,33 +323,33 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-
+  
       {/* Transactions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Transactions</CardTitle>
+      <Card className="bg-white">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-medium">Transactions</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Tabs defaultValue="expenses" className="space-y-4">
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
               <TabsTrigger value="expenses">Expenses</TabsTrigger>
               <TabsTrigger value="income">Income</TabsTrigger>
               <TabsTrigger value="savings">Savings</TabsTrigger>
             </TabsList>
-            <TabsContent value="expenses">
-              <ScrollArea className="h-[400px]">
+            <TabsContent value="expenses" className="mt-4">
+              <ScrollArea className="h-[400px] rounded-md border">
                 {renderTransactionTable(transactions, expenseColumns)}
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </TabsContent>
-            <TabsContent value="income">
-              <ScrollArea className="h-[400px]">
+            <TabsContent value="income" className="mt-4">
+              <ScrollArea className="h-[400px] rounded-md border">
                 {renderTransactionTable(incomeTransactions, incomeAndSavingsColumns)}
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </TabsContent>
-            <TabsContent value="savings">
-              <ScrollArea className="h-[400px]">
+            <TabsContent value="savings" className="mt-4">
+              <ScrollArea className="h-[400px] rounded-md border">
                 {renderTransactionTable(savingsTransactions, incomeAndSavingsColumns)}
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>

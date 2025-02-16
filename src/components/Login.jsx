@@ -34,6 +34,7 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         sessionManager.setSession(data.token);
+        sessionStorage.setItem('username', values.username);
         window.location.href = '/';
       } else {
         setError('Invalid username or password');
