@@ -327,10 +327,10 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0">
+      <div className="p-4 flex-shrink-0">
         <DialogHeader>
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-semibold">Transaction Details</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Transaction Details</DialogTitle>
             <Badge variant={isDebit ? "destructive" : "success"}>
               {transaction.type}
             </Badge>
@@ -338,13 +338,13 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
         </DialogHeader>
       </div>
 
-      <div className="p-6 pt-2 flex-1 overflow-y-auto space-y-6">
-        <div className="flex justify-between items-center bg-gray-50 p-4 rounded-lg">
+      <div className="p-4 pt-2 flex-1 overflow-y-auto space-y-4">
+        <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
           <div>
-            <div className={`text-2xl font-bold ${amountColor}`}>
+            <div className={`text-xl font-bold ${amountColor}`}>
               {isDebit ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-xs text-gray-500">
               {new Date(transaction.occurredOn).toLocaleDateString()}
             </div>
           </div>
@@ -353,9 +353,9 @@ const TransactionView = ({ transaction, onClose, onSplitStart, onShareStart }) =
           </Badge>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="text-sm font-medium text-gray-500">Description</div>
-          <div className="text-base mt-1">{transaction.description}</div>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="text-xs font-medium text-gray-500">Description</div>
+          <div className="text-sm mt-1">{transaction.description}</div>
         </div>
 
         {isDebit && (

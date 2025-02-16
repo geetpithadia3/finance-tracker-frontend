@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 // Import your components
 import TransactionsList from './components/TransactionsList';
@@ -39,27 +39,36 @@ import {
 
 import moment from 'moment';
 
-const MainNav = ({ collapsed, className, ...props }) => {
-  const NavItem = ({ icon: Icon, children, to }) => (
-    <Link
-      to={to}
-      className={cn(
-        "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
-        collapsed && "justify-center px-2"
-      )}
-    >
-      <Icon className="h-4 w-4" />
-      {!collapsed && <span>{children}</span>}
-    </Link>
-  );
+const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
+  const NavItem = ({ icon: Icon, children, to }) => {
+    const content = (
+      <Link
+        to={to}
+        className={cn(
+          "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
+          "hover:bg-gray-100 dark:hover:bg-gray-800",
+          collapsed && "justify-center px-2"
+        )}
+        onClick={onNavClick}
+      >
+        <Icon className="h-4 w-4" />
+        {!collapsed && <span>{children}</span>}
+      </Link>
+    );
+
+    // Only wrap in SheetClose if onNavClick is provided (mobile view)
+    return onNavClick ? (
+      <SheetClose asChild>
+        {content}
+      </SheetClose>
+    ) : content;
+  };
 
   return (
     <nav className={cn("flex flex-col gap-1", className)} {...props}>
       <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
       <NavItem icon={Wallet} to="/accounts">Accounts</NavItem>
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
-      {/* <NavItem icon={Target} to="/goals">Goals</NavItem> */}
       <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
     </nav>
   );
@@ -91,7 +100,7 @@ const UserNav = ({ onLogout }) => {
   );
 };
 
-const Sidebar = ({ collapsed, className }) => {
+const Sidebar = ({ collapsed, className, onNavClick }) => {
   return (
     <div
       className={cn(
@@ -108,7 +117,7 @@ const Sidebar = ({ collapsed, className }) => {
         )}
       </div>
       <ScrollArea className="flex-1 p-3">
-        <MainNav collapsed={collapsed} />
+        <MainNav collapsed={collapsed} onNavClick={onNavClick} />
       </ScrollArea>
     </div>
   );
@@ -150,17 +159,14 @@ const App = () => {
 
   return (
     <Router>
-      <div className="flex h-screen">
-      
+      <div className="min-h-screen flex">
         {/* Desktop Sidebar */}
-        {!isMobile && (
-          <div className={cn("hidden lg:block", collapsed ? "w-16" : "w-64")}>
-            <Sidebar collapsed={collapsed} />
-          </div>
-        )}
+        <div className={cn("hidden lg:block", collapsed ? "w-16" : "w-64")}>
+          <Sidebar collapsed={collapsed} />
+        </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-screen">
           {/* Header */}
           <header className="h-14 border-b bg-background px-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -184,18 +190,16 @@ const App = () => {
                   <Menu className="h-6 w-6" />
                 </Button>
               )}
-              
             </div>
             <UserNav onLogout={handleLogout} />
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1">
             <div className="container mx-auto p-6">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<TransactionsList />} />
-                {/* <Route path="/goals" element={<GoalsList />} /> */}
                 <Route path="/accounts" element={<ManageAccounts />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/configuration" element={<Configuration />} />
@@ -206,7 +210,6 @@ const App = () => {
             </div>
           </main>
         </div>
-        
       </div>
       <Toaster />
     </Router>

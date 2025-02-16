@@ -224,32 +224,35 @@ const TransactionsList = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2">
+    <div className="space-y-4">
+      {/* Header Controls - Improved responsive layout */}
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+        <div className="flex items-center justify-center sm:justify-start gap-2">
           <Button
             variant="outline"
             size="icon"
+            className="h-9 w-9"
             onClick={() => handleMonthChange(-1)}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="min-w-[200px] text-center font-medium">
+          <div className="text-lg font-medium min-w-[160px] text-center">
             {selectedDate.format('MMMM YYYY')}
           </div>
           <Button
             variant="outline"
             size="icon"
+            className="h-9 w-9"
             onClick={() => handleMonthChange(1)}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center sm:justify-end gap-2">
           <Button
             variant={editMode ? "secondary" : "outline"}
+            className="h-9 text-sm font-medium"
             onClick={() => setEditMode(!editMode)}
           >
             {editMode ? (
@@ -265,19 +268,22 @@ const TransactionsList = () => {
             )}
           </Button>
           {editMode && (
-            <Button onClick={handleSaveChanges}>
+            <Button
+              className="h-9 text-sm font-medium"
+              onClick={handleSaveChanges}
+            >
               <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="h-9 w-9">
                 <SlidersHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem className="text-sm">
                 Clear Filters
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -285,98 +291,143 @@ const TransactionsList = () => {
         </div>
       </div>
 
-      {/* Transactions Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead onClick={() => requestSort('occurredOn')}>
-                Date {sortConfig.key === 'occurredOn' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
-              </TableHead>
-              <TableHead onClick={() => requestSort('type')}>
-                Type {sortConfig.key === 'type' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
-              </TableHead>
-              <TableHead onClick={() => requestSort('category')}>
-                Category {sortConfig.key === 'category' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
-              </TableHead>
-              <TableHead onClick={() => requestSort('description')}>
-                Description {sortConfig.key === 'description' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
-              </TableHead>
-              <TableHead className="text-right" onClick={() => requestSort('amount')}>
-                Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'ascending' ? <ChevronUp className="inline h-4 w-4" /> : <ChevronDown className="inline h-4 w-4" />)}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedTransactions.map(transaction => (
-              <TableRow
-                key={transaction.key}
-                className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} ${transaction.refunded ? 'bg-yellow-50' : ''} cursor-pointer hover:bg-gray-50`}
-                onClick={() => handleTransactionClick(transaction)}
-              >
-                <TableCell>
-                  {moment(transaction.occurredOn).format('YYYY-MM-DD')}
-                </TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${transaction.type.toLowerCase() === 'credit'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                    }`}>
-                    {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).toLowerCase()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {editMode ? (
-                    <Select
-                      defaultValue={transaction.category.name}
-                      onValueChange={(value) => handleEdit(transaction, 'category', value)}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(category => (
-                          <SelectItem
-                            key={category.id}
-                            value={category.name}
-                          >
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-100">
-                      {transaction.category.name}
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editMode ? (
-                    <Input
-                      ref={inputRef}
-                      value={transaction.description}
-                      onChange={(e) => handleEdit(transaction, 'description', e.target.value)}
-                      className="h-8"
-                    />
-                  ) : (
-                    transaction.description
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <span className={transaction.type.toLowerCase() === 'credit' ? 'text-green-600' : 'text-red-600'}>
-                    {formatCurrency(transaction.amount)}
-                  </span>
-                </TableCell>
+      {/* Transactions Table - Improved responsive design */}
+      <div className="rounded-md border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-[110px] whitespace-nowrap">
+                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('occurredOn')}>
+                    Date
+                    {sortConfig.key === 'occurredOn' && (
+                      sortConfig.direction === 'ascending' ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead className="w-[90px] whitespace-nowrap">
+                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('type')}>
+                    Type
+                    {sortConfig.key === 'type' && (
+                      sortConfig.direction === 'ascending' ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead className="w-[120px] whitespace-nowrap">
+                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('category')}>
+                    Category
+                    {sortConfig.key === 'category' && (
+                      sortConfig.direction === 'ascending' ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead className="min-w-[200px] max-w-[400px] xl:max-w-[500px]">
+                  <div className="flex items-center gap-1 cursor-pointer" onClick={() => requestSort('description')}>
+                    Description
+                    {sortConfig.key === 'description' && (
+                      sortConfig.direction === 'ascending' ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead className="w-[100px] text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={() => requestSort('amount')}>
+                    Amount
+                    {sortConfig.key === 'amount' && (
+                      sortConfig.direction === 'ascending' ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {sortedTransactions.map(transaction => (
+                <TableRow
+                  key={transaction.key}
+                  className={`${transaction.deleted ? 'bg-red-50 line-through' : ''} 
+                ${transaction.refunded ? 'bg-yellow-50' : ''} 
+                cursor-pointer hover:bg-gray-50`}
+                  onClick={() => handleTransactionClick(transaction)}
+                >
+                  <TableCell className="align-top py-4 text-sm whitespace-nowrap">
+                    {moment(transaction.occurredOn).format('YYYY-MM-DD')}
+                  </TableCell>
+                  <TableCell className="align-top py-4">
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium 
+                ${transaction.type.toLowerCase() === 'credit'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                      }`}>
+                      {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).toLowerCase()}
+                    </span>
+                  </TableCell>
+                  <TableCell className="align-top py-4">
+                    {editMode ? (
+                      <Select
+                        defaultValue={transaction.category.name}
+                        onValueChange={(value) => handleEdit(transaction, 'category', value)}
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map(category => (
+                            <SelectItem
+                              key={category.id}
+                              value={category.name}
+                              className="text-sm"
+                            >
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-gray-100">
+                        {transaction.category.name}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="min-w-[200px] max-w-[400px] xl:max-w-[500px] py-4">
+                    {editMode ? (
+                      <Input
+                        ref={inputRef}
+                        value={transaction.description}
+                        onChange={(e) => handleEdit(transaction, 'description', e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-600 break-words pr-4">
+                        {transaction.description}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="align-top py-4 text-right text-sm whitespace-nowrap">
+                    <span className={`font-medium ${transaction.type.toLowerCase() === 'credit'
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                      }`}>
+                      {formatCurrency(transaction.amount)}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-
-      {/* Add new Action Dialog */}
+      {/* Transaction Dialog - Improved responsive sizing */}
       <Dialog open={transactionModalOpen} onOpenChange={setTransactionModalOpen}>
-        <DialogContent className="sm:max-w-[425px] md:max-w-[625px] lg:max-w-[800px] w-[90vw] max-h-[90vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[400px] md:max-w-[475px] lg:max-w-[550px] xl:max-w-[700px] w-[90vw] max-h-[85vh] p-0 gap-0">
           {selectedTransaction && (
             <div className="flex flex-col h-full">
               <TransactionManager

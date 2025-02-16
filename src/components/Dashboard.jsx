@@ -196,23 +196,25 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Date Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="icon"
             onClick={() => handleMonthChange(-1)}
+            className="h-8 w-8"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="min-w-[150px] text-center font-medium">
-            {selectedDate.format('MMMM YYYY')}
+          <div className="min-w-[120px] text-center font-medium">
+            {selectedDate.format('MMM YYYY')}
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={() => handleMonthChange(1)}
+            className="h-8 w-8"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
