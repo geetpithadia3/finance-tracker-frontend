@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Deploy Frontend to Amazon EC2
 
 on:
   push:
@@ -8,12 +8,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECS_CLUSTER: finance-tracker-cluster
-  ECS_SERVICE: finance-tracker-service
-  ECS_TASK_DEFINITION: task-definition.json
-  CONTAINER_NAME: frontend
-  SUBNET_ID: subnet-009aa3f58ff8e8689        # Replace with your subnet ID
-  SECURITY_GROUP_ID: sg-0ef8c51a9e2a25aed    # Replace with your security group ID
+  EC2_INSTANCE_IP: ${{ vars.EC2_INSTANCE_IP}}    # Replace with your EC2 instance IP
+  BACKEND_URL: ${{ secrets.BACKEND_URL }}  # Backend URL from secrets
 
 permissions:
   contents: read
@@ -38,6 +34,8 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            VITE_API_URL=${{ secrets.BACKEND_URL }}
           tags: |
             ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
             ghcr.io/geetpithadia3/finance-tracker-frontend:main
@@ -46,9 +44,6 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -56,67 +51,59 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+      - name: Login to GitHub Container Registry on EC2
+        uses: appleboy/ssh-action@master
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
+          host: ${{ env.EC2_INSTANCE_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Print task definition JSON
-        run: |
-          echo "Task Definition JSON:"
-          cat "${{ steps.task-def.outputs.task-definition }}"
-
-      - name: Validate task definition JSON
-        id: validate-json
-        run: |
-          cat "${{ steps.task-def.outputs.task-definition }}" | jq empty
-
-      - name: Register the task definition
-        id: register-task-def
-        run: |
-          echo "Registering task definition..."
-          output=$(aws ecs register-task-definition --cli-input-json file://${{ steps.task-def.outputs.task-definition }})
-          echo "Registered Task Definition: $output"
-          echo "task-definition-arn=$(echo $output | jq -r '.taskDefinition.taskDefinitionArn')" >> $GITHUB_OUTPUT
-
-      - name: Output registered task definition
-        run: |
-          echo "Registered Task Definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
-
-      - name: Output task definition
-        run: |
-          echo "Task Definition: ${{ steps.task-def.outputs.task-definition }}"
-
-      - name: Check if ECS service exists
-        id: check-service
-        run: |
-          if aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} | grep -q "MISSING"; then
-            echo "service_exists=false" >> $GITHUB_OUTPUT
-          else
-            echo "service_exists=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create ECS service if it doesn't exist
-        if: steps.check-service.outputs.service_exists == 'false'
-        run: |
-          echo "Creating ECS service with task definition: ${{ steps.register-task-def.outputs.task-definition-arn }}"
-          aws ecs create-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service-name ${{ env.ECS_SERVICE }} \
-            --task-definition "${{ steps.register-task-def.outputs.task-definition-arn }}" \
-            --desired-count 1 \
-            --launch-type EC2 \
-            --network-configuration "awsvpcConfiguration={subnets=[${{ env.SUBNET_ID }}],securityGroups=[${{ env.SECURITY_GROUP_ID }}]}" \
-            --scheduling-strategy REPLICA
-
-      - name: Update existing service
-        if: steps.check-service.outputs.service_exists == 'true'
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      - name: Create or update environment file
+        uses: appleboy/ssh-action@master
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+          host: ${{ env.EC2_INSTANCE_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Create or update the environment file
+            cat > /home/ubuntu/.env << EOL
+            REACT_APP_API_URL=${{ secrets.BACKEND_URL }}
+            VITE_API_URL=${{ secrets.BACKEND_URL }}
+            EOL
+            
+            chmod 600 /home/ubuntu/.env
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.EC2_INSTANCE_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Pull the latest image
+            docker pull ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
+            
+            # Stop and remove the existing container if it exists
+            docker stop finance-tracker-frontend || true
+            docker rm finance-tracker-frontend || true
+            
+            # Run the new container with environment variables
+            docker run -d \
+              --name finance-tracker-frontend \
+              -p 80:80 \
+              --restart unless-stopped \
+              --env-file /home/ubuntu/.env \
+              ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
+            
+            # Cleanup old images
+            docker system prune -f
+            
+            # Verify deployment
+            echo "Waiting for container to start..."
+            sleep 10
+            docker ps | grep finance-tracker-frontend
+            
+            # Check container logs
+            docker logs finance-tracker-frontend
