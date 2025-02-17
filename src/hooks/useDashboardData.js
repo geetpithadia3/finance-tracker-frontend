@@ -21,8 +21,14 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
     }));
   };
 
-  const calculateTotal = (transactions) => {
-    return transactions.reduce((acc, item) => acc + parseFloat(item.amount), 0).toFixed(2);
+  const calculateTotal = (transactions, type = 'expense') => {
+    return transactions.reduce((acc, item) => {
+      // Only use personalShare for expenses
+      const amount = type === 'expense' && item.personalShare !== undefined ? 
+        parseFloat(item.personalShare) : 
+        parseFloat(item.amount);
+      return acc + amount;
+    }, 0).toFixed(2);
   };
 
   const fetchDashboardData = async () => {
@@ -37,9 +43,9 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
       setIncomeTransactions(formattedIncome);
       setSavingsTransactions(formattedSavings);
 
-      setExpenses(calculateTotal(formattedExpenses));
-      setIncome(calculateTotal(formattedIncome));
-      setSavings(calculateTotal(formattedSavings));
+      setExpenses(calculateTotal(formattedExpenses, 'expense'));
+      setIncome(calculateTotal(formattedIncome, 'income'));
+      setSavings(calculateTotal(formattedSavings, 'savings'));
 
       // Calculate expenses by category
       const categoryTotals = formattedExpenses.reduce((acc, item) => {

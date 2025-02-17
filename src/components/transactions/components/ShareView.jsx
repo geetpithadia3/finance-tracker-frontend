@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const shareReducer = (state, action) => {
   switch (action.type) {
@@ -248,6 +249,7 @@ const SummaryStep = ({ state, transaction }) => {
 };
 
 const ShareView = ({ transaction, onSave, onCancel }) => {
+  const { toast } = useToast();
   const [state, dispatch] = useReducer(shareReducer, {
     step: 1,
     personalShare: transaction.personalShare || 0,
@@ -281,6 +283,14 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
   }, [transaction]);
 
   const handleSave = () => {
+    if (state.personalShare + state.owedShare !== transaction.amount) {
+      toast({
+        variant: "destructive",
+        description: "The shares don't add up! Check your math 🧮",
+      });
+      return;
+    }
+    
     const shareData = {
       personalShare: parseFloat(state.personalShare),
       owedShare: parseFloat(state.owedShare),

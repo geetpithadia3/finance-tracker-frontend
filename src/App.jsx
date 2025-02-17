@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 // Import your components
-import TransactionsList from './components/TransactionsList';
+import TransactionsList from './components/transactions/components/TransactionsList';
 // import GoalsList from './components/GoalsList';
 import ManageAccounts from './components/account/ManageAccounts';
 import Login from './components/login/components/Login';
@@ -43,6 +43,13 @@ import { sessionManager } from '@/utils/session';
 const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   const NavItem = ({ icon: Icon, children, to }) => {
     const content = (
+      <>
+        <Icon className="h-4 w-4" />
+        {!collapsed && <span>{children}</span>}
+      </>
+    );
+
+    return (
       <Link
         to={to}
         className={cn(
@@ -52,17 +59,15 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
         )}
         onClick={onNavClick}
       >
-        <Icon className="h-4 w-4" />
-        {!collapsed && <span>{children}</span>}
+        {onNavClick ? (
+          <SheetClose className="flex w-full items-center gap-2">
+            {content}
+          </SheetClose>
+        ) : (
+          content
+        )}
       </Link>
     );
-
-    // Only wrap in SheetClose if onNavClick is provided (mobile view)
-    return onNavClick ? (
-      <SheetClose asChild>
-        {content}
-      </SheetClose>
-    ) : content;
   };
 
   return (
@@ -127,6 +132,8 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState(sessionStorage.getItem('username') || '');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -200,14 +207,17 @@ const App = () => {
           <header className="h-14 border-b bg-background px-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {isMobile ? (
-                <Sheet>
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="lg:hidden">
                       <Menu className="h-6 w-6" />
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="left" className="p-0 w-64">
-                    <Sidebar collapsed={false} />
+                    <Sidebar 
+                      collapsed={false} 
+                      onNavClick={() => setIsSheetOpen(false)} 
+                    />
                   </SheetContent>
                 </Sheet>
               ) : (

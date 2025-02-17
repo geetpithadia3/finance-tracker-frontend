@@ -37,30 +37,41 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <div className="grid gap-6">
-        <MonthSelector 
-          selectedDate={selectedDate}
-          onMonthChange={handleMonthChange}
-          showLabel={true}
-        />
-        
-        <BudgetSummary totalBudget={totalBudget} />
-        
-        <CategoryBudgets
-          categories={categories}
-          budgets={budgets}
-          onBudgetChange={handleBudgetChange}
-        />
-      </div>
+    <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-white">
+      <div className="flex-1 overflow-y-auto">
+        <div className="container mx-auto p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <MonthSelector 
+              selectedDate={selectedDate}
+              onMonthChange={handleMonthChange}
+              showLabel={true}
+            />
+          </div>
+          
+          <BudgetSummary totalBudget={totalBudget} />
+          
+          <CategoryBudgets
+            categories={categories}
+            budgets={budgets}
+            onBudgetChange={handleBudgetChange}
+          />
 
-      <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>
-          Save Configuration
-        </Button>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 sticky bottom-0 bg-white p-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(-1)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave}
+              className="w-full sm:w-auto"
+            >
+              Save Configuration
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
