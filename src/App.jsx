@@ -17,14 +17,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import TransactionsList from './components/TransactionsList';
 // import GoalsList from './components/GoalsList';
 import ManageAccounts from './components/account/ManageAccounts';
-import Login from './components/Login';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard';
-import Profile from './components/Profile';
+import Login from './components/login/components/Login';
+import Register from './components/register/components/Register';
+import Dashboard from './components/dashboard/components/Dashboard';
 import Configuration from './components/configuration/Configuration';
 import { Toaster } from "@/components/ui/toaster"
-import Budget from './components/Budget';
-import BudgetConfiguration from './components/configuration/BudgetConfiguration';
+import Budget from './components/budget/components/Budget';
+import BudgetConfiguration from './components/budget/components/BudgetConfiguration';
 import Avvvatars from 'avvvatars-react'
 
 import { 
@@ -231,7 +230,6 @@ const App = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<TransactionsList />} />
                 <Route path="/accounts" element={<ManageAccounts />} />
-                <Route path="/profile" element={<Profile />} />
                 <Route path="/configuration" element={<Configuration />} />
                 <Route path="/budget" element={<Budget />} />
                 <Route path="/budget/configure" element={<BudgetConfiguration selectedDate={moment()} />} />

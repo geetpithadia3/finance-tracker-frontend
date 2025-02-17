@@ -25,14 +25,6 @@ export const accountsApi = {
   delete: (accountId) => apiClient.delete(`/account/${accountId}`),
   
   /**
-   * Sync transactions for an account
-   * @param {string} accountId - Account ID to sync
-   * @returns {Promise<Object>} Sync results
-   */
-  syncTransactions: (accountId) => 
-    apiClient.post('/sync-transactions', { accountId }),
-    
-  /**
    * Save external credentials
    * @param {string} externalKey - External service key
    * @returns {Promise<Object>} Update result
