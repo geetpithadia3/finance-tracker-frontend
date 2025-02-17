@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 // Import your components
 import TransactionsList from './components/TransactionsList';
 // import GoalsList from './components/GoalsList';
-import ManageAccounts from './components/ManageAccounts';
+import ManageAccounts from './components/account/ManageAccounts';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';

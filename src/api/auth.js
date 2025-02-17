@@ -1,13 +1,24 @@
 import apiClient from './client';
 
+/**
+ * API methods for authentication
+ */
 export const authApi = {
-  login: async (username, password) => {
-    const response = await apiClient.post('/auth/login', { username, password });
-    return response;
-  },
-  
-  register: async (username, password) => {
-    const response = await apiClient.post('/auth/register', { username, password });
-    return response;
-  },
+  /**
+   * Login user
+   * @param {string} username - User's username
+   * @param {string} password - User's password
+   * @returns {Promise<Object>} Authentication response with token
+   */
+  login: (username, password) =>
+    apiClient.post('/auth/login', { username, password }),
+
+  /**
+   * Register new user
+   * @param {string} username - User's username
+   * @param {string} password - User's password
+   * @returns {Promise<Object>} Registration response
+   */
+  register: (username, password) =>
+    apiClient.post('/auth/register', { username, password })
 };
