@@ -4,6 +4,7 @@ import { apiConfig } from './config';
 class ApiClient {
   constructor(baseURL) {
     this.baseURL = baseURL;
+    console.log('API client initialized with baseURL:', baseURL);
   }
 
   async request(endpoint, options = {}) {
