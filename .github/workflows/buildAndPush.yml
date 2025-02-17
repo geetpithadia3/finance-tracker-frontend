@@ -36,7 +36,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            VITE_API_URL=${{ secrets.BACKEND_URL }}
+            VITE_API_BASE_URL=${{ secrets.BACKEND_URL }}
           tags: |
             ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
             ghcr.io/geetpithadia3/finance-tracker-frontend:main
@@ -72,7 +72,7 @@ jobs:
             # Create or update the environment file
             cat > /home/ubuntu/.env << EOL
             REACT_APP_API_URL=${{ secrets.BACKEND_URL }}
-            VITE_API_URL=${{ secrets.BACKEND_URL }}
+            VITE_API_BASE_URL=${{ secrets.BACKEND_URL }}
             EOL
             
             chmod 600 /home/ubuntu/.env
