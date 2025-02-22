@@ -84,16 +84,28 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Check what's using port 80
+            echo "Checking port 80 usage..."
+            sudo lsof -i :80
+            
+            # Stop and remove the existing container if it exists
+            echo "Stopping and removing existing containers..."
+            docker stop finance-tracker-frontend || true
+            docker rm finance-tracker-frontend || true
+            
+            # Additional check to find and stop any container using port 80
+            CONTAINER_ON_80=$(docker ps -q --filter "publish=80")
+            if [ ! -z "$CONTAINER_ON_80" ]; then
+              echo "Found container using port 80. Stopping it..."
+              docker stop $CONTAINER_ON_80
+              docker rm $CONTAINER_ON_80
+            fi
+            
             # Pull the latest image
             docker pull ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
-
-            docker images
-            
-            # # Stop and remove the existing container if it exists
-            # docker stop finance-tracker-frontend || true
-            # docker rm finance-tracker-frontend || true
             
             # Run the new container with environment variables
+            echo "Starting new container..."
             docker run -d \
               --name finance-tracker-frontend \
               -p 80:80 \
@@ -101,13 +113,5 @@ jobs:
               --env-file /home/ubuntu/.env \
               ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
             
-            # Cleanup old images
-            docker system prune -f
-            
-            # Verify deployment
-            echo "Waiting for container to start..."
-            sleep 10
+            # Verify the container is running
             docker ps | grep finance-tracker-frontend
-            
-            # Check container logs
-            docker logs finance-tracker-frontend
