@@ -86,10 +86,12 @@ jobs:
           script: |
             # Pull the latest image
             docker pull ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
+
+            docker images
             
-            # Stop and remove the existing container if it exists
-            docker stop finance-tracker-frontend || true
-            docker rm finance-tracker-frontend || true
+            # # Stop and remove the existing container if it exists
+            # docker stop finance-tracker-frontend || true
+            # docker rm finance-tracker-frontend || true
             
             # Run the new container with environment variables
             docker run -d \
