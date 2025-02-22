@@ -62,21 +62,6 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Create or update environment file
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ vars.EC2_INSTANCE_IP }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            # Create or update the environment file
-            cat > /home/ubuntu/.env << EOL
-            REACT_APP_API_URL=${{ secrets.BACKEND_URL }}
-            VITE_API_BASE_URL=${{ secrets.BACKEND_URL }}
-            EOL
-            
-            chmod 600 /home/ubuntu/.env
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -95,35 +80,10 @@ jobs:
               --name finance-tracker-frontend \
               -p 3000:80 \
               --restart unless-stopped \
-              --env-file /home/ubuntu/.env \
               ghcr.io/geetpithadia3/finance-tracker-frontend:${{ github.sha }}
-            
-            # Create nginx configuration
-            sudo tee /etc/nginx/sites-available/finance-tracker << EOL
-            server {
-                listen 80;
-                server_name _;
-
-                location / {
-                    proxy_pass http://localhost:3000;
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade \$http_upgrade;
-                    proxy_set_header Connection 'upgrade';
-                    proxy_set_header Host \$host;
-                    proxy_cache_bypass \$http_upgrade;
-                }
-            }
-            EOL
-
-            # Enable the site
-            sudo ln -sf /etc/nginx/sites-available/finance-tracker /etc/nginx/sites-enabled/
-            sudo rm -f /etc/nginx/sites-enabled/default
-            
-            # Test nginx configuration
-            sudo nginx -t
-            
-            # Reload nginx
-            sudo systemctl reload nginx
             
             # Verify the container is running
             docker ps | grep finance-tracker-frontend
+            
+            # Reload nginx to ensure it picks up any changes
+            sudo systemctl reload nginx
