@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { TransactionTableHeader } from './TransactionTableHeader';
 import { TransactionRow } from './TransactionRow';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Table, TableBody } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Pencil, Save, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter } from 'lucide-react';
 import { useTransactionListManager } from '../hooks/useTransactionListManager';
 import { EmptyState } from './EmptyState';
 import { TransactionDialog } from './TransactionDialog';
@@ -12,6 +14,8 @@ import { TransactionsTable } from './TransactionsTable';
 
 const TransactionsList = () => {
   const inputRef = useRef(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   const {
     transactions,
     categories,
@@ -36,9 +40,15 @@ const TransactionsList = () => {
   };
 
   const handleTransactionClick = (transaction) => {
-    setSelectedTransaction(transaction);
-    setTransactionModalOpen(true);
+    if (!editMode) {
+      setSelectedTransaction(transaction);
+      setTransactionModalOpen(true);
+    }
   };
+
+  const filteredTransactions = selectedCategory && selectedCategory !== 'all'
+    ? transactions.filter(transaction => transaction.category.name === selectedCategory)
+    : transactions;
 
   return (
     <div className="flex flex-col">
@@ -67,45 +77,77 @@ const TransactionsList = () => {
           </Button>
         </div>
 
-        {/* Edit Controls */}
-        {transactions.length > 0 && (
-          <div className="flex items-center justify-center sm:justify-end gap-2">
-            <Button
-              variant={editMode ? "secondary" : "outline"}
-              className="h-9 text-sm font-medium"
-              onClick={() => setEditMode(!editMode)}
+        {/* Filter and Edit Controls */}
+        <div className="flex items-center justify-center sm:justify-end gap-2">
+          <div className="flex items-center gap-2">
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
             >
-              {editMode ? (
-                <>
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel Edit
-                </>
-              ) : (
-                <>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit Transactions
-                </>
-              )}
-            </Button>
-            {editMode && (
+              <SelectTrigger className="w-[180px] h-9">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedCategory && selectedCategory !== 'all' && (
               <Button
-                className="h-9 text-sm font-medium"
-                onClick={handleSaveChanges}
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCategory('all')}
+                className="h-9 px-2"
               >
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
-        )}
+
+          {transactions.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={editMode ? "secondary" : "outline"}
+                className="h-9 text-sm font-medium"
+                onClick={() => setEditMode(!editMode)}
+              >
+                {editMode ? (
+                  <>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel Edit
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Transactions
+                  </>
+                )}
+              </Button>
+              {editMode && (
+                <Button
+                  className="h-9 text-sm font-medium"
+                  onClick={handleSaveChanges}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Transaction Table */}
-      {transactions.length === 0 ? (
+      {filteredTransactions.length === 0 ? (
         <EmptyState selectedDate={selectedDate} />
       ) : (
         <TransactionsTable
-          transactions={transactions}
+          transactions={filteredTransactions}
           categories={categories}
           editMode={editMode}
           sortConfig={sortConfig}

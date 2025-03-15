@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronUp, ChevronDown, MinusCircle } from 'lucide-react';
-import { useSplitContext } from '../../../context/SplitContext';
+import { useSplitViewContext } from '../context/SplitViewContext';
 
 
 export const SplitItem = ({ split, index, categories }) => {
-  const { dispatch, state: { openSplitIndex } } = useSplitContext();
+  const { dispatch, state: { openSplitIndex } } = useSplitViewContext();
   const isOpen = openSplitIndex === index;
 
   const handleAmountChange = (value) => {

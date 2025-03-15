@@ -12,7 +12,7 @@ export const transactionsApi = {
   },
   
   update: (transactions) => {
-    // console.log(`Updating transactions: ${JSON.stringify(transactions)}`);
+    console.log(`Updating transactions: ${JSON.stringify(transactions)}`);
     return Promise.all(transactions.map(transaction => {
       const updateData = {
         id: transaction.id,
@@ -25,7 +25,8 @@ export const transactionsApi = {
         refunded: transaction.refunded,
         personalShare: transaction.personalShare,
         owedShare: transaction.owedShare,
-        shareMetadata: transaction.shareMetadata
+        shareMetadata: transaction.shareMetadata,
+        recurrence: transaction.recurrence
       };
       console.log(`Updating transaction: ${JSON.stringify(updateData)}`);
       return apiClient.put('/transactions', [updateData]);
@@ -47,7 +48,8 @@ export const transactionsApi = {
       categoryId: parentTransaction.category.id,
       occurredOn: parentTransaction.occurredOn,
       deleted: false,
-      account: parentTransaction.account
+      account: parentTransaction.account,
+      recurrence: parentTransaction.recurrence
     }]);
 
     console.log(`Creating split transactions: ${JSON.stringify(newSplits)}`);
@@ -62,5 +64,15 @@ export const transactionsApi = {
         type: 'DEBIT'
       }))
     );
+  },
+  
+  updateRecurrence: (transactionId, recurrenceData) => {
+    console.log(`Updating recurrence for transaction ${transactionId}: ${JSON.stringify(recurrenceData)}`);
+    return apiClient.put(`/transactions/${transactionId}/recurrence`, recurrenceData);
+  },
+  
+  removeRecurrence: (transactionId) => {
+    console.log(`Removing recurrence for transaction ${transactionId}`);
+    return apiClient.delete(`/transactions/${transactionId}/recurrence`);
   }
 };

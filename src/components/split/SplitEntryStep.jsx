@@ -4,12 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SplitItem } from './SplitItem';
-import { useSplitContext } from './SplitContext';
-import { useSplitCalculations } from '../transactions/hooks/useSplitCalculations';
+import { useSplitViewContext } from '../context/SplitViewContext';
 
-export const SplitEntryStep = ({ transaction }) => {
-    const { state: { splits }, dispatch } = useSplitContext();
-    const calculations = useSplitCalculations(transaction, splits);
+export const SplitEntryStep = ({ transaction, categories }) => {
+    const { state, dispatch, calculations } = useSplitViewContext();
     
     return (
       <div className="space-y-4">
@@ -31,8 +29,8 @@ export const SplitEntryStep = ({ transaction }) => {
           <div className="text-sm font-medium text-gray-500">Split Transactions</div>
           <ScrollArea className="h-[240px] rounded-md border">
             <div className="space-y-2 p-4">
-              {splits.map((split, index) => (
-                <SplitItem key={index} split={split} index={index} />
+              {state.splits.map((split, index) => (
+                <SplitItem key={index} split={split} index={index} categories={categories} />
               ))}
             </div>
           </ScrollArea>

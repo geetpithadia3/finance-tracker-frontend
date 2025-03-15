@@ -2,6 +2,7 @@ import React from 'react';
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Repeat } from "lucide-react";
 import moment from 'moment';
 
 export const TransactionRow = ({ 
@@ -23,6 +24,12 @@ export const TransactionRow = ({
     >
       <TableCell className="align-top py-4 text-sm whitespace-nowrap">
         {moment(transaction.occurredOn).format('YYYY-MM-DD')}
+        {transaction.recurrence && (
+          <div className="flex items-center mt-1 text-blue-600">
+            <Repeat className="h-3 w-3 mr-1" />
+            <span className="text-xs">Recurring</span>
+          </div>
+        )}
       </TableCell>
       <TableCell className="align-top py-4">
         <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium 

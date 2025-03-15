@@ -1,39 +1,36 @@
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { transactionsApi } from '../../../api/transactions';
 import TransactionView from './TransactionView';
 import SplitView from './SplitView';
 import ShareView from './ShareView';
-import { SplitContext } from '../../../context/SplitContext';
-import { splitReducer } from '../../../reducers/splitReducer';
-import { useSplitCalculations } from '../hooks/useSplitCalculations';
-import { useToast } from "@/components/ui/use-toast";
+import { RecurrenceView } from './RecurrenceView';
 
 export const TransactionDialog = ({ open, transaction, categories, onClose, onRefresh }) => {
   const { toast } = useToast();
   const [view, setView] = useState('details');
-  const [state, dispatch] = useReducer(splitReducer, {
-    splits: [],
-    openSplitIndex: 0,
-    step: 1
-  });
 
-  useEffect(() => {
+  const handleBack = () => {
     setView('details');
-    dispatch({ type: 'RESET' });
-  }, [open, transaction]);
+  };
 
-  const calculations = useSplitCalculations(transaction, state.splits);
+  const handleClose = (isOpen) => {
+    setView('details');
+    onClose();
+  };
 
   const handleSplitStart = () => {
-    dispatch({
-      type: 'ADD_SPLIT',
-      category: transaction?.category
-    });
     setView('split');
   };
-  const handleShareStart = () => setView('share');
-  const handleBack = () => setView('details');
+
+  const handleShareStart = () => {
+    setView('share');
+  };
+
+  const handleRecurrenceStart = () => {
+    setView('recurrence');
+  };
 
   const handleSplitSave = async (remainingTransaction, splits) => {
     try {
@@ -88,37 +85,87 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
     }
   };
 
+  const handleRecurrenceSave = async (updatedTransaction) => {
+    try {
+      // If recurrence exists in the updated transaction
+      if (updatedTransaction.recurrence) {
+        // Create a properly formatted recurrence object
+        const recurrenceData = {
+          id: updatedTransaction.recurrence.id, // Include the ID if it exists
+          frequency: updatedTransaction.recurrence.frequency,
+          startDate: transaction.occurredOn, // Use the original transaction date as start date
+          nextDate: updatedTransaction.recurrence.nextDate // Next occurrence date
+        };
+        
+        // Update the transaction with the recurrence data
+        await transactionsApi.update([{
+          ...updatedTransaction,
+          recurrence: recurrenceData
+        }]);
+      } else {
+        // If recurrence is being removed
+        await transactionsApi.update([updatedTransaction]);
+      }
+      
+      await onRefresh();
+      onClose();
+      toast({
+        description: updatedTransaction.recurrence 
+          ? (transaction.recurrence 
+              ? "Recurrence updated! Your schedule has been adjusted 🔄" 
+              : "Recurrence set! This transaction will keep coming back 🔄")
+          : "Recurrence removed! This is now a one-time transaction ✓",
+      });
+    } catch (error) {
+      console.error('Error saving recurrence:', error);
+      toast({
+        variant: "destructive",
+        description: "Couldn't set up the recurrence - try again? 🤔",
+      });
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
-        <SplitContext.Provider value={{ state, dispatch, calculations }}>
-          {view === 'details' && (
-            <TransactionView
-              transaction={transaction}
-              onSplitStart={handleSplitStart}
-              onShareStart={handleShareStart}
-              onRefresh={onRefresh}
-            />
-          )}
+        {view === 'details' && (
+          <TransactionView
+            transaction={transaction}
+            onSplitStart={handleSplitStart}
+            onShareStart={handleShareStart}
+            onRecurrenceStart={handleRecurrenceStart}
+            onRefresh={onRefresh}
+            onClose={handleClose}
+          />
+        )}
 
-          {view === 'split' && transaction && (
-            <SplitView
-              transaction={transaction}
-              categories={categories}
-              onSave={handleSplitSave}
-              onCancel={handleBack}
-            />
-          )}
+        {view === 'split' && transaction && (
+          <SplitView
+            transaction={transaction}
+            categories={categories}
+            onSave={handleSplitSave}
+            onCancel={handleBack}
+          />
+        )}
 
-          {view === 'share' && transaction && (
-            <ShareView
-              transaction={transaction}
-              onSave={handleShareSave}
-              onCancel={handleBack}
-            />
-          )}
-        </SplitContext.Provider>
+        {view === 'share' && transaction && (
+          <ShareView
+            transaction={transaction}
+            onSave={handleShareSave}
+            onCancel={handleBack}
+          />
+        )}
+
+        {view === 'recurrence' && transaction && (
+          <RecurrenceView
+            transaction={transaction}
+            onSave={handleRecurrenceSave}
+            onCancel={handleBack}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
-}; 
+};
+
+export default TransactionDialog; 

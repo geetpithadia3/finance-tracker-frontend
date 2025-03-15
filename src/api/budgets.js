@@ -33,5 +33,15 @@ export const budgetsApi = {
    * @returns {Promise<Object>} Dashboard data
    */
   getDashboardData: (yearMonth) => 
-    apiClient.get(`/dashboard?yearMonth=${yearMonth}`)
+    apiClient.get(`/dashboard?yearMonth=${yearMonth}`),
+
+  /**
+   * Download budget report
+   * @param {string} yearMonth - Year and month in YYYY-MM format
+   * @param {string} format - Report format ('PDF' or 'CSV')
+   * @returns {Promise<Blob>} Report file blob
+   */
+  getReport: (yearMonth, format) => 
+    apiClient.get(`/budgets/report?yearMonth=${yearMonth}&format=${format}`, 
+      { responseType: 'blob' })
 };

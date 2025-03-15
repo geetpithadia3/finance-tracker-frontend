@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Plus } from "lucide-react";
 import { SplitItem } from './SplitItem';
-import { useSplitContext } from '../../../context/SplitContext';
+import { SplitViewContext } from '../context/SplitViewContext';
+import { splitReducer } from '../../../reducers/splitReducer';
+import { useSplitCalculations } from '../hooks/useSplitCalculations';
+import { useSplitViewContext } from '../context/SplitViewContext';
 
 const SplitEntryStep = ({ transaction, categories }) => {
-  const { state, dispatch, calculations } = useSplitContext();
+  const { state, dispatch, calculations } = useSplitViewContext();
 
   return (
     <div className="space-y-4">
@@ -61,7 +64,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
 };
 
 const SummaryStep = ({ transaction }) => {
-  const { state, calculations } = useSplitContext();
+  const { state, calculations } = useSplitViewContext();
 
   return (
     <div className="space-y-4">
@@ -115,7 +118,13 @@ const SummaryStep = ({ transaction }) => {
 };
 
 const SplitView = ({ transaction, onSave, onCancel, categories }) => {
-  const { state, dispatch, calculations } = useSplitContext();
+  const [state, dispatch] = useReducer(splitReducer, {
+    splits: [],
+    openSplitIndex: 0,
+    step: 1
+  });
+
+  const calculations = useSplitCalculations(transaction, state.splits);
 
   const handleSave = () => {
     const remainingTransaction = {
@@ -131,69 +140,71 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0">
-        <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-semibold">
-              {state.step === 1 ? 'Split Transaction' : 'Review Split'}
-            </DialogTitle>
-            {state.step === 1 && (
-              <div className="text-xl font-semibold text-red-600">
-                ${Math.abs(transaction.amount).toFixed(2)}
-              </div>
-            )}
+    <SplitViewContext.Provider value={{ state, dispatch, calculations }}>
+      <div className="flex flex-col h-full">
+        <div className="p-6 flex-shrink-0">
+          <DialogHeader>
+            <div className="flex justify-between items-center">
+              <DialogTitle className="text-xl font-semibold">
+                {state.step === 1 ? 'Split Transaction' : 'Review Split'}
+              </DialogTitle>
+              {state.step === 1 && (
+                <div className="text-xl font-semibold text-red-600">
+                  ${Math.abs(transaction.amount).toFixed(2)}
+                </div>
+              )}
+            </div>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 pt-2 flex-1 overflow-y-auto">
+          {state.step === 1 ? (
+            <SplitEntryStep transaction={transaction} categories={categories} />
+          ) : (
+            <SummaryStep transaction={transaction} />
+          )}
+        </div>
+
+        <div className="p-6 pt-4 border-t flex-shrink-0">
+          <div className="flex w-full gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 h-10 text-base font-medium"
+              onClick={() => {
+                if (state.step === 1) {
+                  onCancel();
+                } else {
+                  dispatch({ type: 'SET_STEP', step: 1 });
+                }
+              }}
+            >
+              {state.step === 1 ? 'Cancel' : 'Back'}
+            </Button>
+            <Button
+              variant="default"
+              className="flex-1 h-10 text-base font-medium"
+              disabled={!calculations.isValid}
+              onClick={() => {
+                if (state.step === 1) {
+                  dispatch({ type: 'SET_STEP', step: 2 });
+                } else {
+                  handleSave();
+                }
+              }}
+            >
+              {state.step === 1 ? (
+                <div className="flex items-center justify-center">
+                  Review
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </div>
+              ) : (
+                'Confirm Split'
+              )}
+            </Button>
           </div>
-        </DialogHeader>
-      </div>
-
-      <div className="p-6 pt-2 flex-1 overflow-y-auto">
-        {state.step === 1 ? (
-          <SplitEntryStep transaction={transaction} categories={categories} />
-        ) : (
-          <SummaryStep transaction={transaction} />
-        )}
-      </div>
-
-      <div className="p-6 pt-4 border-t flex-shrink-0">
-        <div className="flex w-full gap-2">
-          <Button
-            variant="outline"
-            className="flex-1 h-10 text-base font-medium"
-            onClick={() => {
-              if (state.step === 1) {
-                onCancel();
-              } else {
-                dispatch({ type: 'SET_STEP', step: 1 });
-              }
-            }}
-          >
-            {state.step === 1 ? 'Cancel' : 'Back'}
-          </Button>
-          <Button
-            variant="default"
-            className="flex-1 h-10 text-base font-medium"
-            disabled={!calculations.isValid}
-            onClick={() => {
-              if (state.step === 1) {
-                dispatch({ type: 'SET_STEP', step: 2 });
-              } else {
-                handleSave();
-              }
-            }}
-          >
-            {state.step === 1 ? (
-              <div className="flex items-center justify-center">
-                Review
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </div>
-            ) : (
-              'Confirm Split'
-            )}
-          </Button>
         </div>
       </div>
-    </div>
+    </SplitViewContext.Provider>
   );
 };
 
