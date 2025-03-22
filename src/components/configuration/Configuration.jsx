@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Wallet, Calendar, PiggyBank, Settings, ListChecks } from "lucide-react";
+import { Wallet, Calendar, PiggyBank, Settings, ListChecks, Calculator } from "lucide-react";
 import IncomeConfiguration from './IncomeConfiguration';
 import CategoryConfiguration from './CategoryConfiguration';
 
@@ -54,8 +54,6 @@ const Configuration = () => {
     </div>
   );
 };
-
-
 
 const ExpenseConfiguration = () => {
   return (

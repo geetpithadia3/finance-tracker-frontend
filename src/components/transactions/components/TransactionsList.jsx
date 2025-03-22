@@ -6,15 +6,17 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Table, TableBody } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat } from 'lucide-react';
 import { useTransactionListManager } from '../hooks/useTransactionListManager';
 import { EmptyState } from './EmptyState';
 import { TransactionDialog } from './TransactionDialog';
 import { TransactionsTable } from './TransactionsTable';
+import RecurringTransactionsList from './RecurringTransactionsList';
 
 const TransactionsList = () => {
   const inputRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showRecurring, setShowRecurring] = useState(false);
 
   const {
     transactions,
@@ -50,6 +52,10 @@ const TransactionsList = () => {
     ? transactions.filter(transaction => transaction.category.name === selectedCategory)
     : transactions;
 
+  if (showRecurring) {
+    return <RecurringTransactionsList onBack={() => setShowRecurring(false)} />;
+  }
+
   return (
     <div className="flex flex-col">
       {/* Header Controls */}
@@ -79,6 +85,15 @@ const TransactionsList = () => {
 
         {/* Filter and Edit Controls */}
         <div className="flex items-center justify-center sm:justify-end gap-2">
+          <Button
+            variant="outline"
+            className="h-9 text-sm font-medium"
+            onClick={() => setShowRecurring(true)}
+          >
+            <Repeat className="mr-2 h-4 w-4" />
+            View Recurring
+          </Button>
+          
           <div className="flex items-center gap-2">
             <Select
               value={selectedCategory}

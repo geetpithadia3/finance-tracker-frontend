@@ -8,14 +8,51 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 const RECURRENCE_OPTIONS = [
   { value: 'DAILY', label: 'Daily' },
   { value: 'WEEKLY', label: 'Weekly' },
   { value: 'BIWEEKLY', label: 'Bi-weekly' },
+  { value: 'FOUR_WEEKLY', label: 'Every 4 weeks' },
   { value: 'MONTHLY', label: 'Monthly' },
   { value: 'YEARLY', label: 'Yearly' }
 ];
+
+// Define flexibility options for different frequencies
+const DATE_FLEXIBILITY_OPTIONS = {
+  MONTHLY: [
+    { value: 'EXACT', label: 'Exact date' },
+    { value: 'EARLY_MONTH', label: 'Early month (1st-10th)' },
+    { value: 'MID_MONTH', label: 'Mid month (11th-20th)' },
+    { value: 'LATE_MONTH', label: 'Late month (21st-31st)' },
+    { value: 'CUSTOM_RANGE', label: 'Custom range' }
+  ],
+  FOUR_WEEKLY: [
+    { value: 'EXACT', label: 'Exact day' },
+    { value: 'WEEKDAY', label: 'Any weekday (Mon-Fri)' },
+    { value: 'WEEKEND', label: 'Weekend (Sat-Sun)' }
+  ],
+  BIWEEKLY: [
+    { value: 'EXACT', label: 'Exact day' },
+    { value: 'WEEKDAY', label: 'Any weekday (Mon-Fri)' },
+    { value: 'WEEKEND', label: 'Weekend (Sat-Sun)' }
+  ],
+  WEEKLY: [
+    { value: 'EXACT', label: 'Exact day of week' },
+    { value: 'WEEKDAY', label: 'Any weekday (Mon-Fri)' },
+    { value: 'WEEKEND', label: 'Weekend (Sat-Sun)' }
+  ],
+  YEARLY: [
+    { value: 'EXACT', label: 'Exact date' },
+    { value: 'MONTH_RANGE', label: 'Month range' },
+    { value: 'SEASON', label: 'Season-based' }
+  ],
+  DEFAULT: [
+    { value: 'EXACT', label: 'Exact date' }
+  ]
+};
 
 const getNextDate = (currentDate, frequency) => {
   let baseDate = new Date(currentDate);
@@ -27,6 +64,8 @@ const getNextDate = (currentDate, frequency) => {
       return addWeeks(baseDate, 1);
     case 'BIWEEKLY':
       return addWeeks(baseDate, 2);
+    case 'FOUR_WEEKLY':
+      return addWeeks(baseDate, 4);
     case 'MONTHLY':
       return addMonths(baseDate, 1);
     case 'YEARLY':
@@ -38,21 +77,76 @@ const getNextDate = (currentDate, frequency) => {
 
 export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
   const [recurrence, setRecurrence] = useState(null);
+  const [showRangeInputs, setShowRangeInputs] = useState(false);
   const isExistingRecurrence = transaction.recurrence !== null && transaction.recurrence !== undefined;
 
   useEffect(() => {
     // Initialize recurrence state when transaction changes
     if (transaction.recurrence) {
       setRecurrence(transaction.recurrence);
+      setShowRangeInputs(
+        ['CUSTOM_RANGE', 'MONTH_RANGE'].includes(transaction.recurrence.dateFlexibility)
+      );
     } else {
       setRecurrence(null);
+      setShowRangeInputs(false);
     }
   }, [transaction]);
 
   const handleFrequencyChange = (frequency) => {
-    // Always calculate next date from the original transaction date
-    const nextDate = getNextDate(transaction.occurredOn, frequency);
-    setRecurrence({ ...recurrence, frequency, nextDate });
+    // Reset dateFlexibility when frequency changes to ensure compatibility
+    setRecurrence({ 
+      ...recurrence, 
+      frequency, 
+      dateFlexibility: 'EXACT',
+      // Reset any frequency-specific fields
+      rangeStart: null,
+      rangeEnd: null,
+      preference: null
+    });
+    setShowRangeInputs(false);
+  };
+
+  const handleDateFlexibilityChange = (dateFlexibility) => {
+    setShowRangeInputs(['CUSTOM_RANGE', 'MONTH_RANGE'].includes(dateFlexibility));
+    setRecurrence({ ...recurrence, dateFlexibility });
+  };
+
+  const handleVariableAmountChange = (isVariable) => {
+    setRecurrence({ 
+      ...recurrence, 
+      isVariableAmount: isVariable,
+      // If turning off variable amount, reset the min/max values
+      ...(isVariable ? {} : { estimatedMinAmount: null, estimatedMaxAmount: null })
+    });
+  };
+
+  const handleMinAmountChange = (value) => {
+    const minAmount = parseFloat(value);
+    if (!isNaN(minAmount)) {
+      setRecurrence({ 
+        ...recurrence, 
+        estimatedMinAmount: minAmount,
+        // Ensure max is at least as large as min
+        estimatedMaxAmount: recurrence.estimatedMaxAmount < minAmount 
+          ? minAmount 
+          : recurrence.estimatedMaxAmount
+      });
+    }
+  };
+
+  const handleMaxAmountChange = (value) => {
+    const maxAmount = parseFloat(value);
+    if (!isNaN(maxAmount)) {
+      setRecurrence({ 
+        ...recurrence, 
+        estimatedMaxAmount: maxAmount,
+        // Ensure min is not larger than max
+        estimatedMinAmount: recurrence.estimatedMinAmount > maxAmount 
+          ? maxAmount 
+          : recurrence.estimatedMinAmount
+      });
+    }
   };
 
   const handleSave = () => {
@@ -64,7 +158,7 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
       return;
     }
 
-    if (!recurrence.frequency || !recurrence.nextDate) {
+    if (!recurrence.frequency) {
       return;
     }
     
@@ -79,14 +173,260 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
   };
 
   const handleSetupRecurrence = () => {
-    // Always use the transaction's original date as the base for calculation
-    const nextDate = getNextDate(transaction.occurredOn, 'MONTHLY');
-    setRecurrence({ frequency: 'MONTHLY', nextDate });
+    setRecurrence({ 
+      frequency: 'MONTHLY', 
+      dateFlexibility: 'EXACT',
+      rangeStart: null,
+      rangeEnd: null,
+      preference: null,
+      isVariableAmount: false,
+      estimatedMinAmount: null,
+      estimatedMaxAmount: null
+    });
+  };
+
+  // Get the appropriate flexibility options based on frequency
+  const getFlexibilityOptions = () => {
+    if (!recurrence || !recurrence.frequency) return DATE_FLEXIBILITY_OPTIONS.DEFAULT;
+    
+    switch (recurrence.frequency) {
+      case 'MONTHLY':
+        return DATE_FLEXIBILITY_OPTIONS.MONTHLY;
+      case 'FOUR_WEEKLY':
+        return DATE_FLEXIBILITY_OPTIONS.FOUR_WEEKLY;
+      case 'BIWEEKLY':
+        return DATE_FLEXIBILITY_OPTIONS.BIWEEKLY;
+      case 'WEEKLY':
+        return DATE_FLEXIBILITY_OPTIONS.WEEKLY;
+      case 'YEARLY':
+        return DATE_FLEXIBILITY_OPTIONS.YEARLY;
+      default:
+        return DATE_FLEXIBILITY_OPTIONS.DEFAULT;
+    }
+  };
+
+  // Get range input labels based on frequency and flexibility
+  const getRangeLabels = () => {
+    if (recurrence.frequency === 'MONTHLY' && recurrence.dateFlexibility === 'CUSTOM_RANGE') {
+      return {
+        startLabel: 'Range Start (Day of Month)',
+        endLabel: 'Range End (Day of Month)',
+        startMin: 1,
+        startMax: 28,
+        endMin: 1,
+        endMax: 31
+      };
+    } else if (recurrence.frequency === 'YEARLY' && recurrence.dateFlexibility === 'MONTH_RANGE') {
+      return {
+        startLabel: 'Start Month',
+        endLabel: 'End Month',
+        startMin: 1,
+        startMax: 12,
+        endMin: 1,
+        endMax: 12
+      };
+    }
+    return null;
+  };
+
+  // Render frequency-specific flexibility options
+  const renderFlexibilityOptions = () => {
+    if (!recurrence) return null;
+
+    // Common flexibility selector for all frequency types
+    const flexibilitySelector = (
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">
+          {recurrence.frequency === 'WEEKLY' ? 'Day Flexibility' : 'Date Flexibility'}
+        </label>
+        <Select
+          value={recurrence.dateFlexibility || 'EXACT'}
+          onValueChange={handleDateFlexibilityChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={`Select ${recurrence.frequency === 'WEEKLY' ? 'day' : 'date'} flexibility`} />
+          </SelectTrigger>
+          <SelectContent>
+            {getFlexibilityOptions().map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+
+    // Render range inputs if needed
+    const rangeInputs = showRangeInputs && (
+      <div className="space-y-4">
+        {(() => {
+          const labels = getRangeLabels();
+          if (!labels) return null;
+          
+          return (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">{labels.startLabel}</label>
+                <Input
+                  type="number"
+                  min={labels.startMin}
+                  max={labels.startMax}
+                  value={recurrence.rangeStart || ''}
+                  onChange={(e) => setRecurrence({ 
+                    ...recurrence, 
+                    rangeStart: parseInt(e.target.value) || labels.startMin 
+                  })}
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">{labels.endLabel}</label>
+                <Input
+                  type="number"
+                  min={labels.endMin}
+                  max={labels.endMax}
+                  value={recurrence.rangeEnd || ''}
+                  onChange={(e) => setRecurrence({ 
+                    ...recurrence, 
+                    rangeEnd: parseInt(e.target.value) || labels.endMin 
+                  })}
+                  className="h-8 text-sm"
+                />
+              </div>
+            </>
+          );
+        })()}
+      </div>
+    );
+
+    // Render preference selector for specific flexibility types
+    const preferenceSelector = (() => {
+      if (recurrence.frequency === 'WEEKLY' && recurrence.dateFlexibility === 'EXACT') {
+        return (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Day of Week</label>
+            <Select
+              value={recurrence.preference || getDayOfWeek(transaction.occurredOn)}
+              onValueChange={(day) => setRecurrence({ ...recurrence, preference: day })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select day of week" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MONDAY">Monday</SelectItem>
+                <SelectItem value="TUESDAY">Tuesday</SelectItem>
+                <SelectItem value="WEDNESDAY">Wednesday</SelectItem>
+                <SelectItem value="THURSDAY">Thursday</SelectItem>
+                <SelectItem value="FRIDAY">Friday</SelectItem>
+                <SelectItem value="SATURDAY">Saturday</SelectItem>
+                <SelectItem value="SUNDAY">Sunday</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      } else if (recurrence.frequency === 'YEARLY' && recurrence.dateFlexibility === 'SEASON') {
+        return (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Season</label>
+            <Select
+              value={recurrence.preference || 'SPRING'}
+              onValueChange={(season) => setRecurrence({ 
+                ...recurrence, 
+                preference: season
+              })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select season" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="SPRING">Spring (Mar-May)</SelectItem>
+                <SelectItem value="SUMMER">Summer (Jun-Aug)</SelectItem>
+                <SelectItem value="FALL">Fall (Sep-Nov)</SelectItem>
+                <SelectItem value="WINTER">Winter (Dec-Feb)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      }
+      return null;
+    })();
+
+    return (
+      <>
+        {flexibilitySelector}
+        {rangeInputs}
+        {preferenceSelector}
+      </>
+    );
+  };
+
+  // Helper function to get day of week from date
+  const getDayOfWeek = (dateString) => {
+    const date = new Date(dateString);
+    const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    return days[date.getDay()];
   };
 
   const getFrequencyLabel = (frequency) => {
     const option = RECURRENCE_OPTIONS.find(opt => opt.value === frequency);
     return option ? option.label : frequency;
+  };
+
+  // Render variable amount section
+  const renderVariableAmountSection = () => {
+    if (!recurrence) return null;
+
+    return (
+      <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-700">Variable Amount</label>
+          <Switch
+            checked={recurrence.isVariableAmount || false}
+            onCheckedChange={handleVariableAmountChange}
+          />
+        </div>
+        
+        {recurrence.isVariableAmount && (
+          <div className="space-y-4 mt-2 p-3 bg-blue-50 rounded-md">
+            <div className="text-sm text-blue-700">
+              This transaction varies in amount each time it occurs.
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Minimum Amount ($)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={recurrence.estimatedMinAmount || ''}
+                  onChange={(e) => handleMinAmountChange(e.target.value)}
+                  className="h-8 text-sm"
+                  placeholder={`${Math.abs(transaction.amount) * 0.8}`}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Maximum Amount ($)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={recurrence.estimatedMaxAmount || ''}
+                  onChange={(e) => handleMaxAmountChange(e.target.value)}
+                  className="h-8 text-sm"
+                  placeholder={`${Math.abs(transaction.amount) * 1.2}`}
+                />
+              </div>
+            </div>
+            
+            <div className="text-xs text-gray-500 mt-2">
+              Tip: Set a typical range to help with budget planning. The current transaction amount is ${Math.abs(transaction.amount).toFixed(2)}.
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -150,36 +490,11 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Next Occurrence</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !recurrence.nextDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {recurrence.nextDate ? (
-                        format(new Date(recurrence.nextDate), "MMMM d, yyyy")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={recurrence.nextDate ? new Date(recurrence.nextDate) : undefined}
-                      onSelect={(date) => setRecurrence({ ...recurrence, nextDate: date })}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              {/* Render frequency-specific flexibility options */}
+              {renderFlexibilityOptions()}
+
+              {/* Add variable amount section */}
+              {renderVariableAmountSection()}
 
               <Button
                 variant="destructive"
@@ -193,18 +508,11 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
           ) : (
             <div className="text-center space-y-4 py-4">
               <div className="text-gray-500">
-                {isExistingRecurrence 
-                  ? "You're about to remove the recurring schedule for this transaction" 
-                  : "No recurrence set for this transaction"}
+                This transaction is not set to recur.
               </div>
-              {!isExistingRecurrence && (
-                <Button
-                  variant="outline"
-                  onClick={handleSetupRecurrence}
-                >
-                  Set Up Recurrence
-                </Button>
-              )}
+              <Button onClick={handleSetupRecurrence}>
+                Set Up Recurrence
+              </Button>
             </div>
           )}
         </div>

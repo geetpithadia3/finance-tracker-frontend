@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Share2, Split, RefreshCw, Repeat } from 'lucide-react';
+import { Share2, Split, RefreshCw, Repeat, Calendar } from 'lucide-react';
 import { transactionsApi } from '../../../api/transactions';
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -50,10 +50,58 @@ const TransactionView = ({
       'DAILY': 'Daily',
       'WEEKLY': 'Weekly',
       'BIWEEKLY': 'Bi-weekly',
+      'FOUR_WEEKLY': 'Every 4 weeks',
       'MONTHLY': 'Monthly',
       'YEARLY': 'Yearly'
     };
     return options[frequency] || frequency;
+  };
+
+  // Helper function to get a readable date flexibility label
+  const getDateFlexibilityLabel = (flexibility, recurrence) => {
+    if (!flexibility) return 'Exact date';
+    
+    switch (flexibility) {
+      case 'EXACT':
+        if (recurrence.frequency === 'WEEKLY' && recurrence.preference) {
+          const days = {
+            'MONDAY': 'Monday',
+            'TUESDAY': 'Tuesday',
+            'WEDNESDAY': 'Wednesday',
+            'THURSDAY': 'Thursday',
+            'FRIDAY': 'Friday',
+            'SATURDAY': 'Saturday',
+            'SUNDAY': 'Sunday'
+          };
+          return `Every ${days[recurrence.preference]}`;
+        }
+        return 'Exact date';
+      case 'EARLY_MONTH': return 'Early month (1st-10th)';
+      case 'MID_MONTH': return 'Mid month (11th-20th)';
+      case 'LATE_MONTH': return 'Late month (21st-31st)';
+      case 'CUSTOM_RANGE': return 'Custom day range';
+      case 'WEEKDAY': return 'Weekdays only (Mon-Fri)';
+      case 'WEEKEND': return 'Weekends only (Sat-Sun)';
+      case 'MONTH_RANGE': return 'Month range';
+      case 'SEASON': 
+        const seasons = {
+          'SPRING': 'Spring (Mar-May)',
+          'SUMMER': 'Summer (Jun-Aug)',
+          'FALL': 'Fall (Sep-Nov)',
+          'WINTER': 'Winter (Dec-Feb)'
+        };
+        return seasons[recurrence.preference] || 'Seasonal';
+      default: return flexibility;
+    }
+  };
+
+  // Helper function to get month name
+  const getMonthName = (monthNumber) => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[parseInt(monthNumber) - 1];
   };
 
   return (
@@ -114,11 +162,33 @@ const TransactionView = ({
                   )}
                 </div>
                 {localTransaction.recurrence && (
-                  <div className="text-sm text-blue-600 mt-2 flex items-center">
-                    <Repeat className="h-3 w-3 mr-1" />
-                    Next occurrence: {localTransaction.recurrence.nextDate ? 
-                      format(new Date(localTransaction.recurrence.nextDate), "MMMM d, yyyy") : 
-                      "Not scheduled"}
+                  <div className="text-sm text-blue-600 mt-2 flex flex-col">
+                    <div className="flex items-center">
+                      <Repeat className="h-3 w-3 mr-1" />
+                      {getFrequencyLabel(localTransaction.recurrence.frequency)} recurring
+                    </div>
+                    <div className="flex items-center mt-1">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {getDateFlexibilityLabel(localTransaction.recurrence.dateFlexibility, localTransaction.recurrence)}
+                      
+                      {/* Show appropriate range details based on flexibility type */}
+                      {localTransaction.recurrence.dateFlexibility === 'CUSTOM_RANGE' && 
+                        localTransaction.recurrence.rangeStart && 
+                        localTransaction.recurrence.rangeEnd && (
+                          <span className="ml-1">
+                            (Days {localTransaction.recurrence.rangeStart}-{localTransaction.recurrence.rangeEnd})
+                          </span>
+                      )}
+                      
+                      {localTransaction.recurrence.dateFlexibility === 'MONTH_RANGE' && 
+                        localTransaction.recurrence.rangeStart && 
+                        localTransaction.recurrence.rangeEnd && (
+                          <span className="ml-1">
+                            (Months {getMonthName(localTransaction.recurrence.rangeStart)}-
+                            {getMonthName(localTransaction.recurrence.rangeEnd)})
+                          </span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

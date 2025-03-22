@@ -3,15 +3,13 @@ import moment from 'moment';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet, PiggyBank } from 'lucide-react';
+import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet, PiggyBank, Calculator } from 'lucide-react';
 import { StatCard } from './StatCard';
-import { TransactionTable } from './TransactionTable';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import FinancialDistributionChart from './FinancialDistributionChart';
 import ExpensesByCategoryChart from './ExpensesByCategoryChart';
 import TransactionsSection from './TransactionsSection';
+import SmartAllocation from '../../allocation/SmartAllocation';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
 
@@ -114,31 +112,47 @@ const Dashboard = () => {
         <StatCard title="Total Savings" value={savings || 0} icon={Wallet} />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
-        {hasNoData ? (
-          <EmptyChartState title="No Financial Data Yet" />
-        ) : (
-          <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
-        )}
-        
-        {hasNoData ? (
-          <EmptyChartState title="No Expense Categories Yet" />
-        ) : (
-          <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
-        )}
-      </div>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="allocation">Smart Allocation</TabsTrigger>
+        </TabsList>
 
-      {/* Transactions Section */}
-      <div className="mt-4 md:mt-6">
-        <TransactionsSection
-          transactions={transactions}
-          incomeTransactions={incomeTransactions}
-          savingsTransactions={savingsTransactions}
-          expenseColumns={expenseColumns}
-          incomeAndSavingsColumns={incomeAndSavingsColumns}
-        />
-      </div>
+        <TabsContent value="overview">
+          {/* Charts Section */}
+          <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
+            {hasNoData ? (
+              <EmptyChartState title="No Financial Data Yet" />
+            ) : (
+              <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
+            )}
+            
+            {hasNoData ? (
+              <EmptyChartState title="No Expense Categories Yet" />
+            ) : (
+              <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="transactions">
+          {/* Transactions Section */}
+          <TransactionsSection
+            transactions={transactions}
+            incomeTransactions={incomeTransactions}
+            savingsTransactions={savingsTransactions}
+            expenseColumns={expenseColumns}
+            incomeAndSavingsColumns={incomeAndSavingsColumns}
+          />
+        </TabsContent>
+
+        <TabsContent value="allocation">
+          {/* Smart Allocation Section */}
+          <SmartAllocation />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

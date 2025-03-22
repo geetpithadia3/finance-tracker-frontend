@@ -89,12 +89,17 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
     try {
       // If recurrence exists in the updated transaction
       if (updatedTransaction.recurrence) {
-        // Create a properly formatted recurrence object
+        // Create a properly formatted recurrence object with generic fields
         const recurrenceData = {
           id: updatedTransaction.recurrence.id, // Include the ID if it exists
           frequency: updatedTransaction.recurrence.frequency,
           startDate: transaction.occurredOn, // Use the original transaction date as start date
-          nextDate: updatedTransaction.recurrence.nextDate // Next occurrence date
+          dateFlexibility: updatedTransaction.recurrence.dateFlexibility || 'EXACT',
+          
+          // Use generic fields for all types of ranges and preferences
+          rangeStart: updatedTransaction.recurrence.rangeStart || null,
+          rangeEnd: updatedTransaction.recurrence.rangeEnd || null,
+          preference: updatedTransaction.recurrence.preference || null
         };
         
         // Update the transaction with the recurrence data

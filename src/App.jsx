@@ -25,6 +25,7 @@ import { Toaster } from "@/components/ui/toaster"
 import Budget from './components/budget/components/Budget';
 import BudgetConfiguration from './components/budget/components/BudgetConfiguration';
 import Avvvatars from 'avvvatars-react'
+import SmartAllocation from './components/allocation/SmartAllocation';
 
 import { 
   Menu,
@@ -35,6 +36,7 @@ import {
   LogOut,
   Settings,
   PiggyBank,
+  Calculator,
 } from 'lucide-react';
 
 import moment from 'moment';
@@ -76,6 +78,7 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
       <NavItem icon={Wallet} to="/accounts">Accounts</NavItem>
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
       <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
+      <NavItem icon={Calculator} to="/allocation">Smart Allocation</NavItem>
     </nav>
   );
 };
@@ -243,6 +246,7 @@ const App = () => {
                 <Route path="/configuration" element={<Configuration />} />
                 <Route path="/budget" element={<Budget />} />
                 <Route path="/budget/configure" element={<BudgetConfiguration selectedDate={moment()} />} />
+                <Route path="/allocation" element={<SmartAllocation />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </div>
