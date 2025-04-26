@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FileUp } from 'lucide-react';
 import Dropzone from 'shadcn-dropzone';
 
-export const FileUploadCard = ({ onFileUpload }) => {
+export const FileUploadComponent = ({ onFileUpload }) => {
   return (
     <Card className="border-dashed">
       <CardContent className="p-0">

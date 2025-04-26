@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 
 export const transactionsApi = {
   getAll: (yearMonth) => {
@@ -8,7 +8,12 @@ export const transactionsApi = {
   
   create: (transactions) => {
     console.log(`Creating transactions: ${JSON.stringify(transactions)}`);
-    return apiClient.post('/transactions', transactions);
+    // Ensure we're not sending accountId field which is no longer needed
+    const sanitizedTransactions = transactions.map(transaction => {
+      const { accountId, ...rest } = transaction;
+      return rest;
+    });
+    return apiClient.post('/transactions', sanitizedTransactions);
   },
   
   update: (transactions) => {
@@ -77,7 +82,6 @@ export const transactionsApi = {
         description: split.description || parentTransaction.description,
         categoryId: split.category.id,
         occurredOn: parentTransaction.occurredOn,
-        accountId: parentTransaction.account,
         type: 'DEBIT'
       }))
     );

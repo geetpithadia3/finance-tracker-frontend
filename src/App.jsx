@@ -16,9 +16,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 // Import your components
 import TransactionsList from './components/transactions/components/TransactionsList';
 // import GoalsList from './components/GoalsList';
-import ManageAccounts from './components/account/ManageAccounts';
-import Login from './components/login/components/Login';
-import Register from './components/register/components/Register';
+// Remove ManageAccounts import
+// Removed Login and Register imports
 import Dashboard from './components/dashboard/components/Dashboard';
 import Configuration from './components/configuration/Configuration';
 import { Toaster } from "@/components/ui/toaster"
@@ -30,7 +29,6 @@ import SmartAllocation from './components/allocation/SmartAllocation';
 import { 
   Menu,
   LayoutDashboard, 
-  Wallet,
   ListOrdered,
   Target,
   LogOut,
@@ -40,7 +38,7 @@ import {
 } from 'lucide-react';
 
 import moment from 'moment';
-import { sessionManager } from '@/utils/session';
+// Removed session manager import
 
 const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   const NavItem = ({ icon: Icon, children, to }) => {
@@ -75,7 +73,6 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   return (
     <nav className={cn("flex flex-col gap-1", className)} {...props}>
       <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
-      <NavItem icon={Wallet} to="/accounts">Accounts</NavItem>
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
       <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
       <NavItem icon={Calculator} to="/allocation">Smart Allocation</NavItem>
@@ -86,11 +83,11 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
 const UserNav = ({ onLogout, username }) => {
   return (
     <DropdownMenu>
-<DropdownMenuTrigger asChild>
-  <div className="relative p-0 h-8 w-8 rounded-full overflow-hidden">
-    <Avvvatars value={username} style="shape" size={32} />
-  </div>
-</DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
+        <div className="relative p-0 h-8 w-8 rounded-full overflow-hidden">
+          <Avvvatars value={username} style="shape" size={32} />
+        </div>
+      </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuItem asChild>
           <Link to="/configuration">
@@ -98,6 +95,7 @@ const UserNav = ({ onLogout, username }) => {
             <span>Configuration</span>
           </Link>
         </DropdownMenuItem>
+        {/* Keep logout for UI consistency, but it just reloads the page */}
         <DropdownMenuItem onClick={onLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
@@ -132,69 +130,20 @@ const Sidebar = ({ collapsed, className, onNavClick }) => {
 
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState(sessionStorage.getItem('username') || '');
+  // Remove authentication state
+  const [username, setUsername] = useState('User'); // Default username
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [openDialog, setOpenDialog] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = sessionManager.getToken();
-      setIsAuthenticated(!!token);
-    };
-
-    // Check initial auth state
-    checkAuth();
-
-    // Set up activity listeners
-    const handleActivity = () => {
-      if (isAuthenticated) {
-        sessionManager.updateLastActivity();
-      }
-    };
-
-    // Listen for session expiration
-    const handleSessionExpired = () => {
-      setIsAuthenticated(false);
-    };
-
-    // Add event listeners
-    window.addEventListener('sessionExpired', handleSessionExpired);
-    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
-      document.addEventListener(event, handleActivity);
-    });
-
-    // Check auth status periodically
-    const authCheck = setInterval(checkAuth, 60000); // Check every minute
-
-    // Clean up
-    return () => {
-      window.removeEventListener('sessionExpired', handleSessionExpired);
-      ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
-        document.removeEventListener(event, handleActivity);
-      });
-      clearInterval(authCheck);
-    };
-  }, [isAuthenticated]);
+  // Remove authentication related useEffect
 
   const handleLogout = () => {
-    sessionManager.clearSession();
-    sessionStorage.removeItem('username');
-    setIsAuthenticated(false);
+    // Just reload the page since there's no authentication anymore
+    window.location.href = '/';
   };
 
-  if (!isAuthenticated) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
-    );
-  }
+  // Remove conditional rendering for authentication
 
   return (
     <Router>
@@ -242,7 +191,6 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<TransactionsList />} />
-                <Route path="/accounts" element={<ManageAccounts />} />
                 <Route path="/configuration" element={<Configuration />} />
                 <Route path="/budget" element={<Budget />} />
                 <Route path="/budget/configure" element={<BudgetConfiguration selectedDate={moment()} />} />

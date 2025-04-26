@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { budgetsApi } from '../../../api/budgets';
 import moment from 'moment';
@@ -12,10 +12,42 @@ export const useBudget = (initialDate = moment()) => {
 
   const currentYearMonth = useMemo(() => 
     selectedDate.format('YYYY-MM'),
-    [selectedDate.format('YYYY-MM')]
+    [selectedDate]
   );
 
-  const fetchBudgets = async () => {
+  const handleOverBudgetAlert = useCallback((categories) => {
+    const overBudgetCategories = categories.filter(cat => cat.spent > cat.limit);
+    if (overBudgetCategories.length > 0) {
+      toast({
+        title: "Budget Alert! 🚨",
+        description: `Whoopsie! ${overBudgetCategories.length} ${
+          overBudgetCategories.length === 1 ? 'category is' : 'categories are'
+        } doing a little happy dance over their limits!`,
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const handleEmptyBudgets = useCallback(() => {
+    setBudgets([]);
+    setTotalBudget(0);
+    setTotalSpent(0);
+    toast({
+      title: "Fresh Start! 🌱",
+      description: "Time to set up your first budget and make those money goals happen!",
+    });
+  }, [toast]);
+
+  const handleError = useCallback((error) => {
+    console.error('Error loading budgets:', error);
+    toast({
+      title: "Budget Hiccup! 🎪",
+      description: "Your budgets are playing hide and seek. Let's try again!",
+      variant: "destructive",
+    });
+  }, [toast]);
+
+  const fetchBudgets = useCallback(async () => {
     try {
       const data = await budgetsApi.get(currentYearMonth);
       
@@ -35,43 +67,11 @@ export const useBudget = (initialDate = moment()) => {
     } catch (error) {
       handleError(error);
     }
-  };
-
-  const handleOverBudgetAlert = (categories) => {
-    const overBudgetCategories = categories.filter(cat => cat.spent > cat.limit);
-    if (overBudgetCategories.length > 0) {
-      toast({
-        title: "Budget Alert! 🚨",
-        description: `Whoopsie! ${overBudgetCategories.length} ${
-          overBudgetCategories.length === 1 ? 'category is' : 'categories are'
-        } doing a little happy dance over their limits!`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEmptyBudgets = () => {
-    setBudgets([]);
-    setTotalBudget(0);
-    setTotalSpent(0);
-    toast({
-      title: "Fresh Start! 🌱",
-      description: "Time to set up your first budget and make those money goals happen!",
-    });
-  };
-
-  const handleError = (error) => {
-    console.error('Error loading budgets:', error);
-    toast({
-      title: "Budget Hiccup! 🎪",
-      description: "Your budgets are playing hide and seek. Let's try again!",
-      variant: "destructive",
-    });
-  };
+  }, [currentYearMonth, handleOverBudgetAlert, handleEmptyBudgets, handleError]);
 
   useEffect(() => {
     fetchBudgets();
-  }, [selectedDate]);
+  }, [fetchBudgets]);
 
   return {
     budgets,

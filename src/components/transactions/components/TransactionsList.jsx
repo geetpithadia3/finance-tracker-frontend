@@ -6,17 +6,19 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Table, TableBody } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat, Upload } from 'lucide-react';
 import { useTransactionListManager } from '../hooks/useTransactionListManager';
 import { EmptyState } from './EmptyState';
 import { TransactionDialog } from './TransactionDialog';
 import { TransactionsTable } from './TransactionsTable';
 import RecurringTransactionsList from './RecurringTransactionsList';
+import { TransactionImportDialog } from './TransactionImportDialog';
 
 const TransactionsList = () => {
   const inputRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showRecurring, setShowRecurring] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const {
     transactions,
@@ -85,6 +87,15 @@ const TransactionsList = () => {
 
         {/* Filter and Edit Controls */}
         <div className="flex items-center justify-center sm:justify-end gap-2">
+          <Button
+            variant="outline"
+            className="h-9 text-sm font-medium"
+            onClick={() => setShowImportDialog(true)}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Import CSV
+          </Button>
+          
           <Button
             variant="outline"
             className="h-9 text-sm font-medium"
@@ -185,6 +196,16 @@ const TransactionsList = () => {
         }}
         onRefresh={() => fetchTransactions(selectedDate)}
       />
+
+      {/* CSV Import Dialog */}
+      {showImportDialog && (
+        <TransactionImportDialog
+          onClose={() => {
+            setShowImportDialog(false);
+            fetchTransactions(selectedDate);
+          }}
+        />
+      )}
     </div>
   );
 };

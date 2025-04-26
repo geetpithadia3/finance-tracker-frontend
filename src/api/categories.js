@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 
 /**
  * API methods for category management
@@ -8,7 +8,17 @@ export const categoriesApi = {
    * Get all categories
    * @returns {Promise<Array>} List of categories
    */
-  getAll: () => apiClient.get('/categories'),
+  getAll: async () => {
+    console.log('Calling categories API: getAll()');
+    try {
+      const response = await apiClient.get('/categories');
+      console.log('Categories API response:', response);
+      return response;
+    } catch (error) {
+      console.error('Categories API error:', error);
+      throw error;
+    }
+  },
   
   /**
    * Create new category
@@ -16,6 +26,7 @@ export const categoriesApi = {
    * @returns {Promise<Object>} Created category
    */
   create: (categoryData) => {
+    console.log('Creating category:', categoryData);
     return apiClient.post('/categories', categoryData);
   },
   

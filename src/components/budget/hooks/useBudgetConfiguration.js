@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { budgetsApi } from '@/api/budgets';
 import { categoriesApi } from '@/api/categories';
 import { useToast } from "@/components/ui/use-toast";
@@ -10,7 +10,7 @@ export const useBudgetConfiguration = (initialDate) => {
   const [totalBudget, setTotalBudget] = useState(0);
   const [selectedDate, setSelectedDate] = useState(initialDate);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await categoriesApi.getAll();
       setCategories(response);
@@ -22,13 +22,14 @@ export const useBudgetConfiguration = (initialDate) => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const fetchExistingBudgets = async () => {
+  const fetchExistingBudgets = useCallback(async () => {
     try {
       if (categories.length === 0) return;
 
-      const response = await budgetsApi.get(selectedDate.format('YYYY-MM'));
+      const yearMonth = selectedDate.format('YYYY-MM');
+      const response = await budgetsApi.get(yearMonth);
       
       const budgetMap = {};
       categories.forEach(category => {
@@ -56,18 +57,21 @@ export const useBudgetConfiguration = (initialDate) => {
         variant: "destructive",
       });
     }
-  };
+  }, [categories, selectedDate, toast]);
 
-  const handleBudgetChange = (category, value) => {
-    const newBudgets = { ...budgets };
-    newBudgets[category] = parseFloat(value) || 0;
-    setBudgets(newBudgets);
-    
-    const total = Object.values(newBudgets).reduce((sum, amount) => sum + amount, 0);
-    setTotalBudget(total);
-  };
+  const handleBudgetChange = useCallback((category, value) => {
+    setBudgets(prevBudgets => {
+      const newBudgets = { ...prevBudgets };
+      newBudgets[category] = parseFloat(value) || 0;
+      
+      const total = Object.values(newBudgets).reduce((sum, amount) => sum + amount, 0);
+      setTotalBudget(total);
+      
+      return newBudgets;
+    });
+  }, []);
 
-  const saveBudgetConfiguration = async () => {
+  const saveBudgetConfiguration = useCallback(async () => {
     try {
       const budgetData = {
         yearMonth: selectedDate.format('YYYY-MM'),
@@ -78,6 +82,10 @@ export const useBudgetConfiguration = (initialDate) => {
       };
 
       await budgetsApi.create(budgetData);
+      toast({
+        title: "Success",
+        description: "Budget configuration saved successfully",
+      });
       return true;
     } catch (error) {
       toast({
@@ -87,17 +95,17 @@ export const useBudgetConfiguration = (initialDate) => {
       });
       return false;
     }
-  };
+  }, [categories, budgets, selectedDate, toast]);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   useEffect(() => {
     if (categories.length > 0) {
       fetchExistingBudgets();
     }
-  }, [categories, selectedDate]);
+  }, [categories, fetchExistingBudgets]);
 
   return {
     categories,

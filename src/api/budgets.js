@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 
 /**
  * API methods for budget management

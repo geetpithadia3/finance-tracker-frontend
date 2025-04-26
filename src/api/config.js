@@ -1,5 +1,6 @@
 export const apiConfig = {
-  baseURL: 'http://localhost:8080',
+  baseURL: '',
+  smartURL: '',
   defaultHeaders: {
     'Content-Type': 'application/json'
   }

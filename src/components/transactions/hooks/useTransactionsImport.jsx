@@ -6,7 +6,7 @@ import { smartApiClient } from '../../../api/smartClient';
 import moment from 'moment';
 import Papa from 'papaparse';
 
-export const useTransactionsImport = (selectedAccount, onClose) => {
+export const useTransactionsImport = (onClose) => {
   const [data, setData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -71,41 +71,21 @@ export const useTransactionsImport = (selectedAccount, onClose) => {
     // Make batch categorization request if we have any transactions
     if (categorizationRequests.length > 0) {
       try {
-        const categorizations = await smartApiClient.post('/categorize-batch', categorizationRequests);
-        
-        // Apply categorization results to formatted transactions
-        categorizations.forEach((result, index) => {
-          console.log('Categorization result:', result);
-          console.log('Category:', result.category);
-          if (result.category) {
-            const category = categories.find(cat => 
-              cat.name.toLowerCase() === result.category.toLowerCase()
-            );
-            
-            if (category) {
-              formattedTransactions[index].category = category;
-              formattedTransactions[index].autoCategorized = true;
-              formattedTransactions[index].reasoning = "AutoCategorized:" + result.reasoning || 'Based on transaction pattern';
+        const categorizations = await smartApiClient.categorizeTransactions(categorizationRequests);
+        if (categorizations && categorizations.length > 0) {
+          // Match up categorizations with transactions
+          categorizations.forEach((catResult, index) => {
+            if (catResult.category_id && formattedTransactions[index]) {
+              const category = categories.find(c => c.id === catResult.category_id);
+              if (category) {
+                formattedTransactions[index].category = category;
+                formattedTransactions[index].autoCategorized = true;
+              }
             }
-          }
-        });
+          });
+        }
       } catch (error) {
-        console.error('Error getting batch category suggestions:', error);
-      }
-    }
-    
-    // Second pass: apply fallback categories for any transactions that weren't categorized
-    for (let i = 0; i < formattedTransactions.length; i++) {
-      const transaction = formattedTransactions[i];
-      const originalItem = transactions[i];
-      
-      if (!transaction.category) {
-        // If no category from API or error, fall back to manual matching or General
-        const fallbackCategory = categories.find(cat => 
-          cat.name === (originalItem.category || 'General')
-        ) || { id: null };
-        
-        transaction.category = fallbackCategory;
+        console.error("Error during batch categorization:", error);
       }
     }
     
@@ -168,12 +148,11 @@ export const useTransactionsImport = (selectedAccount, onClose) => {
     
     setIsLoading(true);
     try {
-      console.log("Preparing to save transactions for account:", selectedAccount);
       const formattedData = data.map(item => ({
         ...item,
         occurredOn: item.date.format('YYYY-MM-DD'),
-        accountId: selectedAccount,
         categoryId: item.category?.id || null,
+        // Removed accountId field that was previously required
       }));
 
       console.log("Saving transactions:", formattedData);

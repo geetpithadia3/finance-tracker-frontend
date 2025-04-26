@@ -16,7 +16,7 @@ export const DeleteAccountDialog = ({ isOpen, onClose, onConfirm, accountName })
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the account "{accountName}" and all associated data.
+            This will permanently delete the account &quot;{accountName}&quot; and all associated data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

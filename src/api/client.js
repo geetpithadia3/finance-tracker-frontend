@@ -1,64 +1,72 @@
-import { getAuthHeaders } from '../utils/auth';
 import { apiConfig } from './config';
 
 class ApiClient {
-  constructor(baseURL) {
-    this.baseURL = baseURL;
-    console.log('API client initialized with baseURL:', baseURL);
+  constructor() {
+    // Use empty base URL for proxied requests
+    this.baseUrl = '';
+    this.maxRetries = 3;
+    this.retryDelay = 1000; // 1 second
   }
 
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  async request(method, endpoint, data = null, retryCount = 0) {
+    const url = `${this.baseUrl}${endpoint}`;
     const headers = {
-      ...getAuthHeaders(),
-      ...options.headers
+      'Content-Type': 'application/json'
     };
 
     try {
-      const response = await fetch(url, { ...options, headers });
+      console.log(`API Request: ${method} ${url}`, data ? { data } : '');
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : null,
+      });
+
+      console.log(`API Response status: ${response.status}`);
       
       if (!response.ok) {
-        throw new Error(`API call failed: ${response.statusText}`);
+        const errorData = await response.text().catch(() => null);
+        console.error(`API Error (${response.status}):`, errorData);
+        throw new Error(`HTTP error! status: ${response.status}, details: ${errorData || 'No details'}`);
       }
 
-      // Check if the response is JSON
-      const contentType = response.headers.get('Content-Type');
-      let data;
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text(); // Handle non-JSON response
-      }
-      return data;
+      const result = await response.json();
+      console.log('API Response data:', result);
+      return result;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error(`API Request Failed: ${method} ${url}`, error);
+      
+      if (retryCount < this.maxRetries && this.shouldRetry(error)) {
+        console.log(`Retrying (${retryCount + 1}/${this.maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay * (retryCount + 1)));
+        return this.request(method, endpoint, data, retryCount + 1);
+      }
       throw error;
     }
   }
 
-  get(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'GET' });
+  shouldRetry(error) {
+    // Retry on network errors or 5xx server errors
+    return !error.response || (error.response.status >= 500 && error.response.status < 600);
   }
 
-  post(endpoint, data, options = {}) {
-    return this.request(endpoint, {
-      ...options,
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+  get(endpoint) {
+    return this.request('GET', endpoint);
   }
 
-  put(endpoint, data, options = {}) {
-    return this.request(endpoint, {
-      ...options,
-      method: 'PUT',
-      body: JSON.stringify(data)
-    });
+  post(endpoint, data) {
+    return this.request('POST', endpoint, data);
   }
 
-  delete(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'DELETE' });
+  put(endpoint, data) {
+    return this.request('PUT', endpoint, data);
+  }
+
+  delete(endpoint) {
+    return this.request('DELETE', endpoint);
   }
 }
 
-export default new ApiClient(apiConfig.baseURL); 
+// Create and export the apiClient instance
+const apiClient = new ApiClient();
+export { apiClient }; 

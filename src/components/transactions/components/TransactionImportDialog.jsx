@@ -9,10 +9,85 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useTransactionsImport } from '../hooks/useTransactionsImport';
-import { FileUploadCard } from './FileUploadCard';
-import { TransactionTable } from './TransactionTable';
+import { FileUploadComponent } from './FileUploadComponent';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import moment from 'moment';
 
-export const TransactionImportDialog = ({ selectedAccount, onClose }) => {
+// Simple transaction table component for import preview
+const TransactionTable = ({ data, categories, editMode }) => {
+  return (
+    <Table className="flex-1 w-full">
+      <TableHeader className="flex-none">
+        <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+          <TableHead className="font-semibold w-[140px]">Date</TableHead>
+          <TableHead className="font-semibold w-[300px]">Description</TableHead>
+          <TableHead className="font-semibold w-[120px]">Type</TableHead>
+          <TableHead className="font-semibold w-[140px]">Category</TableHead>
+          <TableHead className="font-semibold text-right w-[120px]">Amount</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody className="overflow-auto">
+        {data.map((record) => (
+          <TableRow key={record.id} className="hover:bg-secondary/30">
+            <TableCell className="font-medium">
+              {moment(record.date).format('MMM D, YYYY')}
+            </TableCell>
+            <TableCell>
+              {record.description}
+            </TableCell>
+            <TableCell>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium
+              ${record.type?.toUpperCase() === 'CREDIT' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {record.type || 'Debit'}
+              </span>
+            </TableCell>
+            <TableCell>
+              {editMode ? (
+                <Select 
+                  value={record.category?.id || ""} 
+                  onValueChange={(value) => {
+                    record.category = categories.find(cat => cat.id === value) || null;
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Uncategorized</SelectItem>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <span className="px-2 py-1 rounded-full bg-gray-100 text-xs font-medium">
+                  {record.category?.name || 'Uncategorized'}
+                </span>
+              )}
+            </TableCell>
+            <TableCell className="text-right">
+              <span className={record.type?.toUpperCase() === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
+                ${parseFloat(record.amount).toFixed(2)}
+              </span>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
+
+export const TransactionImportDialog = ({ onClose }) => {
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [editMode, setEditMode] = useState(false);
   
@@ -24,7 +99,7 @@ export const TransactionImportDialog = ({ selectedAccount, onClose }) => {
     fetchCategories,
     handleFileUpload,
     saveTransactions,
-  } = useTransactionsImport(selectedAccount, onClose);
+  } = useTransactionsImport(onClose);
 
   useEffect(() => {
     // Fetch categories only once when the component mounts
@@ -46,7 +121,7 @@ export const TransactionImportDialog = ({ selectedAccount, onClose }) => {
         </DialogDescription>
       </DialogHeader>
       <DialogContent className="max-w-5xl h-[800px] px-6 pb-6 flex flex-col">
-        {!data.length && <FileUploadCard onFileUpload={handleFileUpload} />}
+        {!data.length && <FileUploadComponent onFileUpload={handleFileUpload} />}
 
         {data.length > 0 && (
           <div className="mt-6 space-y-4 flex-1 flex flex-col min-h-0">
@@ -120,4 +195,4 @@ export const TransactionImportDialog = ({ selectedAccount, onClose }) => {
       </DialogContent>
     </Dialog>
   );
-};
+}; 
