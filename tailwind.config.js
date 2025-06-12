@@ -52,27 +52,53 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			sans: ['var(--font-sans)'],
-  			mono: ['var(--font-mono)'],
+  			sans: [
+  				'var(--font-sans)'
+  			],
+  			mono: [
+  				'var(--font-mono)'
+  			]
   		},
   		fontSize: {
-  			'xs': 'var(--font-size-xs)',
-  			'sm': 'var(--font-size-sm)',
-  			'base': 'var(--font-size-base)',
-  			'lg': 'var(--font-size-lg)',
-  			'xl': 'var(--font-size-xl)',
-  			'2xl': 'var(--font-size-2xl)',
+  			xs: 'var(--font-size-xs)',
+  			sm: 'var(--font-size-sm)',
+  			base: 'var(--font-size-base)',
+  			lg: 'var(--font-size-lg)',
+  			xl: 'var(--font-size-xl)',
+  			'2xl': 'var(--font-size-2xl)'
   		},
   		lineHeight: {
   			tight: 'var(--line-height-tight)',
   			normal: 'var(--line-height-normal)',
-  			relaxed: 'var(--line-height-relaxed)',
+  			relaxed: 'var(--line-height-relaxed)'
   		},
   		fontWeight: {
   			normal: 'var(--font-weight-normal)',
   			medium: 'var(--font-weight-medium)',
-  			bold: 'var(--font-weight-bold)',
+  			bold: 'var(--font-weight-bold)'
   		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		}
   	}
   },
   plugins: [require("tailwindcss-animate")],

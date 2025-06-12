@@ -21,7 +21,9 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
       setIsLoading(true);
       setError(null);
       const data = await transactionsApi.getAll(date.format('YYYY-MM'));
+      console.log('Raw transaction data from API:', data);
       const formattedData = formatTransactionData(data);
+      console.log('Formatted transaction data:', formattedData);
       setTransactions(formattedData);
     } catch (error) {
       setError('Failed to load transactions');
@@ -34,6 +36,7 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
   const fetchCategories = async () => {
     try {
       const formattedCategories = await categoriesApi.getAllFormatted();
+      console.log('Categories data from API:', formattedCategories);
       setCategories(formattedCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -42,12 +45,26 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
   };
 
   const formatTransactionData = (data) => {
-    return (Array.isArray(data) ? data : []).map(item => ({
-      ...item,
-      key: item.id.toString(),
-      date: moment(item.date),
-      deleted: false,
-    }));
+    return (Array.isArray(data) ? data : []).map(item => {
+      // Handle category properly
+      let category = item.category;
+      
+      // If category is a string but categoryId exists, create a proper category object
+      if (typeof category === 'string' && item.categoryId) {
+        category = {
+          id: item.categoryId,
+          name: category
+        };
+      }
+      
+      return {
+        ...item,
+        key: item.id.toString(),
+        date: moment(item.date),
+        deleted: false,
+        category: category // Use the properly formatted category
+      };
+    });
   };
 
   const handleMonthChange = (direction) => {
@@ -56,17 +73,27 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
 
   const handleEdit = (transaction, field, value) => {
     setTransactions(prev =>
-      prev.map(t =>
-        t.key === transaction.key
-          ? {
-            ...t,
-            [field]: field === 'category'
-              ? categories.find(c => c.name === value)
-              : value,
-            modified: true
+      prev.map(t => {
+        if (t.key === transaction.key) {
+          // Handle category updates properly
+          if (field === 'category') {
+            const categoryObj = categories.find(c => c.name === value);
+            return {
+              ...t,
+              category: categoryObj || { id: '', name: value },
+              categoryId: categoryObj?.id || '',
+              modified: true
+            };
           }
-          : t
-      )
+          // Handle other field updates
+          return {
+            ...t,
+            [field]: value,
+            modified: true
+          };
+        }
+        return t;
+      })
     );
   };
 

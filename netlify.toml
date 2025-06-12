@@ -1,0 +1,146 @@
+# Netlify Configuration for Cove Finance Tracker Frontend
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Build command to run
+  command = "npm run build:prod"
+  
+  # Directory to publish (Vite default output)
+  publish = "dist"
+  
+  # Node.js version to use for build
+  environment = { NODE_VERSION = "18" }
+
+[build.environment]
+  # Build environment variables
+  NODE_ENV = "production"
+  NPM_CONFIG_PRODUCTION = "false"
+  GENERATE_SOURCEMAP = "false"
+
+# SPA redirect rules for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  
+# API proxy rules for backend communication
+# Uncomment and configure these if your backend is hosted elsewhere
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-backend-api.com/:splat"
+#   status = 200
+#   force = true
+#   headers = {X-From = "Netlify"}
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    
+    # Cache control for static assets
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache control for HTML files
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Cache control for service worker
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Cache control for API responses (if caching API responses)
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+# Preload critical resources
+[[headers]]
+  for = "/"
+  [headers.values]
+    Link = "</static/js/main.*.js>; rel=preload; as=script, </static/css/main.*.css>; rel=preload; as=style"
+
+# Content Security Policy (adjust based on your needs)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.your-backend.com;"
+
+# Environment-specific builds
+[context.production]
+  command = "npm run build:prod"
+  environment = { NODE_ENV = "production" }
+
+[context.deploy-preview]
+  command = "npm run build"
+  environment = { NODE_ENV = "development" }
+
+[context.branch-deploy]
+  command = "npm run build"
+  environment = { NODE_ENV = "development" }
+
+# Specific branch configurations
+[context.staging]
+  command = "npm run build"
+  environment = { NODE_ENV = "staging" }
+
+# Functions configuration (if using Netlify Functions)
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Form handling (if you have contact forms)
+# [build.processing]
+#   skip_processing = false
+# [build.processing.css]
+#   bundle = true
+#   minify = true
+# [build.processing.js]
+#   bundle = true
+#   minify = true
+# [build.processing.html]
+#   pretty_urls = true
+
+# Large Media configuration (if using large assets)
+# [large_media]
+#   track = "*.jpg"
+#   track = "*.png"
+#   track = "*.gif"
+#   track = "*.svg"
+
+# Edge handlers (if using advanced edge functions)
+# [[edge_functions]]
+#   function = "auth"
+#   path = "/dashboard/*"
+
+# Plugin configuration
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+# 
+#   [plugins.inputs.thresholds]
+#     performance = 0.8
+#     accessibility = 0.9
+#     best-practices = 0.9
+#     seo = 0.8
+
+# [[plugins]]
+#   package = "netlify-plugin-submit-sitemap"
+# 
+#   [plugins.inputs]
+#     baseUrl = "https://your-domain.netlify.app"
+#     sitemapPath = "/sitemap.xml"
+#     providers = [
+#       "google",
+#       "bing"
+#     ]

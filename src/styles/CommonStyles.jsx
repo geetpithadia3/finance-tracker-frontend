@@ -1,6 +1,18 @@
+// This file is deprecated - please use shadcn components instead.
+// For imports and examples, see documentation for each component:
+//
+// Button: import { Button } from "@/components/ui/button"
+// Input: import { Input } from "@/components/ui/input"
+// Select: import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// Card/Container: import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+//
+// For styling utilities, use Tailwind classes with the cn utility:
+// import { cn } from "@/lib/utils"
+
 import { createTheme } from '@mui/material';
 import styled from 'styled-components';
 
+// DEPRECATED: Use shadcn Card component instead
 export const CommonContainer = styled.div`
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -12,6 +24,8 @@ export const CommonContainer = styled.div`
   text-align: center;
 `;
 
+// DEPRECATED: Use shadcn Button component with icon instead
+// Example: <Button variant="ghost" size="icon"><Icons.trash className="h-4 w-4" /></Button>
 export const IconButton = styled.button`
   background: none;
   border: none;
@@ -24,6 +38,7 @@ export const IconButton = styled.button`
   }
 `;
 
+// DEPRECATED: Consider using Tailwind theme configuration for customization
 export const theme = createTheme({
   palette: {
       primary: {
@@ -49,6 +64,8 @@ export const theme = createTheme({
   },
 });
 
+// DEPRECATED: Use shadcn Input component instead
+// Example: <Input type="text" placeholder="Enter name" />
 export const StyledInput = styled.input`
   width: 100%;
   padding: 8px;
@@ -59,6 +76,17 @@ export const StyledInput = styled.input`
   color: #000000;
 `;
 
+// DEPRECATED: Use shadcn Select component instead
+// Example:
+// <Select>
+//   <SelectTrigger>
+//     <SelectValue placeholder="Select option" />
+//   </SelectTrigger>
+//   <SelectContent>
+//     <SelectItem value="option1">Option 1</SelectItem>
+//     <SelectItem value="option2">Option 2</SelectItem>
+//   </SelectContent>
+// </Select>
 export const StyledSelect = styled.select`
   width: 100%;
   padding: 8px;
@@ -72,11 +100,14 @@ export const StyledSelect = styled.select`
   appearance: none;
 `;
 
+// DEPRECATED: Use shadcn SelectItem component instead
 export const StyledOption = styled.option`
   background-color: #ffffff;
   color: #000000;
 `;
 
+// DEPRECATED: Use Flexbox Tailwind utilities instead
+// Example: <div className="flex justify-between items-center mb-5">...</div>
 export const RowContainer = styled.div`
   display: flex;
   justify-content: space-around;
@@ -84,6 +115,8 @@ export const RowContainer = styled.div`
   margin-bottom: 20px;
 `;
 
+// DEPRECATED: Use shadcn Button component instead
+// Example: <Button variant="outline">Submit</Button>
 export const StyledButton = styled.button`
   padding: 10px 20px;
   color: #000000;
@@ -103,6 +136,14 @@ export const StyledButton = styled.button`
   }
 `;
 
+// DEPRECATED: Use shadcn Button component with asChild prop for label styling
+// Example: 
+// <Button asChild variant="outline" disabled={isDisabled}>
+//   <label>
+//     <input type="file" className="hidden" onChange={handleFileChange} />
+//     Upload File
+//   </label>
+// </Button>
 export const StyledButtonLabel = styled.label`
   display: inline-block;
   padding: 10px 20px;

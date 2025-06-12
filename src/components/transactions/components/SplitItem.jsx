@@ -2,9 +2,14 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronUp, ChevronDown, MinusCircle } from 'lucide-react';
+import { MinusCircle } from 'lucide-react';
 import { useSplitViewContext } from '../context/SplitViewContext';
-
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export const SplitItem = ({ split, index, categories }) => {
   const { dispatch, state: { openSplitIndex } } = useSplitViewContext();
@@ -17,33 +22,40 @@ export const SplitItem = ({ split, index, categories }) => {
   };
 
   return (
-    <div className="border rounded-lg">
-      <div className="p-3 flex items-center justify-between">
-        <button
-          className="flex items-center gap-2 hover:text-blue-600"
-          onClick={() => dispatch({
-            type: 'SET_OPEN_INDEX',
-            index: isOpen ? -1 : index
-          })}
-        >
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          <span className="text-sm font-medium">
-            Split {index + 1}
-            {split.amount && ` - $${parseFloat(split.amount).toFixed(2)}`}
-          </span>
-        </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={() => dispatch({ type: 'REMOVE_SPLIT', index })}
-        >
-          <MinusCircle className="h-4 w-4" />
-        </Button>
-      </div>
+    <Accordion
+      type="single"
+      collapsible
+      value={isOpen ? `item-${index}` : undefined}
+      onValueChange={(value) => 
+        dispatch({
+          type: 'SET_OPEN_INDEX',
+          index: value === `item-${index}` ? index : -1
+        })
+      }
+      className="border rounded-lg"
+    >
+      <AccordionItem value={`item-${index}`} className="border-none">
+        <div className="flex items-center justify-between pr-2">
+          <AccordionTrigger className="py-3 px-3 hover:no-underline hover:text-blue-600 flex-1">
+            <span className="text-sm font-medium">
+              Split {index + 1}
+              {split.amount && ` - $${parseFloat(split.amount).toFixed(2)}`}
+            </span>
+          </AccordionTrigger>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch({ type: 'REMOVE_SPLIT', index });
+            }}
+          >
+            <MinusCircle className="h-4 w-4" />
+          </Button>
+        </div>
 
-      {isOpen && (
-        <div className="px-3 pb-3 space-y-2">
+        <AccordionContent className="px-3 pb-3 pt-0">
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="text"
@@ -89,8 +101,8 @@ export const SplitItem = ({ split, index, categories }) => {
               />
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }; 

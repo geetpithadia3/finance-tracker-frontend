@@ -1,11 +1,17 @@
+// This file is deprecated - please use shadcn DatePicker component instead.
+// Import example: 
+// import { Calendar } from "@/components/ui/calendar"
+// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+// import { Button } from "@/components/ui/button"
+// import { CalendarIcon } from "lucide-react"
+// import { format } from "date-fns"
+
 import styled from 'styled-components';
 import DatePicker from 'react-datepicker';
 
-export const StyledDatePicker = styled(DatePicker)`
-  width: 100%;
-  padding: 8px;
-  border: none; /* Remove border */
-  border-radius: 4px;
-  box-sizing: border-box;
-  z-index: 1000; /* Ensure it appears above other elements */
+// DEPRECATED: Use shadcn Calendar and Popover components instead
+export const StyledDatePicker = styled.div`
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
 `;

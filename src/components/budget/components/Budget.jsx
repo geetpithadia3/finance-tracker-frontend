@@ -81,7 +81,7 @@ const Budget = () => {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-white">
+    <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-background">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
         <div className="flex items-center justify-center gap-2">
           <Button

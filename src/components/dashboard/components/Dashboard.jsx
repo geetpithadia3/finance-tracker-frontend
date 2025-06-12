@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet, PiggyBank, Calculator } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { useDashboardData } from '../../../hooks/useDashboardData';
@@ -16,12 +17,14 @@ const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899'
 // Empty state components
 const EmptyChartState = ({ title }) => (
   <Card className="h-full">
-    <CardContent className="h-full flex flex-col items-center justify-center p-6 text-center">
-      <PiggyBank className="h-12 w-12 text-muted-foreground mb-4" />
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground">
-        Your financial story is just beginning! Add some transactions to see your data come to life. 🌱
-      </p>
+    <CardContent className="h-full flex flex-col items-center justify-center p-6">
+      <Alert className="border-none shadow-none">
+        <PiggyBank className="h-12 w-12 text-muted-foreground mb-2" />
+        <AlertTitle className="mb-2">{title}</AlertTitle>
+        <AlertDescription className="text-sm text-muted-foreground">
+          Your financial story is just beginning! Add some transactions to see your data come to life. 🌱
+        </AlertDescription>
+      </Alert>
     </CardContent>
   </Card>
 );
@@ -122,18 +125,22 @@ const Dashboard = () => {
 
         <TabsContent value="overview">
           {/* Charts Section */}
-          <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
-            {hasNoData ? (
-              <EmptyChartState title="No Financial Data Yet" />
-            ) : (
-              <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
-            )}
+          <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
+            <div className="w-full lg:max-w-full overflow-hidden">
+              {hasNoData ? (
+                <EmptyChartState title="No Financial Data Yet" />
+              ) : (
+                <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
+              )}
+            </div>
             
-            {hasNoData ? (
-              <EmptyChartState title="No Expense Categories Yet" />
-            ) : (
-              <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
-            )}
+            <div className="w-full lg:max-w-full overflow-hidden">
+              {hasNoData ? (
+                <EmptyChartState title="No Expense Categories Yet" />
+              ) : (
+                <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
+              )}
+            </div>
           </div>
         </TabsContent>
 

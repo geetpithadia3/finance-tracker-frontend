@@ -6,6 +6,24 @@ class ApiClient {
     this.baseUrl = '';
     this.maxRetries = 3;
     this.retryDelay = 1000; // 1 second
+    
+    // Initialize theme from localStorage or default to 'light'
+    this.initializeTheme();
+  }
+
+  initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  }
+
+  toggleTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    localStorage.setItem('theme', newTheme);
+    
+    return newTheme;
   }
 
   async request(method, endpoint, data = null, retryCount = 0) {

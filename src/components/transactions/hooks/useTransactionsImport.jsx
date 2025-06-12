@@ -89,6 +89,20 @@ export const useTransactionsImport = (onClose) => {
       }
     }
     
+    // Second pass: apply fallback category for any transactions that weren't categorized
+    for (let i = 0; i < formattedTransactions.length; i++) {
+      const transaction = formattedTransactions[i];
+      
+      if (!transaction.category) {
+        // If no category from API or error, fall back to "General"
+        const fallbackCategory = categories.find(cat => cat.name === 'General');
+        
+        if (fallbackCategory) {
+          transaction.category = fallbackCategory;
+        }
+      }
+    }
+    
     return formattedTransactions;
   };
 

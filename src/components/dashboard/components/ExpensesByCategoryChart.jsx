@@ -1,42 +1,71 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+const COLORS = [
+  '#3b82f6', // blue
+  '#10b981', // green
+  '#f59e0b', // amber
+  '#ef4444', // red
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#f97316', // orange
+  '#06b6d4'  // cyan
+].map(color => color + '80'); // Adding 50% opacity
 
 const ExpensesByCategoryChart = ({ expensesByCategory }) => {
-  const data = expensesByCategory.filter(category => category.value > 0);
-    console.log(data);
+  const filteredData = expensesByCategory.filter(category => category.value > 0);
+  
+  const labels = filteredData.map(item => item.category);
+  const values = filteredData.map(item => item.value);
+  
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        data: values,
+        backgroundColor: COLORS.slice(0, filteredData.length),
+        borderColor: COLORS.slice(0, filteredData.length),
+        borderWidth: 1,
+      },
+    ],
+  };
+  
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let label = context.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed !== null) {
+              label += `$${context.parsed.toFixed(2)}`;
+            }
+            return label;
+          }
+        }
+      }
+    },
+  };
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
+    <Card className="w-full h-full">
+      <CardHeader className="pb-2">
         <CardTitle>Expenses by Category</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                nameKey="category"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value, name, props) => [`$${value.toFixed(2)}`, props.payload.category]}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="h-[280px] w-full">
+          <Pie data={data} options={options} />
         </div>
       </CardContent>
     </Card>

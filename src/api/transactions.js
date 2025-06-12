@@ -19,6 +19,10 @@ export const transactionsApi = {
   update: (transactions) => {
     console.log(`Updating transactions: ${JSON.stringify(transactions)}`);
     return Promise.all(transactions.map(transaction => {
+      // If transaction is refunded, automatically remove any recurrence data
+      // to prevent refunded transactions from continuing to repeat
+      const shouldRemoveRecurrence = transaction.refunded && transaction.recurrence;
+      
       const updateData = {
         id: transaction.id,
         description: transaction.description,
@@ -31,7 +35,8 @@ export const transactionsApi = {
         personalShare: transaction.personalShare,
         owedShare: transaction.owedShare,
         shareMetadata: transaction.shareMetadata,
-        recurrence: transaction.recurrence ? {
+        // Only include recurrence data if transaction is not refunded
+        recurrence: shouldRemoveRecurrence ? null : transaction.recurrence ? {
           id: transaction.recurrence.id,
           frequency: transaction.recurrence.frequency,
           startDate: transaction.recurrence.startDate,
@@ -44,6 +49,7 @@ export const transactionsApi = {
           estimatedMaxAmount: transaction.recurrence.estimatedMaxAmount
         } : null
       };
+      
       console.log(`Updating transaction: ${JSON.stringify(updateData)}`);
       return apiClient.put('/transactions', [updateData]);
     }));

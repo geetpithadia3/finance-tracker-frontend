@@ -1,0 +1,12 @@
+# Netlify Redirects for Cove Finance Tracker
+# This file provides fallback redirects if netlify.toml doesn't work
+
+# SPA fallback for React Router
+/*    /index.html   200
+
+# API proxy redirects (uncomment and configure if backend is hosted elsewhere)
+# /api/*  https://your-backend-api.com/:splat  200
+
+# Legacy URL redirects (add as needed)
+# /old-dashboard  /dashboard  301
+# /old-transactions  /transactions  301

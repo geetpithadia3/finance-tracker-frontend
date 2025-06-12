@@ -8,25 +8,30 @@ import { SplitViewContext } from '../context/SplitViewContext';
 import { splitReducer } from '../../../reducers/splitReducer';
 import { useSplitCalculations } from '../hooks/useSplitCalculations';
 import { useSplitViewContext } from '../context/SplitViewContext';
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 
 const SplitEntryStep = ({ transaction, categories }) => {
   const { state, dispatch, calculations } = useSplitViewContext();
 
   return (
     <div className="space-y-4">
-      <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="text-base font-semibold">{transaction.description}</div>
-            <Badge variant="outline" className="mt-1 text-xs">
-              {transaction.category.name}
-            </Badge>
+      <Card>
+        <CardContent className="p-3">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="text-base font-semibold">{transaction.description}</div>
+              <Badge variant="outline" className="mt-1 text-xs">
+                {transaction.category.name}
+              </Badge>
+            </div>
+            <div className="text-xl font-bold text-gray-700">
+              ${Math.abs(transaction.amount).toFixed(2)}
+            </div>
           </div>
-          <div className="text-xl font-bold text-gray-700">
-            ${Math.abs(transaction.amount).toFixed(2)}
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-3">
         {state.splits.map((split, index) => (
@@ -51,14 +56,16 @@ const SplitEntryStep = ({ transaction, categories }) => {
         Add Split
       </Button>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Remaining Amount:</span>
-          <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
-            ${calculations.remainingAmount.toFixed(2)}
-          </span>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Remaining Amount:</span>
+            <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
+              ${calculations.remainingAmount.toFixed(2)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
@@ -68,51 +75,57 @@ const SummaryStep = ({ transaction }) => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Original Transaction</span>
-            <span className="font-semibold line-through text-gray-500">
-              ${Math.abs(transaction.amount).toFixed(2)}
-            </span>
+      <Card>
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Original Transaction</span>
+              <span className="font-semibold line-through text-gray-500">
+                ${Math.abs(transaction.amount).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Updated Amount</span>
+              <span className="font-semibold text-blue-600">
+                ${Math.abs(calculations.remainingAmount).toFixed(2)}
+              </span>
+            </div>
+            <div className="text-sm text-gray-600">{transaction.description}</div>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Updated Amount</span>
-            <span className="font-semibold text-blue-600">
-              ${Math.abs(calculations.remainingAmount).toFixed(2)}
-            </span>
-          </div>
-          <div className="text-sm text-gray-600">{transaction.description}</div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-3">
         {state.splits.map((split, index) => (
-          <div key={index} className="bg-white border rounded-lg p-3">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="font-medium">Split {index + 1}</div>
-                <Badge variant="outline" className="mt-1">
-                  {split.category.name}
-                </Badge>
-                {split.description && (
-                  <div className="mt-1 text-sm text-gray-600">{split.description}</div>
-                )}
+          <Card key={index}>
+            <CardContent className="p-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-medium">Split {index + 1}</div>
+                  <Badge variant="outline" className="mt-1">
+                    {split.category.name}
+                  </Badge>
+                  {split.description && (
+                    <div className="mt-1 text-sm text-gray-600">{split.description}</div>
+                  )}
+                </div>
+                <div className="font-semibold">${parseFloat(split.amount).toFixed(2)}</div>
               </div>
-              <div className="font-semibold">${parseFloat(split.amount).toFixed(2)}</div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Remaining Amount</span>
-          <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
-            ${calculations.remainingAmount.toFixed(2)}
-          </span>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Remaining Amount</span>
+            <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
+              ${calculations.remainingAmount.toFixed(2)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
@@ -155,6 +168,7 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
               )}
             </div>
           </DialogHeader>
+          <Progress className="mt-2" value={state.step === 1 ? 50 : 100} />
         </div>
 
         <div className="p-6 pt-2 flex-1 overflow-y-auto">
@@ -165,7 +179,8 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
           )}
         </div>
 
-        <div className="p-6 pt-4 border-t flex-shrink-0">
+        <Separator />
+        <div className="p-6 flex-shrink-0">
           <div className="flex w-full gap-2">
             <Button
               variant="outline"

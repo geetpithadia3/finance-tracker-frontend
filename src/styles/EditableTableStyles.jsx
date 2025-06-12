@@ -1,3 +1,8 @@
+// This file is deprecated - please use shadcn Table and Input components instead.
+// Import examples:
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+// import { Input } from "@/components/ui/input"
+
 import styled from 'styled-components';
 
 export const TableContainer = styled.div`
@@ -35,5 +40,41 @@ export const Table = styled.table`
 
   tr:hover {
     background-color: #e9ecef;
+  }
+`;
+
+// DEPRECATED: Use shadcn Table components with proper styling instead
+export const EditableTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
+// DEPRECATED: Use shadcn Input component instead
+export const EditableCell = styled.input`
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: #007bff;
   }
 `;

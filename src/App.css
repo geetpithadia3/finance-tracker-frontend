@@ -9,16 +9,20 @@
   color: white;
 }
 
+/* DEPRECATED: Use shadcn Table components instead
+   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table" */
 table {
   margin: 20px auto;
   border-collapse: collapse;
   width: 80%;
 }
 
+/* DEPRECATED: Use shadcn Table components instead */
 table, th, td {
   border: 1px solid black;
 }
 
+/* DEPRECATED: Use shadcn Table components instead */
 th, td {
   padding: 10px;
   text-align: left;

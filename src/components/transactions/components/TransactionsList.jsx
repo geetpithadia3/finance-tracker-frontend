@@ -1,12 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { TransactionTableHeader } from './TransactionTableHeader';
-import { TransactionRow } from './TransactionRow';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Table, TableBody } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat, Upload, Plus, Calendar } from 'lucide-react';
 import { useTransactionListManager } from '../hooks/useTransactionListManager';
 import { EmptyState } from './EmptyState';
 import { TransactionDialog } from './TransactionDialog';
@@ -19,6 +15,7 @@ const TransactionsList = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showRecurring, setShowRecurring] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const {
     transactions,
@@ -50,8 +47,19 @@ const TransactionsList = () => {
     }
   };
 
+  // Helper function to get category name from a transaction
+  const getCategoryName = (transaction) => {
+    if (!transaction.category) return '';
+    return typeof transaction.category === 'string' 
+      ? transaction.category 
+      : transaction.category.name || '';
+  };
+
   const filteredTransactions = selectedCategory && selectedCategory !== 'all'
-    ? transactions.filter(transaction => transaction.category.name === selectedCategory)
+    ? transactions.filter(transaction => {
+        const categoryName = getCategoryName(transaction);
+        return categoryName === selectedCategory;
+      })
     : transactions;
 
   if (showRecurring) {
@@ -60,132 +68,119 @@ const TransactionsList = () => {
 
   return (
     <div className="flex flex-col">
-      {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-        {/* Month Navigation */}
-        <div className="flex items-center justify-center sm:justify-start gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => handleMonthChange(-1)}
-          >
+      {/* Minimal header with main controls */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleMonthChange(-1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-lg font-medium min-w-[160px] text-center">
-            {selectedDate.format('MMMM YYYY')}
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => handleMonthChange(1)}
-          >
+          <div className="text-lg font-medium">{selectedDate.format('MMM YYYY')}</div>
+          <Button variant="ghost" size="icon" onClick={() => handleMonthChange(1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Filter and Edit Controls */}
-        <div className="flex items-center justify-center sm:justify-end gap-2">
-          <Button
-            variant="outline"
-            className="h-9 text-sm font-medium"
-            onClick={() => setShowImportDialog(true)}
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
           >
-            <Upload className="mr-2 h-4 w-4" />
-            Import CSV
+            <Filter className="h-4 w-4 mr-1" />
+            {selectedCategory && selectedCategory !== 'all' ? selectedCategory : "Filter"}
           </Button>
           
           <Button
-            variant="outline"
-            className="h-9 text-sm font-medium"
-            onClick={() => setShowRecurring(true)}
-          >
-            <Repeat className="mr-2 h-4 w-4" />
-            View Recurring
-          </Button>
-          
-          <div className="flex items-center gap-2">
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
+              variant="outline"
+              size="sm"
+              onClick={() => setShowImportDialog(true)}
             >
-              <SelectTrigger className="w-[180px] h-9">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedCategory && selectedCategory !== 'all' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedCategory('all')}
-                className="h-9 px-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          {transactions.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant={editMode ? "secondary" : "outline"}
-                className="h-9 text-sm font-medium"
-                onClick={() => setEditMode(!editMode)}
-              >
-                {editMode ? (
-                  <>
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel Edit
-                  </>
-                ) : (
-                  <>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit Transactions
-                  </>
-                )}
-              </Button>
-              {editMode && (
-                <Button
-                  className="h-9 text-sm font-medium"
-                  onClick={handleSaveChanges}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              )}
-            </div>
-          )}
+              <Upload className="h-4 w-4 mr-1" />
+              Import
+            </Button>
         </div>
       </div>
 
-      {/* Transaction Table */}
+      {/* Expandable filters panel */}
+      {showFilters && (
+        <div className="p-3 bg-muted/30 rounded-lg mb-4 flex flex-wrap gap-3 items-center">
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
+          >
+            <SelectTrigger className="w-[160px] h-8">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map(category => (
+                <SelectItem key={category.id} value={category.name}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRecurring(true)}
+            >
+              <Repeat className="h-4 w-4 mr-1" />
+              Recurring
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Transaction Table with inline edit mode */}
       {filteredTransactions.length === 0 ? (
         <EmptyState selectedDate={selectedDate} />
       ) : (
-        <TransactionsTable
-          transactions={filteredTransactions}
-          categories={categories}
-          editMode={editMode}
-          sortConfig={sortConfig}
-          inputRef={inputRef}
-          onEdit={handleEdit}
-          onTransactionClick={handleTransactionClick}
-          formatCurrency={formatCurrency}
-          onRequestSort={handleRequestSort}
-        />
+        <div className="relative rounded-lg border overflow-hidden">
+          {editMode && (
+            <div className="p-2 bg-muted/50 flex justify-between items-center border-b">
+              <span className="text-sm text-muted-foreground">Editing mode</span>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+                <Button size="sm" variant="default" onClick={handleSaveChanges}>
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          <TransactionsTable
+            transactions={filteredTransactions}
+            categories={categories}
+            editMode={editMode}
+            sortConfig={sortConfig}
+            inputRef={inputRef}
+            onEdit={handleEdit}
+            onTransactionClick={handleTransactionClick}
+            formatCurrency={formatCurrency}
+            onRequestSort={handleRequestSort}
+          />
+          
+          {!editMode && (
+            <div className="p-2 flex justify-end border-t">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditMode(true)}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Transaction Dialog */}
+      {/* Dialogs */}
       <TransactionDialog
         open={transactionModalOpen}
         transaction={selectedTransaction}
@@ -197,7 +192,6 @@ const TransactionsList = () => {
         onRefresh={() => fetchTransactions(selectedDate)}
       />
 
-      {/* CSV Import Dialog */}
       {showImportDialog && (
         <TransactionImportDialog
           onClose={() => {

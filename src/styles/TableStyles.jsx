@@ -1,5 +1,25 @@
+// This file is deprecated - please use shadcn Table components instead:
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+//
+// Example usage:
+// <Table>
+//   <TableHeader>
+//     <TableRow>
+//       <TableHead>Header 1</TableHead>
+//       <TableHead>Header 2</TableHead>
+//     </TableRow>
+//   </TableHeader>
+//   <TableBody>
+//     <TableRow>
+//       <TableCell>Cell 1</TableCell>
+//       <TableCell>Cell 2</TableCell>
+//     </TableRow>
+//   </TableBody>
+// </Table>
+
 import styled from 'styled-components';
 
+// DEPRECATED: Use shadcn Table components instead
 export const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
@@ -8,6 +28,7 @@ export const TableContainer = styled.div`
   z-index: 1; /* Ensure it appears above other elements */
 `;
 
+// DEPRECATED: Use shadcn Table components instead
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;

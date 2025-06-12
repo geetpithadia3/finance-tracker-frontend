@@ -1,5 +1,14 @@
+// This file is deprecated - please use shadcn components and Tailwind utilities instead.
+// Import examples:
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Card, CardContent } from "@/components/ui/card"
+// Use Tailwind classes for layout: className="flex justify-between items-center gap-4 mb-5"
+
 import styled from 'styled-components';
 
+// DEPRECATED: Use Tailwind flex utilities instead
+// Example: <div className="flex items-center justify-between mb-5 gap-3 relative z-10">...</div>
 export const RowContainer = styled.div`
   display: flex;
   align-items: center;
@@ -10,6 +19,11 @@ export const RowContainer = styled.div`
   z-index: 10; /* Ensure it appears above other elements */
 `;
 
+// DEPRECATED: Use shadcn Card or Select component instead
+// Example: 
+// <Card className="flex-grow mr-2">
+//   <CardContent className="p-2 bg-black">...</CardContent>
+// </Card>
 export const AccountContainer = styled.div`
     padding: 8px;
     border: 1px solid #ddd;
@@ -20,8 +34,8 @@ export const AccountContainer = styled.div`
     margin-right: 10px;
 `;
 
-
-
+// DEPRECATED: Use shadcn Input component instead
+// Example: <Input className="flex-grow mr-2" />
 export const InputField = styled.input`
   padding: 8px;
   border: 1px solid #ddd;
@@ -31,6 +45,8 @@ export const InputField = styled.input`
   margin-right: 10px;
 `;
 
+// DEPRECATED: Use shadcn Button component instead
+// Example: <Button variant="success" className="flex-grow ml-2" disabled={isDisabled}>Save</Button>
 export const SaveButton = styled.button`
   padding: 10px 20px;
   color: #fff;
@@ -52,6 +68,11 @@ export const SaveButton = styled.button`
   }
 `;
 
+// DEPRECATED: Use shadcn Card component instead
+// Example: 
+// <Card className="max-w-3xl mx-auto relative z-1">
+//   <CardContent className="p-5 text-center">...</CardContent>
+// </Card>
 export const UploaderContainer = styled.div`
   padding: 20px;
   font-family: Arial, sans-serif;

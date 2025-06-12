@@ -6,6 +6,9 @@ import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 
 const shareReducer = (state, action) => {
   switch (action.type) {
@@ -92,19 +95,21 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="text-base font-semibold">{transaction.description}</div>
-            <Badge variant="outline" className="mt-1 text-xs">
-              {transaction.category.name}
-            </Badge>
+      <Card>
+        <CardContent className="p-3">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="text-base font-semibold">{transaction.description}</div>
+              <Badge variant="outline" className="mt-1 text-xs">
+                {transaction.category.name}
+              </Badge>
+            </div>
+            <div className="text-xl font-bold text-gray-700">
+              ${Math.abs(transaction.amount).toFixed(2)}
+            </div>
           </div>
-          <div className="text-xl font-bold text-gray-700">
-            ${Math.abs(transaction.amount).toFixed(2)}
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {state.splitType === 'shares' ? (
@@ -172,28 +177,33 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
           </div>
         )}
 
-        <div className="space-y-3 bg-gray-50 p-3 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-500">Your Share:</span>
-            <span className="text-base">${state.personalShare.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-500">Owed Share:</span>
-            <span className="text-base">${state.owedShare.toFixed(2)}</span>
-          </div>
-          {state.splitType === 'shares' && state.yourShares && state.totalShares && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500">Split Ratio:</span>
-              <span className="text-base">
-                {state.yourShares} : {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares}
-              </span>
+        <Card>
+          <CardContent className="p-3">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-500">Your Share:</span>
+                <span className="text-base">${state.personalShare.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-500">Owed Share:</span>
+                <span className="text-base">${state.owedShare.toFixed(2)}</span>
+              </div>
+              {state.splitType === 'shares' && state.yourShares && state.totalShares && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-500">Split Ratio:</span>
+                  <span className="text-base">
+                    {state.yourShares} : {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares}
+                  </span>
+                </div>
+              )}
+              <Separator className="my-2" />
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-500">Total Amount:</span>
+                <span className="text-base">${Math.abs(transaction.amount).toFixed(2)}</span>
+              </div>
             </div>
-          )}
-          <div className="flex justify-between items-center pt-2 border-t">
-            <span className="text-sm font-medium text-gray-500">Total Amount:</span>
-            <span className="text-base">${Math.abs(transaction.amount).toFixed(2)}</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -206,44 +216,52 @@ const SummaryStep = ({ state, transaction }) => {
         FINAL SHARES
       </div>
 
-      <div className="bg-blue-50/50 rounded-lg p-4">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-gray-600">Your Share</span>
-          <span className="text-lg font-semibold">${state.personalShare.toFixed(2)}</span>
-        </div>
-        {state.splitType === 'percentage' && (
-          <span className="text-sm text-gray-500">
-            {((state.personalShare / transaction.amount) * 100).toFixed(1)}% of total
-          </span>
-        )}
-        {state.splitType === 'shares' && state.totalShares && (
-          <span className="text-sm text-gray-500">
-            {state.yourShares} of {state.totalShares} shares
-          </span>
-        )}
-      </div>
+      <Card className="bg-blue-50/50">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm font-medium text-gray-600">Your Share</span>
+            <span className="text-lg font-semibold">${state.personalShare.toFixed(2)}</span>
+          </div>
+          {state.splitType === 'percentage' && (
+            <span className="text-sm text-gray-500">
+              {((state.personalShare / transaction.amount) * 100).toFixed(1)}% of total
+            </span>
+          )}
+          {state.splitType === 'shares' && state.totalShares && (
+            <span className="text-sm text-gray-500">
+              {state.yourShares} of {state.totalShares} shares
+            </span>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="bg-green-50/50 rounded-lg p-4">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-gray-600">Owed Share</span>
-          <span className="text-lg font-semibold">${state.owedShare.toFixed(2)}</span>
-        </div>
-        {state.splitType === 'percentage' && (
-          <span className="text-sm text-gray-500">
-            {((state.owedShare / transaction.amount) * 100).toFixed(1)}% of total
-          </span>
-        )}
-        {state.splitType === 'shares' && state.totalShares && (
-          <span className="text-sm text-gray-500">
-            {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares} shares
-          </span>
-        )}
-      </div>
+      <Card className="bg-green-50/50">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm font-medium text-gray-600">Owed Share</span>
+            <span className="text-lg font-semibold">${state.owedShare.toFixed(2)}</span>
+          </div>
+          {state.splitType === 'percentage' && (
+            <span className="text-sm text-gray-500">
+              {((state.owedShare / transaction.amount) * 100).toFixed(1)}% of total
+            </span>
+          )}
+          {state.splitType === 'shares' && state.totalShares && (
+            <span className="text-sm text-gray-500">
+              {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares} shares
+            </span>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-        <span className="font-medium">Total Amount:</span>
-        <span className="font-semibold">${Math.abs(transaction.amount).toFixed(2)}</span>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Total Amount:</span>
+            <span className="font-semibold">${Math.abs(transaction.amount).toFixed(2)}</span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
@@ -327,6 +345,7 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
             )}
           </div>
         </DialogHeader>
+        <Progress className="mt-2" value={state.step === 1 ? 50 : 100} />
       </div>
 
       <div className="p-6 pt-2 flex-1 overflow-y-auto">
@@ -335,7 +354,8 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
           : <SummaryStep state={state} transaction={transaction} />}
       </div>
 
-      <div className="p-6 pt-4 border-t flex-shrink-0">
+      <Separator />
+      <div className="p-6 flex-shrink-0">
         <div className="flex w-full gap-2">
           <Button 
             variant="outline" 
