@@ -7,12 +7,10 @@
   
   # Directory to publish (Vite default output)
   publish = "dist"
-  
-  # Node.js version to use for build
-  environment = { NODE_VERSION = "18" }
 
 [build.environment]
   # Build environment variables
+  NODE_VERSION = "18"
   NODE_ENV = "production"
   NPM_CONFIG_PRODUCTION = "false"
   GENERATE_SOURCEMAP = "false"
