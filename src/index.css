@@ -1,124 +1,179 @@
-/* You can leave this as the default styles or customize it as needed */
+/* Sumi Finance Tracker - Main Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Crimson+Text:wght@400;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ... */
-
-body {
-  margin: 0;
-  font-family: 'Courier New', Courier, monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-@media (max-width: 991px) {
-  .ant-layout-sider-collapsed {
-    display: none;
-  }
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Sumi Light Theme */
+    --background: 0 0% 99%;
+    --foreground: 216 19% 16%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 16% 47%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 216 19% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 216 19% 16%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Sumi Ink Primary */
+    --primary: 216 19% 16%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Soft Gray Secondary */
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 216 19% 16%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Warm Gold Accent */
+    --accent: 38 92% 50%;
+    --accent-foreground: 25 95% 15%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --ring: 215 20.2% 65.1%;
+    --ring: 38 92% 50%;
+    --radius: 0.75rem;
 
-    --radius: 0.5rem;
+    /* Sumi Chart Colors */
+    --chart-1: 216 19% 16%;    /* Ink */
+    --chart-2: 38 92% 50%;     /* Gold */
+    --chart-3: 142 76% 36%;    /* Sage */
+    --chart-4: 210 20% 65%;    /* Light Gray */
+    --chart-5: 25 95% 53%;     /* Warm Orange */
 
-    /* Update typography variables */
-    --font-sans: 'Courier New', Courier, monospace;
-    --font-mono: 'Courier New', Courier, monospace;
+    /* Typography */
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Crimson Text', Georgia, serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'JetBrains Mono', Menlo, Monaco, monospace;
     
-    /* Font sizes */
+    /* Font sizes with Sumi-inspired scaling */
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 1rem;
     --font-size-lg: 1.125rem;
     --font-size-xl: 1.25rem;
     --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
     
-    /* Line heights */
+    /* Line heights for better readability */
     --line-height-tight: 1.25;
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.75;
 
-    /* Add font weight variables */
-    --font-weight-normal: 600;
-    --font-weight-medium: 700;
-    --font-weight-bold: 800;
+    /* Font weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Sumi-specific spacing */
+    --space-sumi: 1.618rem; /* Golden ratio */
+    --space-zen: 2.618rem;  /* Extended golden ratio */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Sumi Dark Theme - Inspired by ink on black paper */
+    --background: 216 19% 8%;
+    --foreground: 210 20% 95%;
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 216 19% 12%;
+    --muted-foreground: 215 16% 65%;
     
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 216 19% 8%;
+    --popover-foreground: 210 20% 95%;
     
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 216 19% 10%;
+    --card-foreground: 210 20% 95%;
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 216 19% 18%;
+    --input: 216 19% 18%;
     
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    /* Lighter ink for dark mode */
+    --primary: 210 20% 95%;
+    --primary-foreground: 216 19% 8%;
     
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 216 19% 12%;
+    --secondary-foreground: 210 20% 95%;
     
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    /* Warmer gold for dark mode */
+    --accent: 45 93% 58%;
+    --accent-foreground: 216 19% 8%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 20% 95%;
     
-    --ring: 240 3.7% 15.9%;
+    --ring: 45 93% 58%;
+
+    /* Adjusted chart colors for dark mode */
+    --chart-1: 210 20% 95%;    /* Light Ink */
+    --chart-2: 45 93% 58%;     /* Bright Gold */
+    --chart-3: 142 69% 58%;    /* Bright Sage */
+    --chart-4: 215 16% 65%;    /* Medium Gray */
+    --chart-5: 25 95% 65%;     /* Bright Orange */
   }
 
+  /* Base HTML styling */
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-weight: var(--font-weight-normal);
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: var(--line-height-normal);
   }
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-weight: var(--font-weight-normal);
+    overflow-x: hidden;
+  }
+
+  /* Sumi-inspired heading styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: hsl(var(--foreground));
+  }
+
+  h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+  }
+
+  h2 {
+    font-size: var(--font-size-3xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Paragraph styling */
+  p {
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: hsl(var(--accent) / 0.3);
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
@@ -126,42 +181,196 @@ code {
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
   }
 }
 
-@keyframes in {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
+@layer components {
+  /* Sumi Card Component */
+  .sumi-card {
+    @apply bg-card text-card-foreground rounded-2xl border border-border/50 shadow-sumi backdrop-blur-sm;
+    @apply hover:shadow-sumi-lg transition-all duration-300;
   }
-  to {
+
+  /* Sumi Button Variants */
+  .sumi-button-primary {
+    @apply bg-sumi-ink-800 text-sumi-cream-50 hover:bg-sumi-ink-700;
+    @apply border border-sumi-ink-600 shadow-sm;
+    @apply transition-all duration-200 ease-out;
+    @apply active:scale-95;
+  }
+
+  .sumi-button-accent {
+    @apply bg-sumi-gold-500 text-sumi-ink-900 hover:bg-sumi-gold-400;
+    @apply border border-sumi-gold-400 shadow-sm;
+    @apply transition-all duration-200 ease-out;
+    @apply active:scale-95;
+  }
+
+  /* Sumi Input Styling */
+  .sumi-input {
+    @apply bg-background border border-border/60 rounded-lg px-4 py-2;
+    @apply focus:border-accent focus:ring-2 focus:ring-accent/20;
+    @apply transition-all duration-200;
+    @apply placeholder:text-muted-foreground;
+  }
+
+  /* Ink Flow Animation Container */
+  .ink-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ink-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: ink-flow 0.8s ease-out forwards;
+  }
+
+  /* Zen spacing utilities */
+  .space-zen {
+    padding: var(--space-zen);
+  }
+
+  .space-sumi {
+    padding: var(--space-sumi);
+  }
+
+  /* Brush stroke effect */
+  .brush-stroke {
+    position: relative;
+  }
+
+  .brush-stroke::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--accent)), transparent);
+    border-radius: 1px;
+    opacity: 0.6;
+  }
+
+  /* Sumi Glass Effect */
+  .sumi-glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/30;
+    @apply shadow-sumi;
+  }
+}
+
+/* Sumi-inspired animations */
+@keyframes ink-flow {
+  0% { 
+    transform: scaleX(0); 
+    opacity: 0; 
+  }
+  50% { 
+    opacity: 0.6; 
+  }
+  100% { 
+    transform: scaleX(1); 
+    opacity: 1; 
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes out {
-  from {
-    opacity: 1;
+@keyframes gentle-bounce {
+  0%, 100% {
     transform: translateY(0);
   }
-  to {
-    opacity: 0;
-    transform: translateY(100%);
+  50% {
+    transform: translateY(-4px);
   }
 }
 
-.animate-in {
-  animation: in 0.2s ease-out;
+/* Custom animations */
+.animate-ink-flow {
+  animation: ink-flow 0.8s ease-out;
 }
 
-.animate-out {
-  animation: out 0.2s ease-in;
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out;
 }
 
-/* Smooth transition for theme changes */
+.animate-gentle-bounce {
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+/* Loading skeleton with Sumi styling */
+.sumi-skeleton {
+  @apply bg-gradient-to-r from-muted via-muted/50 to-muted;
+  @apply animate-pulse rounded-md;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent) / 0.5);
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 0 0% 40%;
+    --ring: 0 0% 30%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

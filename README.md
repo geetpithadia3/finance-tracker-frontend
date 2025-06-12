@@ -1,6 +1,6 @@
-# Cove - Personal Finance Tracker Frontend
+# Sumi - Mindful Financial Management
 
-A modern, responsive React application for managing personal finances, budgets, and expenses with intelligent allocation features.
+A beautifully crafted React application inspired by Japanese aesthetics for mindful financial management. Experience the art of budgeting with Sumi's elegant, minimalist interface that brings zen to your financial planning.
 
 ## 🚀 Features
 
@@ -313,10 +313,10 @@ npm run build:prod
 Create a `.env.production` file for production-specific configurations:
 ```env
 VITE_API_BASE_URL=https://your-production-api.com
-VITE_APP_NAME=Cove
+VITE_APP_NAME=Sumi
 VITE_NODE_ENV=production
 ```
 
 ---
 
-**Cove** - Your personal finance management solution. Built with ❤️ using modern web technologies.
+**Sumi** - Mindful financial management inspired by the art of Japanese ink painting. Built with ❤️ and attention to every detail, bringing harmony to your financial journey.
