@@ -1,4 +1,3 @@
-
 class ApiClient {
   constructor() {
     // Use environment variable for base URL with fallback
@@ -33,12 +32,19 @@ class ApiClient {
       'Content-Type': 'application/json'
     };
 
+    // Add Authorization header if token exists
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
       console.log(`API Request: ${method} ${url}`, data ? { data } : '');
       const response = await fetch(url, {
         method,
         headers,
         body: data ? JSON.stringify(data) : null,
+        credentials: 'include'  // Include credentials in requests
       });
 
       console.log(`API Response status: ${response.status}`);

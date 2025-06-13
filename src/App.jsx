@@ -128,7 +128,7 @@ const Sidebar = ({ collapsed, className, onNavClick, showHeader = true }) => {
           {!collapsed && (
             <Link to="/" className="flex items-center gap-2 font-semibold">
               <PiggyBank className="h-5 w-5 text-primary" />
-              <span className="text-lg">Cove</span>
+              <span className="text-lg">Sumi</span>
             </Link>
           )}
           {collapsed && (
@@ -184,133 +184,156 @@ const AppContent = () => {
     logout();
   };
 
-  return (
-    <Router>
-      <div className="min-h-screen flex">
-        {/* Desktop Sidebar - only visible on lg screens and above */}
-        <aside className="hidden lg:block fixed left-0 top-0 h-screen z-30" style={{ width: collapsed ? '64px' : '256px' }}>
-          <Sidebar collapsed={collapsed} className="h-full" />
-        </aside>
+  const MainLayout = ({ children }) => (
+    <div className="min-h-screen flex">
+      {/* Desktop Sidebar - only visible on lg screens and above */}
+      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-30" style={{ width: collapsed ? '64px' : '256px' }}>
+        <Sidebar collapsed={collapsed} className="h-full" />
+      </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-screen w-full" 
-             style={{ marginLeft: isMobile ? '0' : (collapsed ? '64px' : '256px') }}>
-          {/* Header */}
-          <header className="h-14 border-b bg-background px-4 flex items-center justify-between fixed z-20 w-full"
-                 style={{ 
-                   left: isMobile ? '0' : (collapsed ? '64px' : '256px'),
-                   width: isMobile ? '100%' : `calc(100% - ${collapsed ? '64px' : '256px'})`
-                 }}>
-            <div className="flex items-center gap-3">
-              {isMobile ? (
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="lg:hidden">
-                      <Menu className="h-6 w-6" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="p-0 w-[270px] sm:w-[300px]">
-                    <SheetHeader className="h-14 px-4 border-b flex-row justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PiggyBank className="h-5 w-5 text-primary" />
-                        <SheetTitle className="text-left">Cove Finance</SheetTitle>
-                      </div>
-                      <SheetClose className="rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Close</span>
-                      </SheetClose>
-                    </SheetHeader>
-                    <div className="h-[calc(100vh-3.5rem)]">
-                      <Sidebar 
-                        collapsed={false} 
-                        onNavClick={() => setIsSheetOpen(false)}
-                        showHeader={false}
-                      />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen w-full" 
+           style={{ marginLeft: isMobile ? '0' : (collapsed ? '64px' : '256px') }}>
+        {/* Header */}
+        <header className="h-14 border-b bg-background px-4 flex items-center justify-between fixed z-20 w-full"
+               style={{ 
+                 left: isMobile ? '0' : (collapsed ? '64px' : '256px'),
+                 width: isMobile ? '100%' : `calc(100% - ${collapsed ? '64px' : '256px'})`
+               }}>
+          <div className="flex items-center gap-3">
+            {isMobile ? (
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="lg:hidden">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-[270px] sm:w-[300px]">
+                  <SheetHeader className="h-14 px-4 border-b flex-row justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <PiggyBank className="h-5 w-5 text-primary" />
+                      <SheetTitle className="text-left">Sumi Finance</SheetTitle>
                     </div>
-                  </SheetContent>
-                </Sheet>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setCollapsed(!collapsed)}
-                  className="hidden lg:flex"
-                  title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                >
-                  <Menu className="h-6 w-6" />
-                </Button>
-              )}
-              <div className="lg:hidden flex items-center gap-2">
-                <PiggyBank className="h-5 w-5 text-primary" />
-                <span className="font-semibold">Cove</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
+                    <SheetClose className="rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Close</span>
+                    </SheetClose>
+                  </SheetHeader>
+                  <div className="h-[calc(100vh-3.5rem)]">
+                    <Sidebar 
+                      collapsed={false} 
+                      onNavClick={() => setIsSheetOpen(false)}
+                      showHeader={false}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            ) : (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleTheme}
-                className="mr-2"
-                title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                onClick={() => setCollapsed(!collapsed)}
+                className="hidden lg:flex"
+                title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                <Menu className="h-6 w-6" />
               </Button>
-              <UserNav onLogout={handleLogout} username={username} />
+            )}
+            <div className="lg:hidden flex items-center gap-2">
+              <PiggyBank className="h-5 w-5 text-primary" />
+              <span className="font-semibold">Sumi</span>
             </div>
-          </header>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="mr-2"
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </Button>
+            <UserNav onLogout={handleLogout} username={username} />
+          </div>
+        </header>
 
-          {/* Main Content Area - add padding top to account for fixed header */}
-          <main className="flex-1 pt-14">
-            <div className="container mx-auto p-4 sm:p-6 max-w-full xl:max-w-[1280px] 2xl:max-w-[1400px]">
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/" element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                } />
-                <Route path="/transactions" element={
-                  <PrivateRoute>
-                    <TransactionsList />
-                  </PrivateRoute>
-                } />
-                <Route path="/configuration" element={
-                  <PrivateRoute>
-                    <Configuration />
-                  </PrivateRoute>
-                } />
-                <Route path="/budget" element={
-                  <PrivateRoute>
-                    <Budget />
-                  </PrivateRoute>
-                } />
-                <Route path="/budget/configure" element={
-                  <PrivateRoute>
-                    <BudgetConfiguration selectedDate={moment()} />
-                  </PrivateRoute>
-                } />
-                <Route path="/allocation" element={
-                  <PrivateRoute>
-                    <SmartAllocation />
-                  </PrivateRoute>
-                } />
-                <Route path="/how-it-works" element={
-                  <PrivateRoute>
-                    <HowItWorks />
-                  </PrivateRoute>
-                } />
-                <Route path="/welcome" element={
-                  <PrivateRoute>
-                    <Welcome />
-                  </PrivateRoute>
-                } />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </div>
-          </main>
-        </div>
+        {/* Main Content Area - add padding top to account for fixed header */}
+        <main className="flex-1 pt-14">
+          <div className="container mx-auto p-4 sm:p-6 max-w-full xl:max-w-[1280px] 2xl:max-w-[1400px]">
+            {children}
+          </div>
+        </main>
       </div>
+    </div>
+  );
+
+  return (
+    <Router>
+      <Routes>
+        {/* Auth routes without layout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        {/* Protected routes with layout */}
+        <Route path="/" element={
+          <PrivateRoute>
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/transactions" element={
+          <PrivateRoute>
+            <MainLayout>
+              <TransactionsList />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/configuration" element={
+          <PrivateRoute>
+            <MainLayout>
+              <Configuration />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/budget" element={
+          <PrivateRoute>
+            <MainLayout>
+              <Budget />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/budget/configure" element={
+          <PrivateRoute>
+            <MainLayout>
+              <BudgetConfiguration selectedDate={moment()} />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/allocation" element={
+          <PrivateRoute>
+            <MainLayout>
+              <SmartAllocation />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/how-it-works" element={
+          <PrivateRoute>
+            <MainLayout>
+              <HowItWorks />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="/welcome" element={
+          <PrivateRoute>
+            <MainLayout>
+              <Welcome />
+            </MainLayout>
+          </PrivateRoute>
+        } />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
       <Toaster />
     </Router>
   );

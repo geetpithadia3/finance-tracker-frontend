@@ -1,5 +1,9 @@
 import { apiClient } from './client';
 
+/**
+ * API methods for authentication
+ */
+
 // Utility functions for snake_case <-> camelCase mapping
 function toSnake(obj) {
   if (Array.isArray(obj)) return obj.map(toSnake);
@@ -27,24 +31,24 @@ function toCamel(obj) {
   return obj;
 }
 
-export const incomeApi = {
-  getSources: async () => {
-    const res = await apiClient.get('/income-sources');
+export const authApi = {
+  /**
+   * Register a new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise<Object>} Registration response
+   */
+  register: async (userData) => {
+    const res = await apiClient.post('/auth/register', toSnake(userData));
     return toCamel(res);
   },
-  
-  create: async (incomeData) => {
-    const res = await apiClient.post('/income-sources', toSnake(incomeData));
-    return toCamel(res);
-  },
-  
-  update: async (incomeId, incomeData) => {
-    const res = await apiClient.put(`/income-sources/${incomeId}`, toSnake(incomeData));
-    return toCamel(res);
-  },
-    
-  delete: async (incomeId) => {
-    const res = await apiClient.delete(`/income-sources/${incomeId}`);
+
+  /**
+   * Login a user
+   * @param {Object} credentials - User login credentials
+   * @returns {Promise<Object>} Login response with token
+   */
+  login: async (credentials) => {
+    const res = await apiClient.post('/auth/login', toSnake(credentials));
     return toCamel(res);
   }
-};
+}; 

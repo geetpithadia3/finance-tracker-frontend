@@ -1,24 +1,64 @@
 import { apiClient } from './client';
 
+// Utility functions for snake_case <-> camelCase mapping
+function toSnake(obj) {
+  if (Array.isArray(obj)) return obj.map(toSnake);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [
+        k.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`),
+        toSnake(v)
+      ])
+    );
+  }
+  return obj;
+}
+
+function toCamel(obj) {
+  if (Array.isArray(obj)) return obj.map(toCamel);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [
+        k.replace(/_([a-z])/g, g => g[1].toUpperCase()),
+        toCamel(v)
+      ])
+    );
+  }
+  return obj;
+}
+
 export const transactionsApi = {
-  getAll: (yearMonth) => {
+  getAll: async (yearMonth) => {
     console.log(`Fetching transactions for yearMonth: ${yearMonth}`);
-    return apiClient.post('/transactions/list', { yearMonth });
+    // Parse yearMonth format "2025-05" into separate year and month
+    const [year, month] = yearMonth.split('-').map(Number);
+    const res = await apiClient.post('/transactions/list', { year, month });
+    return toCamel(res);
   },
   
-  create: (transactions) => {
+  create: async (transactions) => {
     console.log(`Creating transactions: ${JSON.stringify(transactions)}`);
-    // Ensure we're not sending accountId field which is no longer needed
     const sanitizedTransactions = transactions.map(transaction => {
-      const { accountId, ...rest } = transaction;
-      return rest;
+      if (!transaction.categoryId) {
+        throw new Error('Transaction must have a valid categoryId');
+      }
+      return {
+        description: transaction.description,
+        amount: parseFloat(transaction.amount),
+        type: transaction.type ? transaction.type.toUpperCase() : 'DEBIT',
+        occurredOn: transaction.occurredOn
+          ? new Date(transaction.occurredOn).toISOString().split('.')[0] // 'YYYY-MM-DDTHH:mm:ss'
+          : undefined,
+        categoryId: transaction.categoryId
+      };
     });
-    return apiClient.post('/transactions', sanitizedTransactions);
+    const res = await apiClient.post('/transactions', toSnake(sanitizedTransactions));
+    return toCamel(res);
   },
   
-  update: (transactions) => {
+  update: async (transactions) => {
     console.log(`Updating transactions: ${JSON.stringify(transactions)}`);
-    return Promise.all(transactions.map(transaction => {
+    const updates = await Promise.all(transactions.map(async transaction => {
       // If transaction is refunded, automatically remove any recurrence data
       // to prevent refunded transactions from continuing to repeat
       const shouldRemoveRecurrence = transaction.refunded && transaction.recurrence;
@@ -51,19 +91,22 @@ export const transactionsApi = {
       };
       
       console.log(`Updating transaction: ${JSON.stringify(updateData)}`);
-      return apiClient.put('/transactions', [updateData]);
+      return toSnake(updateData);
     }));
+    const res = await apiClient.put('/transactions', updates);
+    return toCamel(res);
   },
   
-  getDashboardData: (yearMonth) => {
+  getDashboardData: async (yearMonth) => {
     console.log(`Fetching dashboard data for yearMonth: ${yearMonth}`);
-    return apiClient.get(`/dashboard?yearMonth=${yearMonth}`);
+    const res = await apiClient.get(`/dashboard?yearMonth=${yearMonth}`);
+    return toCamel(res);
   },
 
   updateParentAndCreateSplits: async (parentTransaction, parentUpdate, newSplits) => {
     console.log(`Updating parent transaction: ${JSON.stringify(parentTransaction)}`);
     // Update parent transaction
-    await apiClient.put('/transactions', [{
+    await apiClient.put('/transactions', [toSnake({
       id: parentTransaction.id,
       description: parentTransaction.description,
       amount: parentUpdate.amount,
@@ -78,24 +121,24 @@ export const transactionsApi = {
         estimatedMinAmount: parentTransaction.recurrence.estimatedMinAmount,
         estimatedMaxAmount: parentTransaction.recurrence.estimatedMaxAmount
       } : null
-    }]);
+    })]);
 
     console.log(`Creating split transactions: ${JSON.stringify(newSplits)}`);
     // Create split transactions
-    return apiClient.post('/transactions', 
-      newSplits.map(split => ({
-        amount: parseFloat(split.amount),
-        description: split.description || parentTransaction.description,
-        categoryId: split.category.id,
-        occurredOn: parentTransaction.occurredOn,
-        type: 'DEBIT'
-      }))
-    );
+    const splitPayload = newSplits.map(split => toSnake({
+      amount: parseFloat(split.amount),
+      description: split.description || parentTransaction.description,
+      categoryId: split.category.id,
+      occurredOn: parentTransaction.occurredOn,
+      type: 'DEBIT'
+    }));
+    const res = await apiClient.post('/transactions', splitPayload);
+    return toCamel(res);
   },
   
   updateRecurrence: (transactionId, recurrenceData) => {
     console.log(`Updating recurrence for transaction ${transactionId}: ${JSON.stringify(recurrenceData)}`);
-    return apiClient.put(`/transactions/${transactionId}/recurrence`, recurrenceData);
+    return apiClient.put(`/transactions/${transactionId}/recurrence`, toSnake(recurrenceData));
   },
   
   removeRecurrence: (transactionId) => {
@@ -107,7 +150,7 @@ export const transactionsApi = {
     console.log('Fetching recurring expenses');
     try {
       const response = await apiClient.get('/recurring-transactions');
-      return response;
+      return toCamel(response);
     } catch (error) {
       console.error('Error fetching recurring expenses:', error);
       throw error;
@@ -119,7 +162,7 @@ export const transactionsApi = {
     try {
       const response = await apiClient.get(`/allocation?yearMonth=${yearMonth}`);
       console.log('Smart allocation data:', response);
-      return response;
+      return toCamel(response);
     } catch (error) {
       console.error('Error fetching smart allocation data:', error);
       throw error;
@@ -129,8 +172,8 @@ export const transactionsApi = {
   updateRecurringStatus: async (transactionId, isActive) => {
     console.log(`Updating recurring transaction status for ${transactionId} to ${isActive ? 'active' : 'inactive'}`);
     try {
-      const response = await apiClient.put(`/recurring-transactions/${transactionId}/status`, { isActive });
-      return response;
+      const response = await apiClient.put(`/recurring-transactions/${transactionId}/status`, toSnake({ isActive }));
+      return toCamel(response);
     } catch (error) {
       console.error('Error updating recurring transaction status:', error);
       throw error;
@@ -140,8 +183,8 @@ export const transactionsApi = {
   updateVariableAmountSettings: async (transactionId, variableAmountData) => {
     console.log(`Updating variable amount settings for transaction ${transactionId}: ${JSON.stringify(variableAmountData)}`);
     try {
-      const response = await apiClient.put(`/transactions/${transactionId}/variable-amount`, variableAmountData);
-      return response;
+      const response = await apiClient.put(`/transactions/${transactionId}/variable-amount`, toSnake(variableAmountData));
+      return toCamel(response);
     } catch (error) {
       console.error('Error updating variable amount settings:', error);
       throw error;

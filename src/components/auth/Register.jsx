@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PiggyBank, Eye, EyeOff } from 'lucide-react';
+import { authApi } from '../../api/auth';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -45,28 +46,17 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
+      await authApi.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
       });
-
-      if (response.ok) {
-        navigate('/login', { 
-          state: { message: 'Registration successful! Please log in.' }
-        });
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
-      }
+      
+      navigate('/login', { 
+        state: { message: 'Registration successful! Please log in.' }
+      });
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +71,7 @@ const Register = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Create account</CardTitle>
           <CardDescription>
-            Enter your details to create your Cove Finance account
+            Enter your details to create your Sumi Finance account
           </CardDescription>
         </CardHeader>
         <CardContent>

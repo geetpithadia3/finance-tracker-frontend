@@ -17,14 +17,12 @@ const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899'
 // Empty state components
 const EmptyChartState = ({ title }) => (
   <Card className="h-full">
-    <CardContent className="h-full flex flex-col items-center justify-center p-6">
-      <Alert className="border-none shadow-none">
-        <PiggyBank className="h-12 w-12 text-muted-foreground mb-2" />
-        <AlertTitle className="mb-2">{title}</AlertTitle>
-        <AlertDescription className="text-sm text-muted-foreground">
-          Your financial story is just beginning! Add some transactions to see your data come to life. 🌱
-        </AlertDescription>
-      </Alert>
+    <CardContent className="h-full flex flex-col items-center justify-center p-8">
+      <PiggyBank className="h-10 w-10 text-sumi-ink-400 mb-3" />
+      <div className="font-semibold text-lg text-sumi-ink-700 mb-1 text-center">{title}</div>
+      <div className="text-sumi-ink-500 text-center max-w-xs">
+        Your financial story is just beginning! Add some transactions to see your data come to life. 🌱
+      </div>
     </CardContent>
   </Card>
 );

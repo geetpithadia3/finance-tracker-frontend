@@ -100,10 +100,12 @@ export const useTransactionsImport = (selectedAccount, onClose) => {
       const originalItem = transactions[i];
       
       if (!transaction.category) {
-        // If no category from API or error, fall back to manual matching or General
+        // If no category from API or error, fall back to manual matching or first available category
         const fallbackCategory = categories.find(cat => 
-          cat.name === (originalItem.category || 'General')
-        ) || { id: null };
+          cat.name === (originalItem.category || 'Shopping')
+        ) || categories.find(cat => 
+          cat.name === 'Shopping'
+        ) || categories[0] || { id: null };
         
         transaction.category = fallbackCategory;
       }
@@ -169,12 +171,21 @@ export const useTransactionsImport = (selectedAccount, onClose) => {
     setIsLoading(true);
     try {
       console.log("Preparing to save transactions for account:", selectedAccount);
-      const formattedData = data.map(item => ({
-        ...item,
-        occurredOn: item.date.format('YYYY-MM-DD'),
-        accountId: selectedAccount,
-        categoryId: item.category?.id || null,
-      }));
+      const formattedData = data.map(item => {
+        let categoryId = item.category?.id;
+        
+        // Ensure we always have a valid categoryId
+        if (!categoryId && categories.length > 0) {
+          // Use first category as fallback
+          categoryId = categories[0].id;
+        }
+        
+        return {
+          ...item,
+          occurredOn: item.date.format('YYYY-MM-DD'),
+          categoryId: categoryId,
+        };
+      });
 
       console.log("Saving transactions:", formattedData);
       await transactionsApi.create(formattedData);

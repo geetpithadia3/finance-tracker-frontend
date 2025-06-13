@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PiggyBank, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { authApi } from '../../api/auth';
 
 const Login = () => {
   const { login } = useAuth();
@@ -43,28 +44,22 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password
-        }),
+      const response = await authApi.login({
+        username: formData.username,
+        password: formData.password
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        login(data);
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Login failed');
-      }
+      
+      // Extract the access token from the response
+      const userData = {
+        username: formData.username,
+        token: response.access_token
+      };
+      
+      login(userData);
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +74,7 @@ const Login = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>
-            Sign in to your Cove Finance account
+            Sign in to your Sumi Finance account
           </CardDescription>
         </CardHeader>
         <CardContent>
