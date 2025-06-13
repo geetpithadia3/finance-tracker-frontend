@@ -36,18 +36,22 @@ class ApiClient {
     const token = localStorage.getItem('token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('Using token:', token.substring(0, 10) + '...');
+    } else {
+      console.log('No token found in localStorage');
     }
 
     try {
       console.log(`API Request: ${method} ${url}`, data ? { data } : '');
+      console.log('Request headers:', headers);
       const response = await fetch(url, {
         method,
         headers,
-        body: data ? JSON.stringify(data) : null,
-        credentials: 'include'  // Include credentials in requests
+        body: data ? JSON.stringify(data) : null
       });
 
       console.log(`API Response status: ${response.status}`);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorData = await response.text().catch(() => null);
