@@ -24,6 +24,10 @@ import Avvvatars from 'avvvatars-react'
 import SmartAllocation from './components/allocation/SmartAllocation';
 import HowItWorks from './components/HowItWorks';
 import Welcome from './components/Welcome';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 import { 
   Menu,
@@ -141,19 +145,24 @@ const Sidebar = ({ collapsed, className, onNavClick, showHeader = true }) => {
   );
 };
 
-const App = () => {
+const AppContent = () => {
+  const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const [username, setUsername] = useState('User');
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023); // Changed from 768 to 1023 (lg breakpoint)
+  const [username, setUsername] = useState(user?.username || 'User');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
-  // Effect to handle window resize
+  useEffect(() => {
+    if (user?.username) {
+      setUsername(user.username);
+    }
+  }, [user]);
+
   useEffect(() => {
     const handleResize = () => {
       const newIsMobile = window.innerWidth <= 1023;
       setIsMobile(newIsMobile);
-      // Auto-collapse sidebar on medium screens
       if (window.innerWidth <= 1280 && window.innerWidth > 1023) {
         setCollapsed(true);
       } else if (window.innerWidth > 1280) {
@@ -161,7 +170,7 @@ const App = () => {
       }
     };
     
-    handleResize(); // Initialize on mount
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -172,7 +181,7 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    window.location.href = '/';
+    logout();
   };
 
   return (
@@ -254,14 +263,48 @@ const App = () => {
           <main className="flex-1 pt-14">
             <div className="container mx-auto p-4 sm:p-6 max-w-full xl:max-w-[1280px] 2xl:max-w-[1400px]">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/transactions" element={<TransactionsList />} />
-                <Route path="/configuration" element={<Configuration />} />
-                <Route path="/budget" element={<Budget />} />
-                <Route path="/budget/configure" element={<BudgetConfiguration selectedDate={moment()} />} />
-                <Route path="/allocation" element={<SmartAllocation />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/" element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                } />
+                <Route path="/transactions" element={
+                  <PrivateRoute>
+                    <TransactionsList />
+                  </PrivateRoute>
+                } />
+                <Route path="/configuration" element={
+                  <PrivateRoute>
+                    <Configuration />
+                  </PrivateRoute>
+                } />
+                <Route path="/budget" element={
+                  <PrivateRoute>
+                    <Budget />
+                  </PrivateRoute>
+                } />
+                <Route path="/budget/configure" element={
+                  <PrivateRoute>
+                    <BudgetConfiguration selectedDate={moment()} />
+                  </PrivateRoute>
+                } />
+                <Route path="/allocation" element={
+                  <PrivateRoute>
+                    <SmartAllocation />
+                  </PrivateRoute>
+                } />
+                <Route path="/how-it-works" element={
+                  <PrivateRoute>
+                    <HowItWorks />
+                  </PrivateRoute>
+                } />
+                <Route path="/welcome" element={
+                  <PrivateRoute>
+                    <Welcome />
+                  </PrivateRoute>
+                } />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </div>
@@ -270,6 +313,14 @@ const App = () => {
       </div>
       <Toaster />
     </Router>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
