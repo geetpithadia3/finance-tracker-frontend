@@ -160,7 +160,7 @@ export const transactionsApi = {
   getSmartAllocation: async (yearMonth) => {
     console.log(`Fetching smart allocation data for yearMonth: ${yearMonth}`);
     try {
-      const response = await apiClient.get(`/allocation?yearMonth=${yearMonth}`);
+      const response = await apiClient.get(`/allocation?year_month=${yearMonth}`);
       console.log('Smart allocation data:', response);
       return toCamel(response);
     } catch (error) {

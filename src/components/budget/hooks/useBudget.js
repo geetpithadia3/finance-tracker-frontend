@@ -40,12 +40,17 @@ export const useBudget = (initialDate = moment()) => {
 
   const handleError = useCallback((error) => {
     console.error('Error loading budgets:', error);
-    toast({
-      title: "Budget Hiccup! 🎪",
-      description: "Your budgets are playing hide and seek. Let's try again!",
-      variant: "destructive",
-    });
-  }, [toast]);
+    // Only show error toast for non-404 errors
+    if (!error.message?.includes('404')) {
+      toast({
+        title: "Budget Hiccup! 🎪",
+        description: "Your budgets are playing hide and seek. Let's try again!",
+        variant: "destructive",
+      });
+    }
+    // For 404 or any other error, treat it as no budget
+    handleEmptyBudgets();
+  }, [toast, handleEmptyBudgets]);
 
   const fetchBudgets = useCallback(async () => {
     try {

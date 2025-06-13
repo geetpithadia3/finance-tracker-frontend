@@ -67,7 +67,7 @@ export const budgetsApi = {
    * @returns {Promise<Object>} Dashboard data
    */
   getDashboardData: async (yearMonth) => {
-    const res = await apiClient.get(`/dashboard?yearMonth=${yearMonth}`);
+    const res = await apiClient.get(`/dashboard?year_month=${yearMonth}`);
     return toCamel(res);
   },
 
@@ -78,7 +78,7 @@ export const budgetsApi = {
    * @returns {Promise<Blob>} Report file blob
    */
   getReport: async (yearMonth, format) => {
-    const res = await apiClient.get(`/budgets/report?yearMonth=${yearMonth}&format=${format}`, { responseType: 'blob' });
+    const res = await apiClient.get(`/budgets/report?year_month=${yearMonth}&format=${format}`, { responseType: 'blob' });
     return res; // No mapping for blobs
   }
 };

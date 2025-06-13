@@ -20,8 +20,31 @@ export const AuthProvider = ({ children }) => {
     const username = localStorage.getItem('username');
     
     if (token && username) {
-      setUser({ username, token });
-      setIsAuthenticated(true);
+      // Verify token is still valid by making a test request
+      fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/auth/verify`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(response => {
+        if (!response.ok) {
+          // Token is invalid or expired
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+          setUser(null);
+          setIsAuthenticated(false);
+          window.location.href = '/login';
+        } else {
+          setUser({ username, token });
+          setIsAuthenticated(true);
+        }
+      }).catch(() => {
+        // Network error or other issue
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        setUser(null);
+        setIsAuthenticated(false);
+        window.location.href = '/login';
+      });
     }
     
     setIsLoading(false);

@@ -49,15 +49,11 @@ const Login = () => {
         password: formData.password
       });
       
-      console.log('Login response:', response.accessToken);
-      
       // Extract the access token from the response
       const userData = {
         username: formData.username,
         token: response.accessToken
       };
-      
-      console.log('User data being stored:', userData);
       
       login(userData);
       const from = location.state?.from?.pathname || '/';

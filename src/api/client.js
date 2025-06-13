@@ -2,8 +2,6 @@ class ApiClient {
   constructor() {
     // Use environment variable for base URL with fallback
     this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-    this.maxRetries = 3;
-    this.retryDelay = 1000; // 1 second
     
     console.log('ApiClient initialized with baseUrl:', this.baseUrl);
     
@@ -26,7 +24,7 @@ class ApiClient {
     return newTheme;
   }
 
-  async request(method, endpoint, data = null, retryCount = 0) {
+  async request(method, endpoint, data = null) {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'Content-Type': 'application/json'
@@ -36,14 +34,10 @@ class ApiClient {
     const token = localStorage.getItem('token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('Using token:', token.substring(0, 10) + '...');
-    } else {
-      console.log('No token found in localStorage');
     }
 
     try {
       console.log(`API Request: ${method} ${url}`, data ? { data } : '');
-      console.log('Request headers:', headers);
       const response = await fetch(url, {
         method,
         headers,
@@ -56,6 +50,16 @@ class ApiClient {
       if (!response.ok) {
         const errorData = await response.text().catch(() => null);
         console.error(`API Error (${response.status}):`, errorData);
+        
+        // Handle unauthorized responses
+        if (response.status === 401) {
+          // Clear auth data
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+          // Redirect to login
+          window.location.href = '/login';
+        }
+        
         throw new Error(`HTTP error! status: ${response.status}, details: ${errorData || 'No details'}`);
       }
 
@@ -64,19 +68,8 @@ class ApiClient {
       return result;
     } catch (error) {
       console.error(`API Request Failed: ${method} ${url}`, error);
-      
-      if (retryCount < this.maxRetries && this.shouldRetry(error)) {
-        console.log(`Retrying (${retryCount + 1}/${this.maxRetries})...`);
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay * (retryCount + 1)));
-        return this.request(method, endpoint, data, retryCount + 1);
-      }
       throw error;
     }
-  }
-
-  shouldRetry(error) {
-    // Retry on network errors or 5xx server errors
-    return !error.response || (error.response.status >= 500 && error.response.status < 600);
   }
 
   get(endpoint) {
