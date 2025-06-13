@@ -1,11 +1,12 @@
-import { apiConfig } from './config';
 
 class ApiClient {
   constructor() {
-    // Use empty base URL for proxied requests
-    this.baseUrl = '';
+    // Use environment variable for base URL with fallback
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
     this.maxRetries = 3;
     this.retryDelay = 1000; // 1 second
+    
+    console.log('ApiClient initialized with baseUrl:', this.baseUrl);
     
     // Initialize theme from localStorage or default to 'light'
     this.initializeTheme();
