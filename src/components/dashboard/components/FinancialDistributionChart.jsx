@@ -55,12 +55,12 @@ const FinancialDistributionChart = ({ income, expenses, savings }) => {
   };
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader className="pb-2">
-        <CardTitle>Financial Distribution</CardTitle>
+    <Card className="w-full max-w-full h-full">
+      <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+        <CardTitle className="text-xs sm:text-base">Financial Distribution</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[280px] w-full">
+      <CardContent className="px-2 sm:px-4 py-1 sm:py-2 overflow-x-auto">
+        <div className="h-[200px] sm:h-[280px] w-full min-w-[220px]">
           <Pie data={data} options={options} />
         </div>
       </CardContent>

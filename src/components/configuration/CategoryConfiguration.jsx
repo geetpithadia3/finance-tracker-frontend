@@ -115,30 +115,35 @@ const CategoryConfiguration = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-2">
+    <div className="space-y-3 sm:space-y-4 px-1 sm:px-0">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:space-x-2">
         <Input
           placeholder="New category name"
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
-          className="flex-1"
+          className="flex-1 text-xs sm:text-sm h-8 sm:h-10"
         />
-        <Button onClick={handleAddCategory}>Add Category</Button>
+        <Button 
+          onClick={handleAddCategory}
+          className="text-xs sm:text-sm h-8 sm:h-10 px-3 sm:px-4"
+        >
+          Add Category
+        </Button>
       </div>
 
-      <ScrollArea className="h-[400px] rounded-md border">
+      <ScrollArea className="h-[300px] sm:h-[400px] rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Category Name</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="text-xs sm:text-sm">Category Name</TableHead>
+              <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">Status</TableHead>
+              <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {categories.map((category, index) => (
               <TableRow key={index}>
-                <TableCell>
+                <TableCell className="text-xs sm:text-sm">
                   {editingCategory?.index === index ? (
                     <Input
                       value={editingCategory.name}
@@ -146,6 +151,7 @@ const CategoryConfiguration = () => {
                         ...editingCategory,
                         name: e.target.value
                       })}
+                      className="text-xs sm:text-sm h-7 sm:h-8"
                     />
                   ) : (
                     category.name
@@ -155,6 +161,7 @@ const CategoryConfiguration = () => {
                   <Switch
                     checked={category.isActive}
                     onCheckedChange={() => handleToggleCategory(index)}
+                    className="scale-75 sm:scale-100"
                   />
                 </TableCell>
                 <TableCell>
@@ -162,6 +169,7 @@ const CategoryConfiguration = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
                       onClick={() => handleUpdateCategory(index)}
                     >
                       Save
@@ -170,6 +178,7 @@ const CategoryConfiguration = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
                       onClick={() => handleEditCategory(index)}
                       disabled={!category.isEditable}
                     >

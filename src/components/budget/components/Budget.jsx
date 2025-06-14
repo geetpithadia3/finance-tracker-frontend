@@ -81,9 +81,9 @@ const Budget = () => {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-background">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-        <div className="flex items-center justify-center gap-2">
+    <div className="w-full max-w-full h-[calc(100vh-4rem)] flex flex-col bg-background overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-4 w-full max-w-full">
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
           <Button
             variant="outline"
             size="icon"
@@ -92,7 +92,7 @@ const Budget = () => {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-lg font-medium min-w-[160px] text-center">
+          <div className="text-sm sm:text-lg font-medium min-w-[120px] sm:min-w-[160px] text-center">
             {selectedDate.format('MMMM YYYY')}
           </div>
           <Button
@@ -104,34 +104,35 @@ const Budget = () => {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
             onClick={() => handleDownloadReport('CSV')}
           >
-            <FileDown className="h-4 w-4" />
-            CSV
+            <FileDown className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">CSV</span>
           </Button>
           <Button
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
             onClick={() => handleDownloadReport('PDF')}
           >
-            <FileText className="h-4 w-4" />
-            PDF
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">PDF</span>
           </Button>
         </div>
         <Button
           variant="outline"
-          className="text-sm w-full sm:w-auto"
+          className="text-xs sm:text-sm w-full sm:w-auto h-8 sm:h-9 px-2 sm:px-3"
           onClick={handleConfigureClick}
         >
-          Configure Budget
+          <span className="hidden sm:inline">Configure Budget</span>
+          <span className="sm:hidden">Configure</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 overflow-y-auto pb-2 sm:pb-4 w-full max-w-full">
         {budgets.map((budget) => (
           <BudgetCategory
             key={budget.categoryId}

@@ -26,24 +26,26 @@ const Configuration = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 px-1 sm:px-0">
       {configurationWidgets.map((widget) => (
         <Dialog key={widget.id} open={openDialog === widget.id} onOpenChange={(open) => setOpenDialog(open ? widget.id : '')}>
           <DialogTrigger asChild>
             <Card className="cursor-pointer hover:bg-accent transition-colors">
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  {widget.icon}
-                  <h3 className="font-semibold text-lg">{widget.title}</h3>
-                  <p className="text-sm text-muted-foreground">{widget.description}</p>
+              <CardContent className="pt-4 sm:pt-6 p-3 sm:p-6">
+                <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3">
+                  <div className="h-5 w-5 sm:h-6 sm:w-6">
+                    {React.cloneElement(widget.icon, { className: "h-5 w-5 sm:h-6 sm:w-6" })}
+                  </div>
+                  <h3 className="font-semibold text-sm sm:text-lg">{widget.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{widget.description}</p>
                 </div>
               </CardContent>
             </Card>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto mx-auto">
             <DialogHeader>
-              <DialogTitle>{widget.title}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-sm sm:text-base">{widget.title}</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">
                 {widget.description}
               </DialogDescription>
             </DialogHeader>

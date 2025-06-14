@@ -138,17 +138,17 @@ const TransactionView = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0">
+      <div className="p-2 sm:p-6 flex-shrink-0 w-full max-w-full">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-semibold">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
               Transaction Details
             </DialogTitle>
             {localTransaction.refunded ? (
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-1 w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-10"
                 onClick={handleRefund}
               >
                 <RefreshCw className="h-4 w-4" />
@@ -157,12 +157,12 @@ const TransactionView = ({
             ) : (
               <AlertDialog open={refundAlertOpen} onOpenChange={setRefundAlertOpen}>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-1 w-full sm:w-auto text-xs sm:text-sm h-8 sm:h-10">
                     <RefreshCw className="h-4 w-4" />
                     Mark as Refunded
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-[98vw] sm:max-w-md p-2 sm:p-6">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Mark as Refunded?</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -185,24 +185,24 @@ const TransactionView = ({
         </DialogHeader>
       </div>
 
-      <div className="p-6 pt-2 flex-1">
-        <div className="space-y-6">
+      <div className="p-2 sm:p-6 pt-2 flex-1 w-full max-w-full overflow-x-hidden">
+        <div className="space-y-3 sm:space-y-6 w-full max-w-full">
           {/* Transaction Summary Card */}
-          <Card className={localTransaction.refunded ? "bg-yellow-50" : ""}>
-            <CardContent className="p-4">
+          <Card className={localTransaction.refunded ? "bg-yellow-50 w-full max-w-full" : "w-full max-w-full"}>
+            <CardContent className="p-2 sm:p-4 w-full max-w-full">
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0 mr-4">
-                  <div className="text-lg font-semibold truncate">{localTransaction.description}</div>
-                  <div className="text-sm text-gray-500 mt-1">
+                  <div className="text-base sm:text-lg font-semibold truncate">{localTransaction.description}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 mt-1">
                     {format(new Date(localTransaction.occurredOn), "MMMM d, yyyy")}
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="mt-1">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm px-2 py-0.5">
                       {localTransaction.category.name}
                     </Badge>
                     <Badge 
                       variant="outline" 
-                      className={`mt-1 ${
+                      className={`mt-1 text-xs sm:text-sm px-2 py-0.5 ${
                         localTransaction.type.toLowerCase() === 'credit'
                           ? 'bg-green-100 text-green-700 border-green-200' 
                           : 'bg-red-100 text-red-700 border-red-200'
@@ -211,12 +211,12 @@ const TransactionView = ({
                       {localTransaction.type.charAt(0).toUpperCase() + localTransaction.type.slice(1).toLowerCase()}
                     </Badge>
                     {localTransaction.refunded && (
-                      <Badge variant="outline" className="mt-1 bg-yellow-100 text-yellow-700 border-yellow-200">
+                      <Badge variant="outline" className="mt-1 text-xs sm:text-sm px-2 py-0.5 bg-yellow-100 text-yellow-700 border-yellow-200">
                         Refunded
                       </Badge>
                     )}
                     {localTransaction.recurrence && (
-                      <Badge variant="outline" className="mt-1 bg-blue-100 text-blue-700 border-blue-200">
+                      <Badge variant="outline" className="mt-1 text-xs sm:text-sm px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-200">
                         {getFrequencyLabel(localTransaction.recurrence.frequency)} Recurring
                       </Badge>
                     )}
@@ -252,21 +252,33 @@ const TransactionView = ({
                     </div>
                   )}
                 </div>
-                <div className="text-xl font-bold text-gray-700 whitespace-nowrap">
+                <div className="text-base sm:text-xl font-bold text-gray-700 whitespace-nowrap">
                   ${Math.abs(localTransaction.amount).toFixed(2)}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Mobile: compact vertical action list */}
+          <div className="flex flex-col gap-1 sm:hidden mt-2">
+            <Button variant="ghost" className="justify-start text-left text-xs py-2 px-2" onClick={onSplitStart} disabled={localTransaction.refunded}>
+              <Split className="h-4 w-4 mr-2" /> Split Transaction
+            </Button>
+            <Button variant="ghost" className="justify-start text-left text-xs py-2 px-2" onClick={onShareStart} disabled={localTransaction.refunded}>
+              <Share2 className="h-4 w-4 mr-2" /> Share Transaction
+            </Button>
+            <Button variant="ghost" className="justify-start text-left text-xs py-2 px-2" onClick={onRecurrenceStart} disabled={localTransaction.refunded}>
+              <Repeat className="h-4 w-4 mr-2" /> {localTransaction.recurrence ? "Edit Recurring" : "Make Recurring"}
+            </Button>
+          </div>
+          {/* Desktop: keep grid */}
+          <div className="hidden sm:grid grid-cols-3 gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-24 flex-col gap-2 p-2"
+                    className="h-24 flex-col gap-2 p-2 text-sm"
                     onClick={onSplitStart}
                     disabled={localTransaction.refunded}
                   >
@@ -282,13 +294,12 @@ const TransactionView = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-24 flex-col gap-2 p-2"
+                    className="h-24 flex-col gap-2 p-2 text-sm"
                     onClick={onShareStart}
                     disabled={localTransaction.refunded}
                   >
@@ -304,13 +315,12 @@ const TransactionView = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant={localTransaction.recurrence ? "secondary" : "outline"}
-                    className="h-24 flex-col gap-2 p-2"
+                    className="h-24 flex-col gap-2 p-2 text-sm"
                     onClick={onRecurrenceStart}
                     disabled={localTransaction.refunded}
                   >
@@ -335,10 +345,10 @@ const TransactionView = ({
       </div>
 
       <Separator className="mt-4" />
-      <div className="p-6 flex-shrink-0">
+      <div className="p-2 sm:p-6 flex-shrink-0 w-full max-w-full">
         <Button
           variant="outline"
-          className="w-full h-10"
+          className="w-full h-9 sm:h-10 text-xs sm:text-base max-w-full"
           onClick={onClose}
         >
           Close

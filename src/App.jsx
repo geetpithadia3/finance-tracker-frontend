@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 // Import your components
 import TransactionsList from './components/transactions/components/TransactionsList';
@@ -33,7 +33,6 @@ import {
   Menu,
   LayoutDashboard, 
   ListOrdered,
-  Target,
   LogOut,
   Settings,
   PiggyBank,
@@ -41,7 +40,6 @@ import {
   HelpCircle,
   Moon,
   Sun,
-  X,
 } from 'lucide-react';
 
 import moment from 'moment';
@@ -53,7 +51,7 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
     const content = (
       <>
         <Icon className="h-4 w-4" />
-        {!collapsed && <span>{children}</span>}
+        {!collapsed && <span className="text-sm sm:text-base">{children}</span>}
       </>
     );
 
@@ -63,6 +61,7 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
         className={cn(
           "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
           "hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-sm sm:text-base",
           collapsed && "justify-center px-2"
         )}
         onClick={onNavClick}
@@ -84,7 +83,6 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
       <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
       <NavItem icon={Calculator} to="/allocation">Smart Allocation</NavItem>
-      <NavItem icon={HelpCircle} to="/how-it-works">How It Works</NavItem>
     </nav>
   );
 };
@@ -127,18 +125,18 @@ const Sidebar = ({ collapsed, className, onNavClick, showHeader = true }) => {
         <div className="flex h-14 items-center border-b px-3 justify-center">
           {!collapsed && (
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              <PiggyBank className="h-5 w-5 text-primary" />
-              <span className="text-lg">Sumi</span>
+              <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="text-sm sm:text-lg">Sumi</span>
             </Link>
           )}
           {collapsed && (
             <Link to="/" className="flex items-center justify-center">
-              <PiggyBank className="h-6 w-6 text-primary" />
+              <PiggyBank className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </Link>
           )}
         </div>
       )}
-      <ScrollArea className="flex-1 p-3">
+      <ScrollArea className="flex-1 p-2 sm:p-3">
         <MainNav collapsed={collapsed} onNavClick={onNavClick} />
       </ScrollArea>
     </div>
@@ -151,6 +149,7 @@ const AppContent = () => {
   const [username, setUsername] = useState(user?.username || 'User');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1023);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
@@ -208,16 +207,12 @@ const AppContent = () => {
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-[270px] sm:w-[300px]">
-                  <SheetHeader className="h-14 px-4 border-b flex-row justify-between items-center">
+                <SheetContent side="left" className="p-0 w-[260px] sm:w-[300px]">
+                  <SheetHeader className="h-14 px-3 sm:px-4 border-b flex-row justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <PiggyBank className="h-5 w-5 text-primary" />
-                      <SheetTitle className="text-left">Sumi Finance</SheetTitle>
+                      <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      <SheetTitle className="text-left text-sm sm:text-base">Sumi Finance</SheetTitle>
                     </div>
-                    <SheetClose className="rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Close</span>
-                    </SheetClose>
                   </SheetHeader>
                   <div className="h-[calc(100vh-3.5rem)]">
                     <Sidebar 
@@ -240,11 +235,28 @@ const AppContent = () => {
               </Button>
             )}
             <div className="lg:hidden flex items-center gap-2">
-              <PiggyBank className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Sumi</span>
+              <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="font-semibold text-sm sm:text-base">Sumi</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Dialog open={isHowItWorksOpen} onOpenChange={setIsHowItWorksOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title="How It Works"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className="overflow-y-auto"
+                style={{ width: '90vw', maxWidth: '700px', maxHeight: '90vh' }}
+              >
+                <HowItWorks />
+              </DialogContent>
+            </Dialog>
             <Button
               variant="ghost"
               size="icon"

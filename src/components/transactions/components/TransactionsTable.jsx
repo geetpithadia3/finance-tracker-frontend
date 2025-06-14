@@ -15,8 +15,8 @@ export const TransactionsTable = ({
   onRequestSort
 }) => {
   return (
-    <div className="border rounded-lg mt-4 overflow-hidden">
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[500px] sm:min-w-[600px] w-full">
         <TransactionTableHeader 
           sortConfig={sortConfig}
           onRequestSort={onRequestSort}

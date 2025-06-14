@@ -11,12 +11,12 @@ const TransactionsSection = ({
   incomeAndSavingsColumns
 }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Transactions</CardTitle>
+    <Card className="w-full max-w-full">
+      <CardHeader className="px-2 sm:px-4 py-2">
+        <CardTitle className="text-xs sm:text-base">Recent Transactions</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="expenses" className="space-y-4">
+      <CardContent className="px-2 sm:px-4 py-2 overflow-x-auto">
+        <Tabs defaultValue="expenses" className="space-y-2 sm:space-y-4 w-full max-w-full">
           <TabsList>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="income">Income</TabsTrigger>

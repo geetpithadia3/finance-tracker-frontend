@@ -64,7 +64,7 @@ export const TransactionRow = ({
         cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50`}
       onClick={handleRowClick}
     >
-      <TableCell className="align-top py-4 text-sm whitespace-nowrap">
+      <TableCell className="align-top py-2 sm:py-4 text-xs sm:text-sm whitespace-nowrap max-w-full">
         {moment(transaction.occurredOn).format('YYYY-MM-DD')}
         <div className="flex flex-col gap-1 mt-1">
           {transaction.recurrence && (
@@ -93,14 +93,14 @@ export const TransactionRow = ({
           )}
         </div>
       </TableCell>
-      <TableCell className="align-top py-4">
+      <TableCell className="align-top py-2 sm:py-4 text-xs sm:text-sm max-w-full">
         <Badge
           variant={transaction.type?.toLowerCase() === 'credit' ? 'outline' : 'default'}
         >
           {(transaction.type || 'Unknown').charAt(0).toUpperCase() + (transaction.type || 'Unknown').slice(1).toLowerCase()}
         </Badge>
       </TableCell>
-      <TableCell className="align-top py-4">
+      <TableCell className="align-top py-2 sm:py-4 text-xs sm:text-sm max-w-full">
         {editMode ? (
           <Select
             defaultValue={categoryName}
@@ -127,7 +127,7 @@ export const TransactionRow = ({
           </span>
         )}
       </TableCell>
-      <TableCell className="min-w-[200px] max-w-[400px] xl:max-w-[500px] py-4">
+      <TableCell className="max-w-[120px] sm:min-w-[200px] sm:max-w-[400px] xl:max-w-[500px] py-2 sm:py-4 text-xs sm:text-sm truncate align-top">
         {editMode ? (
           <Input
             ref={inputRef}
@@ -137,7 +137,7 @@ export const TransactionRow = ({
           />
         ) : (
           <div className="flex flex-col">
-            <div className="text-sm text-gray-600 dark:text-gray-300 break-words pr-4">
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words pr-2 sm:pr-4 truncate max-w-full">
               {transaction.description}
             </div>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -163,7 +163,7 @@ export const TransactionRow = ({
           </div>
         )}
       </TableCell>
-      <TableCell className="align-top py-4 text-right text-sm whitespace-nowrap">
+      <TableCell className="align-top py-2 sm:py-4 text-right text-xs sm:text-sm whitespace-nowrap max-w-full">
         <div className="flex flex-col items-end">
           {transaction.personalShare > 0 && transaction.personalShare !== transaction.amount && (
             <span className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">

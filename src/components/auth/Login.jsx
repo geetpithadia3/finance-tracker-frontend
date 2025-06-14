@@ -66,19 +66,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <PiggyBank className="h-8 w-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-6 px-2 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-xs sm:max-w-md">
+        <CardHeader className="space-y-1 text-center px-2 sm:px-6">
+          <div className="flex justify-center mb-2 sm:mb-4">
+            <PiggyBank className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg sm:text-2xl font-bold">Welcome back</CardTitle>
+          <CardDescription className="text-xs sm:text-base">
             Sign in to your Sumi Finance account
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="px-2 sm:px-6">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -91,8 +91,8 @@ const Login = () => {
               </Alert>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="username" className="text-xs sm:text-sm">Username</Label>
               <Input
                 id="username"
                 name="username"
@@ -101,11 +101,12 @@ const Login = () => {
                 value={formData.username}
                 onChange={handleChange}
                 placeholder="Enter your username"
+                className="text-xs sm:text-sm h-8 sm:h-10"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1 sm:space-y-2">
+              <Label htmlFor="password" className="text-xs sm:text-sm">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -115,12 +116,13 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
+                  className="text-xs sm:text-sm h-8 sm:h-10"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-2 sm:px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -134,16 +136,16 @@ const Login = () => {
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full text-xs sm:text-base h-8 sm:h-10" 
               disabled={isLoading}
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
+          <div className="mt-4 sm:mt-6 text-center">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+              Don&apos;t have an account?{' '}
               <Link 
                 to="/register" 
                 className="text-primary hover:underline font-medium"

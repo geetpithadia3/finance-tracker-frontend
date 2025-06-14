@@ -67,48 +67,52 @@ const TransactionsList = () => {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col px-1 sm:px-0">
       {/* Minimal header with main controls */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => handleMonthChange(-1)}>
-            <ChevronLeft className="h-4 w-4" />
+      <div className="flex justify-between items-center mb-3 sm:mb-4">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleMonthChange(-1)}>
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
-          <div className="text-lg font-medium">{selectedDate.format('MMM YYYY')}</div>
-          <Button variant="ghost" size="icon" onClick={() => handleMonthChange(1)}>
-            <ChevronRight className="h-4 w-4" />
+          <div className="text-sm sm:text-lg font-medium">{selectedDate.format('MMM YYYY')}</div>
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={() => handleMonthChange(1)}>
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
           <Button 
             variant="ghost" 
             size="sm"
+            className="text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Filter className="h-4 w-4 mr-1" />
-            {selectedCategory && selectedCategory !== 'all' ? selectedCategory : "Filter"}
+            <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+            <span className="hidden sm:inline">
+              {selectedCategory && selectedCategory !== 'all' ? selectedCategory : "Filter"}
+            </span>
           </Button>
           
           <Button
               variant="outline"
               size="sm"
+              className="text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               onClick={() => setShowImportDialog(true)}
             >
-              <Upload className="h-4 w-4 mr-1" />
-              Import
+              <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-0 sm:mr-1" />
+              <span className="hidden sm:inline">Import</span>
             </Button>
         </div>
       </div>
 
       {/* Expandable filters panel */}
       {showFilters && (
-        <div className="p-3 bg-muted/30 rounded-lg mb-4 flex flex-wrap gap-3 items-center">
+        <div className="p-2 sm:p-3 bg-muted/30 rounded-lg mb-3 sm:mb-4 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 items-start sm:items-center">
           <Select
             value={selectedCategory}
             onValueChange={setSelectedCategory}
           >
-            <SelectTrigger className="w-[160px] h-8">
+            <SelectTrigger className="w-full sm:w-[160px] h-8 text-xs sm:text-sm">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -121,13 +125,14 @@ const TransactionsList = () => {
             </SelectContent>
           </Select>
           
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
             <Button
               variant="outline"
               size="sm"
+              className="text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
               onClick={() => setShowRecurring(true)}
             >
-              <Repeat className="h-4 w-4 mr-1" />
+              <Repeat className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Recurring
             </Button>
           </div>
@@ -141,12 +146,12 @@ const TransactionsList = () => {
         <div className="relative rounded-lg border overflow-hidden">
           {editMode && (
             <div className="p-2 bg-muted/50 flex justify-between items-center border-b">
-              <span className="text-sm text-muted-foreground">Editing mode</span>
-              <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setEditMode(false)}>
+              <span className="text-xs sm:text-sm text-muted-foreground">Editing mode</span>
+              <div className="flex gap-1 sm:gap-2">
+                <Button size="sm" variant="ghost" className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3" onClick={() => setEditMode(false)}>
                   Cancel
                 </Button>
-                <Button size="sm" variant="default" onClick={handleSaveChanges}>
+                <Button size="sm" variant="default" className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3" onClick={handleSaveChanges}>
                   Save
                 </Button>
               </div>
@@ -170,9 +175,10 @@ const TransactionsList = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                 onClick={() => setEditMode(true)}
               >
-                <Pencil className="h-4 w-4 mr-1" />
+                <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Edit
               </Button>
             </div>

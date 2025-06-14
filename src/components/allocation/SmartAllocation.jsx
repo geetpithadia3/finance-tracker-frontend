@@ -113,30 +113,30 @@ const SmartAllocation = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-4 sm:space-y-6 px-1 sm:px-0">
       {/* Header with Date Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-2">
-        <h1 className="text-2xl font-bold">Smart Allocation</h1>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 mb-2">
+        <h1 className="text-lg sm:text-2xl font-bold">Smart Allocation</h1>
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9"
+            className="h-8 w-8 sm:h-9 sm:w-9"
             onClick={() => handleMonthChange(-1)}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="sr-only">Previous month</span>
           </Button>
-          <div className="text-lg font-medium min-w-[160px] text-center">
+          <div className="text-sm sm:text-lg font-medium min-w-[120px] sm:min-w-[160px] text-center">
             {selectedDate.format('MMMM YYYY')}
           </div>
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9"
+            className="h-8 w-8 sm:h-9 sm:w-9"
             onClick={() => handleMonthChange(1)}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="sr-only">Next month</span>
           </Button>
         </div>
@@ -144,9 +144,9 @@ const SmartAllocation = () => {
 
       {/* Introduction Card */}
       <Alert variant="info">
-        <Wallet className="h-5 w-5" />
-        <AlertTitle>What is Smart Allocation?</AlertTitle>
-        <AlertDescription>
+        <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
+        <AlertTitle className="text-sm sm:text-base">What is Smart Allocation?</AlertTitle>
+        <AlertDescription className="text-xs sm:text-sm">
           Smart Allocation helps you plan your spending by showing which bills are due before your next paycheck.
           This helps ensure you have enough money set aside for upcoming expenses.
         </AlertDescription>
@@ -154,9 +154,9 @@ const SmartAllocation = () => {
 
       {/* Tabs for Allocation and Recurring Transactions */}
       <Tabs defaultValue="allocation" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="allocation">Paycheck Allocation</TabsTrigger>
-          <TabsTrigger value="recurring">Recurring Transactions</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-4">
+          <TabsTrigger value="allocation" className="text-xs sm:text-sm">Paycheck Allocation</TabsTrigger>
+          <TabsTrigger value="recurring" className="text-xs sm:text-sm">Recurring Transactions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="allocation">
@@ -168,43 +168,43 @@ const SmartAllocation = () => {
             </Card>
           ) : !allocationData || !allocationData.paychecks || allocationData.paychecks.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <AlertCircle className="h-12 w-12 text-amber-500 dark:text-amber-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No allocation data available</h3>
-                <p className="text-muted-foreground mb-4">
+              <CardContent className="flex flex-col items-center justify-center p-4 sm:p-8 text-center">
+                <AlertCircle className="h-8 w-8 sm:h-12 sm:w-12 text-amber-500 dark:text-amber-400 mb-3 sm:mb-4" />
+                <h3 className="text-sm sm:text-lg font-semibold mb-2">No allocation data available</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                   We couldn't find any allocation data for this period. This could be because you don't have any recurring expenses.
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {/* Summary Card */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Monthly Overview</CardTitle>
+                  <CardTitle className="text-sm sm:text-base">Monthly Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
-                      <CardContent className="pt-4">
-                        <h3 className="font-medium text-sm text-blue-700 dark:text-blue-400 mb-1">Total Income</h3>
-                        <p className="text-2xl font-bold">
+                      <CardContent className="pt-3 sm:pt-4 p-3 sm:p-6">
+                        <h3 className="font-medium text-xs sm:text-sm text-blue-700 dark:text-blue-400 mb-1">Total Income</h3>
+                        <p className="text-lg sm:text-2xl font-bold">
                           ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.amount), 0).toFixed(2)}
                         </p>
                       </CardContent>
                     </Card>
                     <Card className="bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800">
-                      <CardContent className="pt-4">
-                        <h3 className="font-medium text-sm text-red-700 dark:text-red-400 mb-1">Total Bills</h3>
-                        <p className="text-2xl font-bold">
+                      <CardContent className="pt-3 sm:pt-4 p-3 sm:p-6">
+                        <h3 className="font-medium text-xs sm:text-sm text-red-700 dark:text-red-400 mb-1">Total Bills</h3>
+                        <p className="text-lg sm:text-2xl font-bold">
                           ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.totalAllocationAmount), 0).toFixed(2)}
                         </p>
                       </CardContent>
                     </Card>
                     <Card className="bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800">
-                      <CardContent className="pt-4">
-                        <h3 className="font-medium text-sm text-green-700 dark:text-green-400 mb-1">Remaining</h3>
-                        <p className="text-2xl font-bold">
+                      <CardContent className="pt-3 sm:pt-4 p-3 sm:p-6">
+                        <h3 className="font-medium text-xs sm:text-sm text-green-700 dark:text-green-400 mb-1">Remaining</h3>
+                        <p className="text-lg sm:text-2xl font-bold">
                           ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.remainingAmount), 0).toFixed(2)}
                         </p>
                       </CardContent>
@@ -214,38 +214,38 @@ const SmartAllocation = () => {
               </Card>
 
               {/* Paychecks Section */}
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold px-1">Your Paychecks</h2>
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-lg sm:text-xl font-semibold px-1">Your Paychecks</h2>
                 
                 {allocationData.paychecks.map((paycheckAllocation, index) => (
                   <Card key={paycheckAllocation.id} className="overflow-hidden">
                     {/* Paycheck Header */}
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-b py-4">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-b py-3 sm:py-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                         <div>
-                          <CardTitle className="text-lg">
-                            {paycheckAllocation.source} 
-                            <Badge variant="secondary" className="ml-2 font-normal text-blue-700 dark:text-blue-400">
+                          <CardTitle className="text-sm sm:text-lg flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <span>{paycheckAllocation.source}</span>
+                            <Badge variant="secondary" className="text-xs font-normal text-blue-700 dark:text-blue-400 w-fit">
                               {getFrequencyLabel(paycheckAllocation.frequency)}
                             </Badge>
                           </CardTitle>
-                          <CardDescription className="flex items-center gap-1">
+                          <CardDescription className="flex items-center gap-1 text-xs sm:text-sm">
                             <Calendar className="h-3 w-3" />
                             {format(new Date(paycheckAllocation.date), "MMMM d, yyyy")}
                           </CardDescription>
                         </div>
-                        <div className="mt-2 md:mt-0 text-2xl font-bold text-blue-700 dark:text-blue-400">
+                        <div className="text-lg sm:text-2xl font-bold text-blue-700 dark:text-blue-400">
                           ${parseFloat(paycheckAllocation.amount).toFixed(2)}
                         </div>
                       </div>
                     </CardHeader>
 
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-4 sm:pt-6 p-3 sm:p-6">
                       {/* Allocation Progress */}
-                      <div className="mb-6">
+                      <div className="mb-4 sm:mb-6">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Allocation Progress</span>
-                          <span className="text-sm font-medium">
+                          <span className="text-xs sm:text-sm font-medium">Allocation Progress</span>
+                          <span className="text-xs sm:text-sm font-medium">
                             ${paycheckAllocation.totalAllocationAmount.toFixed(2)} of ${paycheckAllocation.amount.toFixed(2)}
                           </span>
                         </div>

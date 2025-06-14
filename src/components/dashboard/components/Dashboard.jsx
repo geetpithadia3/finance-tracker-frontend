@@ -17,10 +17,10 @@ const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899'
 // Empty state components
 const EmptyChartState = ({ title }) => (
   <Card className="h-full">
-    <CardContent className="h-full flex flex-col items-center justify-center p-8">
-      <PiggyBank className="h-10 w-10 text-sumi-ink-400 mb-3" />
-      <div className="font-semibold text-lg text-sumi-ink-700 mb-1 text-center">{title}</div>
-      <div className="text-sumi-ink-500 text-center max-w-xs">
+    <CardContent className="h-full flex flex-col items-center justify-center p-4 sm:p-8">
+      <PiggyBank className="h-8 w-8 sm:h-10 sm:w-10 text-sumi-ink-400 mb-2 sm:mb-3" />
+      <div className="font-semibold text-sm sm:text-lg text-sumi-ink-700 mb-1 text-center">{title}</div>
+      <div className="text-xs sm:text-sm text-sumi-ink-500 text-center max-w-xs">
         Your financial story is just beginning! Add some transactions to see your data come to life. 🌱
       </div>
     </CardContent>
@@ -82,49 +82,49 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-4 sm:space-y-6 w-full max-w-full">
       {/* Date Navigation */}
-      <div className="flex items-center justify-center sm:justify-start gap-2">
+      <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 w-full max-w-full">
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9"
+          className="h-8 w-8 sm:h-9 sm:w-9"
           onClick={() => handleMonthChange(-1)}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
-        <div className="text-lg font-medium min-w-[160px] text-center">
+        <div className="text-sm sm:text-lg font-medium min-w-[120px] sm:min-w-[160px] text-center">
           {selectedDate.format('MMMM YYYY')}
         </div>
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9"
+          className="h-8 w-8 sm:h-9 sm:w-9"
           onClick={() => handleMonthChange(1)}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
         
       {/* Stats Overview */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-2 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full max-w-full">
         <StatCard title="Total Income" value={income || 0} icon={TrendingUp} />
         <StatCard title="Total Expenses" value={expenses || 0} icon={TrendingDown} />
         <StatCard title="Total Savings" value={savings || 0} icon={Wallet} />
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="allocation">Smart Allocation</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-2 sm:space-y-4 w-full max-w-full">
+        <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transactions</TabsTrigger>
+          <TabsTrigger value="allocation" className="text-xs sm:text-sm">Smart Allocation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
           {/* Charts Section */}
-          <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
-            <div className="w-full lg:max-w-full overflow-hidden">
+          <div className="grid gap-2 sm:gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2 w-full max-w-full">
+            <div className="w-full max-w-full overflow-x-auto">
               {hasNoData ? (
                 <EmptyChartState title="No Financial Data Yet" />
               ) : (
@@ -132,7 +132,7 @@ const Dashboard = () => {
               )}
             </div>
             
-            <div className="w-full lg:max-w-full overflow-hidden">
+            <div className="w-full max-w-full overflow-x-auto">
               {hasNoData ? (
                 <EmptyChartState title="No Expense Categories Yet" />
               ) : (

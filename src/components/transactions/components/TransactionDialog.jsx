@@ -132,7 +132,7 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl p-0 sm:p-6">
         {view === 'details' && (
           <TransactionView
             transaction={transaction}

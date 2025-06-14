@@ -332,9 +332,9 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0">
+      <div className="p-4 sm:p-6 flex-shrink-0">
         <DialogHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <DialogTitle className="text-xl font-semibold">
               {state.step === 1 ? 'Adjust Shares' : 'Review Shares'}
             </DialogTitle>
@@ -348,7 +348,7 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
         <Progress className="mt-2" value={state.step === 1 ? 50 : 100} />
       </div>
 
-      <div className="p-6 pt-2 flex-1 overflow-y-auto">
+      <div className="p-4 sm:p-6 pt-2 flex-1 overflow-y-auto">
         {state.step === 1 ? 
           <ShareEntryStep state={state} dispatch={dispatch} transaction={transaction} /> 
           : <SummaryStep state={state} transaction={transaction} />}
