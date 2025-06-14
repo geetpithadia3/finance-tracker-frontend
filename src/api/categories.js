@@ -70,16 +70,6 @@ export const categoriesApi = {
     return toCamel(res);
   },
     
-  /**
-   * Update category name
-   * @param {string} oldName - Current category name
-   * @param {string} newName - New category name
-   * @returns {Promise<Object>} Updated category
-   */
-  updateName: async (oldName, newName) => {
-    const res = await apiClient.put(`/categories/${oldName}`, toSnake({ newName }));
-    return toCamel(res);
-  },
     
   /**
    * Toggle category status
@@ -91,6 +81,17 @@ export const categoriesApi = {
     const res = await apiClient.put(`/categories/${categoryId}`, toSnake({ isActive }));
     return toCamel(res);
   },
+
+  /**
+   * Delete category
+   * @param {string} categoryId - Category ID to delete
+   * @returns {Promise<Object>} Delete confirmation
+   */
+  delete: async (categoryId) => {
+    const res = await apiClient.delete(`/categories/${categoryId}`);
+    return res;
+  },
+
 
   /**
    * Get all categories in formatted structure

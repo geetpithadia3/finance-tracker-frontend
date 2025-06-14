@@ -67,7 +67,7 @@ const Dashboard = () => {
   const incomeAndSavingsColumns = [
     {
       title: 'Date',
-      dataIndex: 'date',
+      dataIndex: 'occurredOn',
       render: (date) => moment(date).format('YYYY-MM-DD'),
     },
     {

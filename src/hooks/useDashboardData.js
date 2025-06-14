@@ -47,9 +47,12 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
       setIncome(calculateTotal(formattedIncome, 'income'));
       setSavings(calculateTotal(formattedSavings, 'savings'));
 
-      // Calculate expenses by category
+      // Calculate expenses by category using personalShare for consistency
       const categoryTotals = formattedExpenses.reduce((acc, item) => {
-        acc[item.category] = (acc[item.category] || 0) + parseFloat(item.amount);
+        const amount = item.personalShare !== undefined ? 
+          parseFloat(item.personalShare) : 
+          parseFloat(item.amount);
+        acc[item.category] = (acc[item.category] || 0) + amount;
         return acc;
       }, {});
 
@@ -65,7 +68,12 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
           ...budget,
           spent: formattedExpenses
             .filter(expense => expense.category === budget.category)
-            .reduce((acc, expense) => acc + parseFloat(expense.amount), 0),
+            .reduce((acc, expense) => {
+              const amount = expense.personalShare !== undefined ? 
+                parseFloat(expense.personalShare) : 
+                parseFloat(expense.amount);
+              return acc + amount;
+            }, 0),
         }));
         setBudgets(budgetProgress);
       }

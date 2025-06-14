@@ -12,6 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trash2, Plus } from 'lucide-react';
 import { categoriesApi } from '@/api/categories';
 
 const CategoryConfiguration = () => {
@@ -102,7 +104,7 @@ const CategoryConfiguration = () => {
 
       toast({
         title: "Success",
-        description: `Category ${!category.isActive ? 'disabled' : 'enabled'} successfully`,
+        description: `Category ${!category.isActive ? 'enabled' : 'disabled'} successfully`,
       });
     } catch (error) {
       console.error('Error toggling category:', error);
@@ -114,9 +116,30 @@ const CategoryConfiguration = () => {
     }
   };
 
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    try {
+      await categoriesApi.delete(categoryId);
+      await fetchCategories();
+      
+      toast({
+        title: "Success",
+        description: `Category "${categoryName}" deleted successfully`,
+      });
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to delete category';
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+
   return (
     <div className="space-y-3 sm:space-y-4 px-1 sm:px-0">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:space-x-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2">
         <Input
           placeholder="New category name"
           value={newCategory}
@@ -127,6 +150,7 @@ const CategoryConfiguration = () => {
           onClick={handleAddCategory}
           className="text-xs sm:text-sm h-8 sm:h-10 px-3 sm:px-4"
         >
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
           Add Category
         </Button>
       </div>
@@ -137,7 +161,7 @@ const CategoryConfiguration = () => {
             <TableRow>
               <TableHead className="text-xs sm:text-sm">Category Name</TableHead>
               <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">Status</TableHead>
-              <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">Actions</TableHead>
+              <TableHead className="w-[120px] sm:w-[140px] text-xs sm:text-sm">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -165,26 +189,58 @@ const CategoryConfiguration = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  {editingCategory?.index === index ? (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
-                      onClick={() => handleUpdateCategory(index)}
-                    >
-                      Save
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
-                      onClick={() => handleEditCategory(index)}
-                      disabled={!category.isEditable}
-                    >
-                      Edit
-                    </Button>
-                  )}
+                  <div className="flex gap-1 sm:gap-2">
+                    {editingCategory?.index === index ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
+                        onClick={() => handleUpdateCategory(index)}
+                      >
+                        Save
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3"
+                        onClick={() => handleEditCategory(index)}
+                        disabled={!category.isEditable}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                    {category.isEditable && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{category.name}"? This action cannot be undone and will fail if the category is being used by transactions.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteCategory(category.id, category.name)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
