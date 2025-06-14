@@ -94,9 +94,9 @@ export const useTransactionsImport = (onClose) => {
       const transaction = formattedTransactions[i];
       
       if (!transaction.category) {
-        // If no category from API or error, fall back to first available category
+        // If no category from API or error, fall back to 'General' category if available
         const fallbackCategory = categories.find(cat => 
-          cat.name === 'Shopping'
+          cat.name === 'General'
         ) || categories[0];
         
         if (fallbackCategory) {

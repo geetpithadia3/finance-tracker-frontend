@@ -206,6 +206,34 @@ const TransactionsList = () => {
           }}
         />
       )}
+
+      {/* Add Transaction Floating Button */}
+      <Button
+        variant="default"
+        size="icon"
+        className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full w-14 h-14 flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          // Find the 'General' category if it exists
+          const generalCategory = categories.find(cat => cat.name === 'General') || categories[0] || { id: '', name: 'General' };
+          setSelectedTransaction({
+            id: `new-${Date.now()}`,
+            description: '',
+            amount: '',
+            type: 'DEBIT',
+            occurredOn: selectedDate.clone().startOf('month').format('YYYY-MM-DD'),
+            category: generalCategory,
+            categoryId: generalCategory.id,
+            personalShare: 0,
+            owedShare: 0,
+            shareMetadata: '',
+            isNew: true
+          });
+          setTransactionModalOpen(true);
+        }}
+        title="Add Transaction"
+      >
+        <Plus className="w-7 h-7" />
+      </Button>
     </div>
   );
 };

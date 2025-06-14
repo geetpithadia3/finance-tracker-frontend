@@ -129,23 +129,25 @@ const HowItWorks = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-3 sm:mb-4 lg:mb-6 h-8 sm:h-10">
-            <TabsTrigger value="transactions" className="flex items-center gap-1 text-xs px-1 sm:px-3 sm:text-sm">
+          <TabsList
+            className="grid grid-cols-4 mb-3 sm:mb-4 lg:mb-6 h-8 sm:h-10 gap-0 px-0"
+          >
+            <TabsTrigger value="transactions" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
               <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Transactions</span>
               <span className="sm:hidden">Trans</span>
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-1 text-xs px-1 sm:px-3 sm:text-sm">
+            <TabsTrigger value="dashboard" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
               <LayoutDashboard className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Dashboard</span>
               <span className="sm:hidden">Dash</span>
             </TabsTrigger>
-            <TabsTrigger value="budget" className="flex items-center gap-1 text-xs px-1 sm:px-3 sm:text-sm">
+            <TabsTrigger value="budget" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
               <PiggyBank className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Budget</span>
               <span className="sm:hidden">Budget</span>
             </TabsTrigger>
-            <TabsTrigger value="allocation" className="flex items-center gap-1 text-xs px-1 sm:px-3 sm:text-sm">
+            <TabsTrigger value="allocation" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
               <Calculator className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Smart Allocation</span>
               <span className="sm:hidden">Alloc</span>
