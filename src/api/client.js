@@ -1,7 +1,7 @@
 class ApiClient {
   constructor() {
     // Use environment variable for base URL with fallback
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     
     console.log('ApiClient initialized with baseUrl:', this.baseUrl);
     

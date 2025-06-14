@@ -1,18 +1,15 @@
 import React from 'react';
 import moment from 'moment';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ChevronLeft, ChevronRight, DollarSign, TrendingDown, TrendingUp, Wallet, PiggyBank, Calculator } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, PiggyBank } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import FinancialDistributionChart from './FinancialDistributionChart';
 import ExpensesByCategoryChart from './ExpensesByCategoryChart';
 import TransactionsSection from './TransactionsSection';
-import SmartAllocation from '../../allocation/SmartAllocation';
 
-const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'];
 
 // Empty state components
 const EmptyChartState = ({ title }) => (
@@ -37,7 +34,6 @@ const Dashboard = () => {
     incomeTransactions,
     savingsTransactions,
     expensesByCategory,
-    budgets,
     handleMonthChange,
   } = useDashboardData();
 
@@ -115,10 +111,9 @@ const Dashboard = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-2 sm:space-y-4 w-full max-w-full">
-        <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+        <TabsList className="grid w-full grid-cols-2 gap-1 sm:gap-2">
           <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
           <TabsTrigger value="transactions" className="text-xs sm:text-sm">Transactions</TabsTrigger>
-          <TabsTrigger value="allocation" className="text-xs sm:text-sm">Smart Allocation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -151,11 +146,6 @@ const Dashboard = () => {
             expenseColumns={expenseColumns}
             incomeAndSavingsColumns={incomeAndSavingsColumns}
           />
-        </TabsContent>
-
-        <TabsContent value="allocation">
-          {/* Smart Allocation Section */}
-          <SmartAllocation />
         </TabsContent>
       </Tabs>
     </div>

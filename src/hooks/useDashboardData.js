@@ -23,8 +23,8 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
 
   const calculateTotal = (transactions, type = 'expense') => {
     return transactions.reduce((acc, item) => {
-      // Only use personalShare for expenses
-      const amount = type === 'expense' && item.personalShare !== undefined ? 
+      // Only use personalShare for expenses if it has a value
+      const amount = type === 'expense' && item.personalShare !== undefined && item.personalShare !== 0 ? 
         parseFloat(item.personalShare) : 
         parseFloat(item.amount);
       return acc + amount;
@@ -49,7 +49,7 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
 
       // Calculate expenses by category using personalShare for consistency
       const categoryTotals = formattedExpenses.reduce((acc, item) => {
-        const amount = item.personalShare !== undefined ? 
+        const amount = item.personalShare !== undefined && item.personalShare !== 0 ? 
           parseFloat(item.personalShare) : 
           parseFloat(item.amount);
         acc[item.category] = (acc[item.category] || 0) + amount;
@@ -69,7 +69,7 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
           spent: formattedExpenses
             .filter(expense => expense.category === budget.category)
             .reduce((acc, expense) => {
-              const amount = expense.personalShare !== undefined ? 
+              const amount = expense.personalShare !== undefined && expense.personalShare !== 0 ? 
                 parseFloat(expense.personalShare) : 
                 parseFloat(expense.amount);
               return acc + amount;
