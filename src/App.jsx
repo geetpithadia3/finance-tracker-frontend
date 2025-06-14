@@ -250,10 +250,7 @@ const AppContent = () => {
                   <HelpCircle className="h-5 w-5" />
                 </Button>
               </DialogTrigger>
-              <DialogContent
-                className="overflow-y-auto"
-                style={{ width: '90vw', maxWidth: '700px', maxHeight: '90vh' }}
-              >
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                 <HowItWorks />
               </DialogContent>
             </Dialog>

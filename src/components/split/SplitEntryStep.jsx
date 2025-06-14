@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SplitItem } from './SplitItem';
-import { useSplitViewContext } from '../context/SplitViewContext';
+import { SplitItem } from '../transactions/components/SplitItem';
+import { useSplitViewContext } from '../transactions/context/SplitViewContext';
 
 export const SplitEntryStep = ({ transaction, categories }) => {
     const { state, dispatch, calculations } = useSplitViewContext();

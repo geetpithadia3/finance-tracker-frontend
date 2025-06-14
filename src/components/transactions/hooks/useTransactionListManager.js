@@ -21,9 +21,7 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
       setIsLoading(true);
       setError(null);
       const data = await transactionsApi.getAll(date.format('YYYY-MM'));
-      console.log('Raw transaction data from API:', data);
       const formattedData = formatTransactionData(data);
-      console.log('Formatted transaction data:', formattedData);
       setTransactions(formattedData);
     } catch (error) {
       setError('Failed to load transactions');
@@ -36,7 +34,6 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
   const fetchCategories = async () => {
     try {
       const formattedCategories = await categoriesApi.getAllFormatted();
-      console.log('Categories data from API:', formattedCategories);
       setCategories(formattedCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -99,8 +96,7 @@ export const useTransactionListManager = (initialDate = moment().subtract(1, 'mo
 
   const handleSaveChanges = async () => {
     try {
-      const updatedTransactions = transactions
-      console.log('Updated transactions:', updatedTransactions);
+      const updatedTransactions = transactions.filter(t => t.modified);
       await transactionsApi.update(updatedTransactions);
       await fetchTransactions(selectedDate);
       setEditMode(false);

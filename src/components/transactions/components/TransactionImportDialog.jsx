@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import moment from 'moment';
 
 // Simple transaction table component for import preview
-const TransactionTable = ({ data, categories, editMode }) => {
+const ImportTransactionTable = ({ data, categories, editMode, onDataChange }) => {
   return (
     <Table className="flex-1 w-full">
       <TableHeader className="flex-none">
@@ -56,7 +56,14 @@ const TransactionTable = ({ data, categories, editMode }) => {
                 <Select 
                   value={record.category?.id || ""} 
                   onValueChange={(value) => {
-                    record.category = categories.find(cat => cat.id === value) || null;
+                    const updatedRecord = {
+                      ...record,
+                      category: categories.find(cat => cat.id === value) || null
+                    };
+                    const updatedData = data.map(item => 
+                      item.id === record.id ? updatedRecord : item
+                    );
+                    onDataChange(updatedData);
                   }}
                 >
                   <SelectTrigger className="w-full h-6 sm:h-8 text-xs sm:text-sm">
@@ -115,13 +122,13 @@ export const TransactionImportDialog = ({ onClose }) => {
 
   return (
     <Dialog open={isModalVisible} onOpenChange={handleClose}>
-      <DialogHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+      <DialogHeader className="p-4 sm:p-6 pb-0">
         <DialogTitle className="text-lg sm:text-2xl font-semibold">Import Transactions</DialogTitle>
         <DialogDescription className="text-sm">
           Upload your transaction data or sync with external services
         </DialogDescription>
       </DialogHeader>
-      <DialogContent className="max-w-5xl h-[90vh] sm:h-[800px] w-[95vw] sm:w-full px-3 sm:px-6 pb-3 sm:pb-6 flex flex-col">
+      <DialogContent className="max-w-6xl h-[85vh] sm:h-[800px] p-4 sm:p-6 flex flex-col">
         {!data.length && <FileUploadComponent onFileUpload={handleFileUpload} />}
 
         {data.length > 0 && (
@@ -179,10 +186,11 @@ export const TransactionImportDialog = ({ onClose }) => {
             </div>
             
             <div className="border rounded-lg overflow-hidden flex-1 flex flex-col w-full">
-              <TransactionTable 
+              <ImportTransactionTable 
                 data={data}
                 categories={categories}
                 editMode={editMode}
+                onDataChange={setData}
               />
             </div>
           </div>

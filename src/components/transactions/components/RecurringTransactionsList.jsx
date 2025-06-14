@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { formatCurrency, getFrequencyLabel, getDateFlexibilityLabel } from '../utils/transactionHelpers';
 
 const RecurringTransactionsList = ({ onBack }) => {
   const { toast } = useToast();
@@ -26,7 +27,6 @@ const RecurringTransactionsList = ({ onBack }) => {
       const data = await transactionsApi.getRecurringExpenses();
       setRecurringTransactions(data || []);
     } catch (error) {
-      console.error('Error fetching recurring transactions:', error);
       toast({
         variant: "destructive",
         description: "Failed to load recurring transactions",
@@ -37,35 +37,7 @@ const RecurringTransactionsList = ({ onBack }) => {
   };
 
   // Helper function to get a readable frequency label
-  const getFrequencyLabel = (frequency) => {
-    const options = {
-      'DAILY': 'Daily',
-      'WEEKLY': 'Weekly',
-      'BIWEEKLY': 'Bi-weekly',
-      'FOUR_WEEKLY': 'Every 4 weeks',
-      'MONTHLY': 'Monthly',
-      'YEARLY': 'Yearly'
-    };
-    return options[frequency] || frequency;
-  };
 
-  // Helper function to get a readable date flexibility label
-  const getDateFlexibilityLabel = (flexibility) => {
-    if (!flexibility) return 'Exact date';
-    
-    switch (flexibility) {
-      case 'EXACT': return 'Exact date';
-      case 'EARLY_MONTH': return 'Early month (1st-10th)';
-      case 'MID_MONTH': return 'Mid month (11th-20th)';
-      case 'LATE_MONTH': return 'Late month (21st-31st)';
-      case 'CUSTOM_RANGE': return 'Custom day range';
-      case 'WEEKDAY': return 'Weekdays only (Mon-Fri)';
-      case 'WEEKEND': return 'Weekends only (Sat-Sun)';
-      case 'MONTH_RANGE': return 'Month range';
-      case 'SEASON': return 'Seasonal';
-      default: return flexibility;
-    }
-  };
 
   const getPriorityLabel = (priority) => {
     const options = {
@@ -244,7 +216,7 @@ const RecurringTransactionsList = ({ onBack }) => {
 
       {/* Confirmation Dialog */}
       <Dialog open={confirmToggleOpen} onOpenChange={setConfirmToggleOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               {transactionToToggle?.isActive 
@@ -262,7 +234,7 @@ const RecurringTransactionsList = ({ onBack }) => {
               <div className="mt-4 p-3 bg-gray-50 rounded-md">
                 <p className="font-medium">{transactionToToggle.description}</p>
                 <div className="flex items-center mt-1 text-sm text-gray-500">
-                  <span className="mr-2">${Math.abs(transactionToToggle.amount).toFixed(2)}</span>
+                  <span className="mr-2">{formatCurrency(Math.abs(transactionToToggle.amount))}</span>
                   <span>•</span>
                   <span className="mx-2">{transactionToToggle.category.name}</span>
                   <span>•</span>

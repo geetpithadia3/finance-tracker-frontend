@@ -1,9 +1,9 @@
 import React from 'react';
 import { Table, TableBody } from "@/components/ui/table";
 import { TransactionTableHeader } from './TransactionTableHeader';
-import { TransactionRow } from './TransactionRow';
+import { TransactionTableRow } from './TransactionTableRow';
 
-export const TransactionsTable = ({
+export const TransactionTable = ({
   transactions,
   categories,
   editMode,
@@ -11,7 +11,6 @@ export const TransactionsTable = ({
   inputRef,
   onEdit,
   onTransactionClick,
-  formatCurrency,
   onRequestSort
 }) => {
   return (
@@ -23,7 +22,7 @@ export const TransactionsTable = ({
         />
         <TableBody>
           {transactions.map((transaction) => (
-            <TransactionRow
+            <TransactionTableRow
               key={transaction.id}
               transaction={transaction}
               categories={categories}
@@ -31,7 +30,6 @@ export const TransactionsTable = ({
               inputRef={inputRef}
               onEdit={onEdit}
               onClick={() => onTransactionClick(transaction)}
-              formatCurrency={formatCurrency}
             />
           ))}
         </TableBody>

@@ -5,6 +5,7 @@ import { categoriesApi } from '../../../api/categories';
 import { smartApiClient } from '../../../api/smartClient';
 import moment from 'moment';
 import Papa from 'papaparse';
+import { formatCurrency } from '../utils/transactionHelpers';
 
 export const useTransactionsImport = (onClose) => {
   const [data, setData] = useState([]);
@@ -16,9 +17,7 @@ export const useTransactionsImport = (onClose) => {
     
     try {
       setIsLoading(true);
-      console.log("Fetching categories...");
       const data = await categoriesApi.getAll();
-      console.log("Categories fetched:", data);
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -38,9 +37,7 @@ export const useTransactionsImport = (onClose) => {
     
     // First pass: prepare data for batch categorization
     for (const item of transactions) {
-      console.log('Item:', item);
       const subDescription = item['Sub-description'] || item.subDescription || '';
-      console.log('Sub-Description:', subDescription);
       const description = (item.description || item.Description || '') + 
                          (subDescription ? ` - ${subDescription}` : '');
       const amount = parseFloat(item.amount || item.Amount || 0);
@@ -180,9 +177,7 @@ export const useTransactionsImport = (onClose) => {
         };
       });
 
-      console.log("Saving transactions:", formattedData);
       await transactionsApi.create(formattedData);
-      console.log("Transactions saved successfully");
       
       toast({
         title: "Transactions Saved! 🎊",

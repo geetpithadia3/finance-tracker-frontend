@@ -5,48 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Repeat, RefreshCw, Users, Scissors } from "lucide-react";
 import moment from 'moment';
 import { Badge } from "@/components/ui/badge";
+import { 
+  formatCurrency, 
+  getCategoryName, 
+  isSharedTransaction, 
+  isSplitTransaction,
+  getTransactionAmountColor 
+} from '../../utils/transactionHelpers';
 
-export const TransactionRow = ({ 
+export const TransactionTableRow = ({ 
   transaction, 
   editMode, 
   categories, 
   onEdit, 
   onClick, 
-  inputRef,
-  formatCurrency
+  inputRef
 }) => {
-  // Debug transaction object, particularly the category
-  console.log('Transaction in TransactionRow:', transaction);
-  console.log('Transaction category:', transaction.category);
-
-  // Handle the case where the category might be a string or an object or missing
-  const getCategoryName = () => {
-    if (!transaction.category) return 'No Category';
-    if (typeof transaction.category === 'string') return transaction.category;
-    if (transaction.category.name) return transaction.category.name;
-    return 'No Category';
-  };
-
-  // Get the current category name
-  const categoryName = getCategoryName();
-
-  // Check if transaction is shared
-  const isShared = () => {
-    return transaction.owedShare > 0 || 
-           (transaction.shareMetadata && Object.keys(transaction.shareMetadata).length > 0);
-  };
-
-  // Check if transaction is split
-  const isSplit = () => {
-    return transaction.isSplit || 
-           (transaction.parentTransactionId) || 
-           (transaction.splitTransactions && transaction.splitTransactions.length > 0);
-  };
+  const categoryName = getCategoryName(transaction);
+  const isShared = isSharedTransaction(transaction);
+  const isSplit = isSplitTransaction(transaction);
   
-  // Handle row click, preventing actions on refunded transactions
   const handleRowClick = (e) => {
     if (transaction.refunded) {
-      // Prevent any action on refunded transactions
       e.stopPropagation();
       return;
     }
@@ -55,6 +35,20 @@ export const TransactionRow = ({
       onClick(e);
     }
   };
+
+  const TransactionIndicator = ({ icon: Icon, label, color }) => (
+    <div className={`flex items-center ${color}`}>
+      <Icon className="h-3 w-3 mr-1" />
+      <span className="text-xs">{label}</span>
+    </div>
+  );
+
+  const TransactionBadge = ({ icon: Icon, label, color }) => (
+    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${color}`}>
+      <Icon className="h-2 w-2 mr-0.5" />
+      {label}
+    </span>
+  );
 
   return (
     <TableRow
@@ -68,31 +62,36 @@ export const TransactionRow = ({
         {moment(transaction.occurredOn).format('YYYY-MM-DD')}
         <div className="flex flex-col gap-1 mt-1">
           {transaction.recurrence && (
-            <div className="flex items-center text-blue-600 dark:text-blue-400">
-              <Repeat className="h-3 w-3 mr-1" />
-              <span className="text-xs">Recurring</span>
-            </div>
+            <TransactionIndicator 
+              icon={Repeat} 
+              label="Recurring" 
+              color="text-blue-600 dark:text-blue-400" 
+            />
           )}
           {transaction.refunded && (
-            <div className="flex items-center text-amber-600 dark:text-amber-400">
-              <RefreshCw className="h-3 w-3 mr-1" />
-              <span className="text-xs">Refunded</span>
-            </div>
+            <TransactionIndicator 
+              icon={RefreshCw} 
+              label="Refunded" 
+              color="text-amber-600 dark:text-amber-400" 
+            />
           )}
-          {isShared() && (
-            <div className="flex items-center text-purple-600 dark:text-purple-400">
-              <Users className="h-3 w-3 mr-1" />
-              <span className="text-xs">Shared</span>
-            </div>
+          {isShared && (
+            <TransactionIndicator 
+              icon={Users} 
+              label="Shared" 
+              color="text-purple-600 dark:text-purple-400" 
+            />
           )}
-          {isSplit() && (
-            <div className="flex items-center text-indigo-600 dark:text-indigo-400">
-              <Scissors className="h-3 w-3 mr-1" />
-              <span className="text-xs">Split</span>
-            </div>
+          {isSplit && (
+            <TransactionIndicator 
+              icon={Scissors} 
+              label="Split" 
+              color="text-indigo-600 dark:text-indigo-400" 
+            />
           )}
         </div>
       </TableCell>
+      
       <TableCell className="align-top py-2 sm:py-4 text-xs sm:text-sm max-w-full">
         <Badge
           variant={transaction.type?.toLowerCase() === 'credit' ? 'outline' : 'default'}
@@ -100,6 +99,7 @@ export const TransactionRow = ({
           {(transaction.type || 'Unknown').charAt(0).toUpperCase() + (transaction.type || 'Unknown').slice(1).toLowerCase()}
         </Badge>
       </TableCell>
+      
       <TableCell className="align-top py-2 sm:py-4 text-xs sm:text-sm max-w-full">
         {editMode ? (
           <Select
@@ -127,6 +127,7 @@ export const TransactionRow = ({
           </span>
         )}
       </TableCell>
+      
       <TableCell className="max-w-[120px] sm:min-w-[200px] sm:max-w-[400px] xl:max-w-[500px] py-2 sm:py-4 text-xs sm:text-sm truncate align-top">
         {editMode ? (
           <Input
@@ -142,27 +143,31 @@ export const TransactionRow = ({
             </div>
             <div className="flex flex-wrap gap-1 mt-1">
               {transaction.refunded && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                  <RefreshCw className="h-2 w-2 mr-0.5" />
-                  Refunded
-                </span>
+                <TransactionBadge 
+                  icon={RefreshCw} 
+                  label="Refunded"
+                  color="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                />
               )}
-              {isShared() && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                  <Users className="h-2 w-2 mr-0.5" />
-                  Shared
-                </span>
+              {isShared && (
+                <TransactionBadge 
+                  icon={Users} 
+                  label="Shared"
+                  color="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                />
               )}
-              {isSplit() && (
-                <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                  <Scissors className="h-2 w-2 mr-0.5" />
-                  Split
-                </span>
+              {isSplit && (
+                <TransactionBadge 
+                  icon={Scissors} 
+                  label="Split"
+                  color="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
+                />
               )}
             </div>
           </div>
         )}
       </TableCell>
+      
       <TableCell className="align-top py-2 sm:py-4 text-right text-xs sm:text-sm whitespace-nowrap max-w-full">
         <div className="flex flex-col items-end">
           {transaction.personalShare > 0 && transaction.personalShare !== transaction.amount && (
@@ -175,11 +180,7 @@ export const TransactionRow = ({
               Owed: {formatCurrency(transaction.owedShare)}
             </span>
           )}
-          <span className={`font-medium ${
-            transaction.type?.toLowerCase() === 'credit'
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-red-600 dark:text-red-400'
-          }`}>
+          <span className={`font-medium ${getTransactionAmountColor(transaction.type)}`}>
             {formatCurrency(transaction.amount)}
           </span>
         </div>

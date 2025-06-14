@@ -32,4 +32,4 @@ export const TransactionTableHeader = ({ sortConfig, onRequestSort }) => {
       </TableRow>
     </TableHeader>
   );
-}; 
+};

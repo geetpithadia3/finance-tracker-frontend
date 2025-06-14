@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { transactionsApi } from '../../../api/transactions';
-import TransactionView from './TransactionView';
+import { TransactionDetailsView } from './views';
 import SplitView from './SplitView';
 import ShareView from './ShareView';
 import { RecurrenceView } from './RecurrenceView';
@@ -132,9 +132,9 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl p-0 sm:p-6">
+      <DialogContent className="max-w-2xl p-0 sm:p-6">
         {view === 'details' && (
-          <TransactionView
+          <TransactionDetailsView
             transaction={transaction}
             onSplitStart={handleSplitStart}
             onShareStart={handleShareStart}

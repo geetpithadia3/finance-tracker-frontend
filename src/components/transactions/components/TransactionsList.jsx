@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Pencil, Save, X, Filter, Repeat, Upload, Plus, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Filter, Repeat, Upload, Plus } from 'lucide-react';
 import { useTransactionListManager } from '../hooks/useTransactionListManager';
 import { EmptyState } from './EmptyState';
 import { TransactionDialog } from './TransactionDialog';
-import { TransactionsTable } from './TransactionsTable';
+import { TransactionTable } from './table';
+import { formatCurrency } from '../utils/transactionHelpers';
 import RecurringTransactionsList from './RecurringTransactionsList';
 import { TransactionImportDialog } from './TransactionImportDialog';
 
@@ -35,10 +35,6 @@ const TransactionsList = () => {
     handleRequestSort,
   } = useTransactionListManager();
 
-  const formatCurrency = (amount) => {
-    const value = parseFloat(amount);
-    return isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
-  };
 
   const handleTransactionClick = (transaction) => {
     if (!editMode) {
@@ -158,7 +154,7 @@ const TransactionsList = () => {
             </div>
           )}
           
-          <TransactionsTable
+          <TransactionTable
             transactions={filteredTransactions}
             categories={categories}
             editMode={editMode}
@@ -166,7 +162,6 @@ const TransactionsList = () => {
             inputRef={inputRef}
             onEdit={handleEdit}
             onTransactionClick={handleTransactionClick}
-            formatCurrency={formatCurrency}
             onRequestSort={handleRequestSort}
           />
           

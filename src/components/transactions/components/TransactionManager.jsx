@@ -3,7 +3,7 @@ import { useTransactionManager } from '../hooks/useTransactionManager';
 import SplitView from './SplitView';
 import ShareView  from './ShareView';
 import { SplitContext } from '../../../context/SplitContext';
-import TransactionView from './TransactionView';
+import { TransactionDetailsView } from './views';
 
 const TransactionManager = ({ transaction, onSplitSave, onShareSave, categories = [], onClose }) => {
   const {
@@ -38,7 +38,7 @@ const TransactionManager = ({ transaction, onSplitSave, onShareSave, categories 
           categories={categories}
         />
       ) : (
-        <TransactionView
+        <TransactionDetailsView
           transaction={transaction}
           onClose={onClose}
           onSplitStart={handleSplitStart}

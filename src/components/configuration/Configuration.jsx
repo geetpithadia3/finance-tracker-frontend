@@ -42,7 +42,7 @@ const Configuration = () => {
               </CardContent>
             </Card>
           </DialogTrigger>
-          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto mx-auto">
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-sm sm:text-base">{widget.title}</DialogTitle>
               <DialogDescription className="text-xs sm:text-sm">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { transactionsApi } from '../../../api/transactions';
+import { formatCurrency } from '../utils/transactionHelpers';
 
 export const useTransactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -20,7 +21,6 @@ export const useTransactions = () => {
       const formattedData = formatTransactionData(data);
       setTransactions(formattedData);
     } catch (error) {
-      console.error('Error:', error);
       setError('Failed to load transactions');
     } finally {
       setIsLoading(false);
@@ -74,14 +74,10 @@ export const useTransactions = () => {
       await fetchTransactions(selectedDate);
       setEditMode(false);
     } catch (error) {
-      console.error('Error updating transactions:', error);
+      // Error handling could be improved with toast notifications
     }
   };
 
-  const formatCurrency = (amount) => {
-    const value = parseFloat(amount);
-    return isNaN(value) ? '$0.00' : `$${value.toFixed(2)}`;
-  };
 
   return {
     transactions,
