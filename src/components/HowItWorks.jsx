@@ -22,6 +22,8 @@ import {
   Search,
   CreditCard,
   ExternalLink,
+  Repeat,
+  DollarSign,
 } from 'lucide-react';
 
 const HowItWorks = () => {
@@ -44,8 +46,8 @@ const HowItWorks = () => {
       },
       {
         icon: CreditCard,
-        title: "Set Recurring Transactions",
-        description: "Mark income or expenses as recurring to better track regular financial commitments.",
+        title: "Set Up Recurring Transactions",
+        description: "Click 'Make Recurring' on any transaction to set up recurring income (paychecks) and expenses (bills). Configure frequency, date flexibility, and variable amounts.",
         image: "/images/recurring.png" // Replace with actual screenshot
       },
       {
@@ -85,16 +87,28 @@ const HowItWorks = () => {
     ],
     allocation: [
       {
-        icon: Calculator,
-        title: "Smart Fund Allocation",
-        description: "Using your recurring transactions, the app analyzes spending patterns and recommends optimal allocation of your income.",
-        image: "/images/smart-allocation.png" // Replace with actual screenshot
+        icon: Repeat,
+        title: "Set Up Recurring Income & Expenses",
+        description: "First, create recurring transactions for your regular income (salary, paychecks) and expenses (rent, utilities, subscriptions). Use CREDIT type for income and DEBIT for expenses.",
+        image: "/images/setup-recurring.png" // Replace with actual screenshot
       },
       {
-        icon: PiggyBank,
-        title: "Savings Recommendations",
-        description: "Get personalized suggestions on how to increase your savings based on your recurring income and expenses.",
-        image: "/images/savings-tips.png" // Replace with actual screenshot
+        icon: DollarSign,
+        title: "Configure Income Categories",
+        description: "Ensure your recurring income is categorized as 'Income', 'Salary', or contains keywords like 'payroll', 'salary'. This helps the system identify your paychecks correctly.",
+        image: "/images/income-categories.png" // Replace with actual screenshot
+      },
+      {
+        icon: Calculator,
+        title: "View Paycheck Allocation",
+        description: "Smart Allocation will show you when each paycheck arrives and which bills are due before your next paycheck, helping you allocate funds properly.",
+        image: "/images/paycheck-allocation.png" // Replace with actual screenshot
+      },
+      {
+        icon: BarChart3,
+        title: "Future Planning",
+        description: "Use any future month to see your predicted paycheck allocation. Perfect for planning ahead and ensuring you have enough for all bills.",
+        image: "/images/future-planning.png" // Replace with actual screenshot
       }
     ]
   };

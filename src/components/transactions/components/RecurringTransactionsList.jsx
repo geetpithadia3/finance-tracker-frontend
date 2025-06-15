@@ -151,7 +151,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                   <TableCell>
                     <div className="flex items-center text-sm">
                       <Calendar className="h-3 w-3 mr-1" />
-                      <span>{getDateFlexibilityLabel(transaction.dateFlexibility)}</span>
+                      <span>{getDateFlexibilityLabel(transaction.dateFlexibility, transaction)}</span>
                       
                       {transaction.dateFlexibility === 'CUSTOM_RANGE' && 
                         transaction.rangeStart && 

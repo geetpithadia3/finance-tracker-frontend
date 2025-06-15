@@ -18,7 +18,11 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
     selectedDate,
     setSelectedDate,
     handleBudgetChange,
-    saveBudgetConfiguration
+    saveBudgetConfiguration,
+    deleteBudgetConfiguration,
+    copyBudgetFromPreviousMonth,
+    existingBudgetId,
+    isLoading
   } = useBudgetConfiguration(initialDate);
 
   const handleMonthChange = (newValue) => {
@@ -28,24 +32,53 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
   const handleSave = async () => {
     const success = await saveBudgetConfiguration();
     if (success) {
-      toast({
-        title: "Success",
-        description: "Budget configuration saved successfully",
-      });
       navigate(-1);
     }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this budget configuration?')) {
+      const success = await deleteBudgetConfiguration();
+      if (success) {
+        navigate(-1);
+      }
+    }
+  };
+
+  const handleCopyFromPrevious = async () => {
+    await copyBudgetFromPreviousMonth();
   };
 
   return (
     <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-white">
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <MonthSelector 
               selectedDate={selectedDate}
               onMonthChange={handleMonthChange}
               showLabel={true}
             />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleCopyFromPrevious}
+                disabled={isLoading}
+                className="text-sm"
+              >
+                Copy from Previous Month
+              </Button>
+              {existingBudgetId && (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="text-sm"
+                >
+                  Delete Budget
+                </Button>
+              )}
+            </div>
           </div>
           
           <BudgetSummary totalBudget={totalBudget} />
@@ -66,9 +99,10 @@ const BudgetConfiguration = ({ selectedDate: initialDate }) => {
             </Button>
             <Button 
               onClick={handleSave}
+              disabled={isLoading}
               className="w-full sm:w-auto"
             >
-              Save Configuration
+              {isLoading ? 'Saving...' : existingBudgetId ? 'Update Configuration' : 'Save Configuration'}
             </Button>
           </div>
         </div>

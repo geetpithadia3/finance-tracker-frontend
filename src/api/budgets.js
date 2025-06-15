@@ -80,5 +80,35 @@ export const budgetsApi = {
   getReport: async (yearMonth, format) => {
     const res = await apiClient.get(`/budgets/report?year_month=${yearMonth}&format=${format}`, { responseType: 'blob' });
     return res; // No mapping for blobs
+  },
+
+  /**
+   * Update existing budget
+   * @param {string} budgetId - Budget ID to update
+   * @param {Object} budgetData - Updated budget data
+   * @returns {Promise<Object>} Updated budget
+   */
+  update: async (budgetId, budgetData) => {
+    const res = await apiClient.put(`/budgets/${budgetId}`, toSnake(budgetData));
+    return toCamel(res);
+  },
+
+  /**
+   * Delete budget
+   * @param {string} budgetId - Budget ID to delete
+   * @returns {Promise<Object>} Deletion confirmation
+   */
+  delete: async (budgetId) => {
+    const res = await apiClient.delete(`/budgets/${budgetId}`);
+    return res;
+  },
+
+  /**
+   * Get available categories for budgeting
+   * @returns {Promise<Array>} List of categories
+   */
+  getCategories: async () => {
+    const res = await apiClient.get('/budgets/categories');
+    return toCamel(res);
   }
 };

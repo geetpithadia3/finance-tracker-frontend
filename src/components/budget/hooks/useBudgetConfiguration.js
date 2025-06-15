@@ -9,6 +9,8 @@ export const useBudgetConfiguration = (initialDate) => {
   const [budgets, setBudgets] = useState({});
   const [totalBudget, setTotalBudget] = useState(0);
   const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [existingBudgetId, setExistingBudgetId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -37,12 +39,15 @@ export const useBudgetConfiguration = (initialDate) => {
       });
 
       if (response && response.categories) {
+        setExistingBudgetId(response.id);
         response.categories.forEach(budget => {
           const category = categories.find(c => c.id === budget.categoryId);
           if (category) {
             budgetMap[category.name] = parseFloat(budget.limit) || 0;
           }
         });
+      } else {
+        setExistingBudgetId(null);
       }
       
       setBudgets(budgetMap);
@@ -73,6 +78,7 @@ export const useBudgetConfiguration = (initialDate) => {
 
   const saveBudgetConfiguration = useCallback(async () => {
     try {
+      setIsLoading(true);
       const budgetData = {
         yearMonth: selectedDate.format('YYYY-MM'),
         categoryLimits: categories.map(category => ({
@@ -81,21 +87,113 @@ export const useBudgetConfiguration = (initialDate) => {
         }))
       };
 
-      await budgetsApi.create(budgetData);
-      toast({
-        title: "Success",
-        description: "Budget configuration saved successfully",
-      });
+      if (existingBudgetId) {
+        await budgetsApi.update(existingBudgetId, budgetData);
+        toast({
+          title: "Success",
+          description: "Budget configuration updated successfully",
+        });
+      } else {
+        await budgetsApi.create(budgetData);
+        toast({
+          title: "Success",
+          description: "Budget configuration created successfully",
+        });
+      }
       return true;
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save budget configuration",
+        description: existingBudgetId ? "Failed to update budget configuration" : "Failed to create budget configuration",
         variant: "destructive",
       });
       return false;
+    } finally {
+      setIsLoading(false);
     }
-  }, [categories, budgets, selectedDate, toast]);
+  }, [categories, budgets, selectedDate, existingBudgetId, toast]);
+
+  const deleteBudgetConfiguration = useCallback(async () => {
+    if (!existingBudgetId) return false;
+    
+    try {
+      setIsLoading(true);
+      await budgetsApi.delete(existingBudgetId);
+      toast({
+        title: "Success",
+        description: "Budget configuration deleted successfully",
+      });
+      
+      // Reset local state
+      setExistingBudgetId(null);
+      const resetBudgets = {};
+      categories.forEach(category => {
+        resetBudgets[category.name] = 0;
+      });
+      setBudgets(resetBudgets);
+      setTotalBudget(0);
+      
+      return true;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete budget configuration",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [existingBudgetId, categories, toast]);
+
+  const copyBudgetFromPreviousMonth = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const previousMonth = selectedDate.subtract(1, 'month');
+      const yearMonth = previousMonth.format('YYYY-MM');
+      const response = await budgetsApi.get(yearMonth);
+      
+      if (response && response.categories) {
+        const budgetMap = {};
+        categories.forEach(category => {
+          budgetMap[category.name] = 0;
+        });
+
+        response.categories.forEach(budget => {
+          const category = categories.find(c => c.id === budget.categoryId);
+          if (category) {
+            budgetMap[category.name] = parseFloat(budget.limit) || 0;
+          }
+        });
+        
+        setBudgets(budgetMap);
+        const total = Object.values(budgetMap).reduce((sum, amount) => sum + amount, 0);
+        setTotalBudget(total);
+        
+        toast({
+          title: "Success",
+          description: `Budget copied from ${previousMonth.format('MMMM YYYY')}`,
+        });
+        return true;
+      } else {
+        toast({
+          title: "Info",
+          description: `No budget found for ${previousMonth.format('MMMM YYYY')}`,
+          variant: "default",
+        });
+        return false;
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy budget from previous month",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categories, selectedDate, toast]);
 
   useEffect(() => {
     fetchCategories();
@@ -114,6 +212,10 @@ export const useBudgetConfiguration = (initialDate) => {
     selectedDate,
     setSelectedDate,
     handleBudgetChange,
-    saveBudgetConfiguration
+    saveBudgetConfiguration,
+    deleteBudgetConfiguration,
+    copyBudgetFromPreviousMonth,
+    existingBudgetId,
+    isLoading
   };
 }; 
