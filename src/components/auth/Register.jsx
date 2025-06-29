@@ -11,7 +11,6 @@ import { authApi } from '../../api/auth';
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: '',
     confirmPassword: ''
   });
@@ -48,7 +47,6 @@ const Register = () => {
     try {
       await authApi.register({
         username: formData.username,
-        email: formData.email,
         password: formData.password
       });
       
@@ -92,20 +90,6 @@ const Register = () => {
                 value={formData.username}
                 onChange={handleChange}
                 placeholder="Enter your username"
-                className="text-xs sm:text-sm h-8 sm:h-10"
-              />
-            </div>
-
-            <div className="space-y-1 sm:space-y-2">
-              <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
                 className="text-xs sm:text-sm h-8 sm:h-10"
               />
             </div>

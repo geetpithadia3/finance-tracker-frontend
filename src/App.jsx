@@ -18,8 +18,7 @@ import TransactionsList from './components/transactions/components/TransactionsL
 import Dashboard from './components/dashboard/components/Dashboard';
 import Configuration from './components/configuration/Configuration';
 import { Toaster } from "@/components/ui/toaster"
-import Budget from './components/budget/components/Budget';
-import BudgetConfiguration from './components/budget/components/BudgetConfiguration';
+import { BudgetDashboard } from './components/budget/components/BudgetDashboard';
 import Avvvatars from 'avvvatars-react'
 import SmartAllocation from './components/allocation/SmartAllocation';
 import HowItWorks from './components/HowItWorks';
@@ -42,7 +41,6 @@ import {
   Sun,
 } from 'lucide-react';
 
-import moment from 'moment';
 // Import the API client to use the theme functions
 import { apiClient } from './api/client';
 
@@ -309,14 +307,7 @@ const AppContent = () => {
         <Route path="/budget" element={
           <PrivateRoute>
             <MainLayout>
-              <Budget />
-            </MainLayout>
-          </PrivateRoute>
-        } />
-        <Route path="/budget/configure" element={
-          <PrivateRoute>
-            <MainLayout>
-              <BudgetConfiguration selectedDate={moment()} />
+              <BudgetDashboard />
             </MainLayout>
           </PrivateRoute>
         } />

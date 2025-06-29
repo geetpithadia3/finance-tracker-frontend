@@ -1,114 +1,89 @@
 import { apiClient } from './client';
 
-/**
- * API methods for budget management
- */
-
-// Utility functions for snake_case <-> camelCase mapping
-function toSnake(obj) {
-  if (Array.isArray(obj)) return obj.map(toSnake);
-  if (obj !== null && typeof obj === 'object') {
-    return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [
-        k.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`),
-        toSnake(v)
-      ])
-    );
-  }
-  return obj;
-}
-
-function toCamel(obj) {
-  if (Array.isArray(obj)) return obj.map(toCamel);
-  if (obj !== null && typeof obj === 'object') {
-    return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [
-        k.replace(/_([a-z])/g, g => g[1].toUpperCase()),
-        toCamel(v)
-      ])
-    );
-  }
-  return obj;
-}
-
-export const budgetsApi = {
-  /**
-   * Get budget for specific month
-   * @param {string} yearMonth - Year and month in YYYY-MM format
-   * @returns {Promise<Object>} Budget data
-   */
-  get: async (yearMonth) => {
-    const res = await apiClient.get(`/budgets?yearMonth=${yearMonth}`);
-    return toCamel(res);
+export const budgetAPI = {
+  // Create new monthly budget
+  createBudget: async (budgetData) => {
+    return await apiClient.post('/budgets/', budgetData);
   },
+
+  // Get all budgets
+  getBudgets: async (skip = 0, limit = 100) => {
+    return await apiClient.get(`/budgets/?skip=${skip}&limit=${limit}`);
+  },
+
+  // Get budget by year-month
+  getBudgetByMonth: async (yearMonth) => {
+    return await apiClient.get(`/budgets/${yearMonth}`);
+  },
+
+  // Update existing budget
+  updateBudget: async (budgetId, budgetData) => {
+    return await apiClient.put(`/budgets/${budgetId}`, budgetData);
+  },
+
+  // Delete budget
+  deleteBudget: async (budgetId) => {
+    return await apiClient.delete(`/budgets/${budgetId}`);
+  },
+
+  // Copy budget from previous month
+  copyBudget: async (sourceYearMonth, targetYearMonth) => {
+    return await apiClient.post('/budgets/copy', {
+      source_year_month: sourceYearMonth,
+      target_year_month: targetYearMonth
+    });
+  },
+
+  // Get budget spending data
+  getBudgetSpending: async (yearMonth) => {
+    return await apiClient.get(`/budgets/${yearMonth}/spending`);
+  },
+
+  // Project Budget Methods
   
-  /**
-   * Create new budget
-   * @param {Object} budgetData - Budget creation data
-   * @returns {Promise<Object>} Created budget
-   */
-  create: async (budgetData) => {
-    const res = await apiClient.post('/budgets', toSnake(budgetData));
-    return toCamel(res);
-  },
-    
-  /**
-   * Get estimated income
-   * @returns {Promise<Object>} Estimated income data
-   */
-  getEstimatedIncome: async () => {
-    const res = await apiClient.get('/income-sources');
-    return toCamel(res);
-  },
-    
-  /**
-   * Get dashboard data
-   * @param {string} yearMonth - Year and month in YYYY-MM format
-   * @returns {Promise<Object>} Dashboard data
-   */
-  getDashboardData: async (yearMonth) => {
-    const res = await apiClient.get(`/dashboard?year_month=${yearMonth}`);
-    return toCamel(res);
+  // Create new project budget
+  createProjectBudget: async (projectBudgetData) => {
+    console.log('API: Creating project budget with data:', projectBudgetData);
+    try {
+      const result = await apiClient.post('/budgets/projects', projectBudgetData);
+      console.log('API: Project budget created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('API: Failed to create project budget:', error);
+      throw error;
+    }
   },
 
-  /**
-   * Download budget report
-   * @param {string} yearMonth - Year and month in YYYY-MM format
-   * @param {string} format - Report format ('PDF' or 'CSV')
-   * @returns {Promise<Blob>} Report file blob
-   */
-  getReport: async (yearMonth, format) => {
-    const res = await apiClient.get(`/budgets/report?year_month=${yearMonth}&format=${format}`, { responseType: 'blob' });
-    return res; // No mapping for blobs
+  // Get all project budgets
+  getProjectBudgets: async (skip = 0, limit = 100, activeOnly = true) => {
+    console.log('API: Fetching project budgets with params:', { skip, limit, activeOnly });
+    try {
+      const result = await apiClient.get(`/budgets/projects?skip=${skip}&limit=${limit}&active_only=${activeOnly}`);
+      console.log('API: Project budgets fetched successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('API: Failed to fetch project budgets:', error);
+      throw error;
+    }
   },
 
-  /**
-   * Update existing budget
-   * @param {string} budgetId - Budget ID to update
-   * @param {Object} budgetData - Updated budget data
-   * @returns {Promise<Object>} Updated budget
-   */
-  update: async (budgetId, budgetData) => {
-    const res = await apiClient.put(`/budgets/${budgetId}`, toSnake(budgetData));
-    return toCamel(res);
+  // Get project budget by ID
+  getProjectBudget: async (projectBudgetId) => {
+    return await apiClient.get(`/budgets/projects/${projectBudgetId}`);
   },
 
-  /**
-   * Delete budget
-   * @param {string} budgetId - Budget ID to delete
-   * @returns {Promise<Object>} Deletion confirmation
-   */
-  delete: async (budgetId) => {
-    const res = await apiClient.delete(`/budgets/${budgetId}`);
-    return res;
+  // Update project budget
+  updateProjectBudget: async (projectBudgetId, projectBudgetData) => {
+    return await apiClient.put(`/budgets/projects/${projectBudgetId}`, projectBudgetData);
   },
 
-  /**
-   * Get available categories for budgeting
-   * @returns {Promise<Array>} List of categories
-   */
-  getCategories: async () => {
-    const res = await apiClient.get('/budgets/categories');
-    return toCamel(res);
+  // Delete project budget
+  deleteProjectBudget: async (projectBudgetId) => {
+    return await apiClient.delete(`/budgets/projects/${projectBudgetId}`);
+  },
+
+  // Get project budget progress
+  getProjectBudgetProgress: async (projectBudgetId) => {
+    return await apiClient.get(`/budgets/projects/${projectBudgetId}/progress`);
   }
 };

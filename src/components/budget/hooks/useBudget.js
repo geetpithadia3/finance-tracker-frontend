@@ -1,89 +1,196 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useToast } from "@/components/ui/use-toast";
-import { budgetsApi } from '../../../api/budgets';
-import moment from 'moment';
+import { useState, useEffect, useCallback } from 'react';
+import { budgetAPI } from '../../../api/budgets';
+import { useToast } from '../../../hooks/use-toast';
 
-export const useBudget = (initialDate = moment()) => {
-  const { toast } = useToast();
+export const useBudget = () => {
   const [budgets, setBudgets] = useState([]);
-  const [totalBudget, setTotalBudget] = useState(0);
-  const [totalSpent, setTotalSpent] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(initialDate);
-
-  const currentYearMonth = useMemo(() => 
-    selectedDate.format('YYYY-MM'),
-    [selectedDate]
-  );
-
-  const handleOverBudgetAlert = useCallback((categories) => {
-    const overBudgetCategories = categories.filter(cat => cat.spent > cat.limit);
-    if (overBudgetCategories.length > 0) {
-      toast({
-        title: "Budget Alert! 🚨",
-        description: `Whoopsie! ${overBudgetCategories.length} ${
-          overBudgetCategories.length === 1 ? 'category is' : 'categories are'
-        } doing a little happy dance over their limits!`,
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  const handleEmptyBudgets = useCallback(() => {
-    setBudgets([]);
-    setTotalBudget(0);
-    setTotalSpent(0);
-    toast({
-      title: "Fresh Start! 🌱",
-      description: "Time to set up your first budget and make those money goals happen!",
-    });
-  }, [toast]);
-
-  const handleError = useCallback((error) => {
-    console.error('Error loading budgets:', error);
-    // Only show error toast for non-404 errors
-    if (!error.message?.includes('404')) {
-      toast({
-        title: "Budget Hiccup! 🎪",
-        description: "Your budgets are playing hide and seek. Let's try again!",
-        variant: "destructive",
-      });
-    }
-    // For 404 or any other error, treat it as no budget
-    handleEmptyBudgets();
-  }, [toast, handleEmptyBudgets]);
+  const [currentBudget, setCurrentBudget] = useState(null);
+  const [budgetSpending, setBudgetSpending] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { toast } = useToast();
 
   const fetchBudgets = useCallback(async () => {
     try {
-      const data = await budgetsApi.get(currentYearMonth);
-      
-      if (data && data.categories && data.categories.length > 0) {
-        const filteredCategories = data.categories.filter(cat => cat.categoryName !== 'Income');
-        setBudgets(filteredCategories);
-        const total = filteredCategories.reduce((acc, budget) => acc + budget.limit, 0);
-        const spent = filteredCategories.reduce((acc, budget) => acc + budget.spent, 0);
-        
-        setTotalBudget(total);
-        setTotalSpent(spent);
-
-        handleOverBudgetAlert(filteredCategories);
-      } else {
-        handleEmptyBudgets();
-      }
-    } catch (error) {
-      handleError(error);
+      setLoading(true);
+      setError(null);
+      const data = await budgetAPI.getBudgets();
+      setBudgets(data);
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: "Failed to fetch budgets",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [currentYearMonth, handleOverBudgetAlert, handleEmptyBudgets, handleError]);
+  }, [toast]);
 
-  useEffect(() => {
-    fetchBudgets();
-  }, [fetchBudgets]);
+  const fetchBudgetByMonth = useCallback(async (yearMonth) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await budgetAPI.getBudgetByMonth(yearMonth);
+      setCurrentBudget(data);
+      return data;
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setCurrentBudget(null);
+        return null;
+      }
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: "Failed to fetch budget",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const fetchBudgetSpending = useCallback(async (yearMonth) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await budgetAPI.getBudgetSpending(yearMonth);
+      setBudgetSpending(data);
+      return data;
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setBudgetSpending(null);
+        return null;
+      }
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: "Failed to fetch budget spending data",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const createBudget = useCallback(async (budgetData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const newBudget = await budgetAPI.createBudget(budgetData);
+      setBudgets(prev => [newBudget, ...prev]);
+      toast({
+        title: "Success",
+        description: "Budget created successfully",
+      });
+      return newBudget;
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.response?.data?.detail || "Failed to create budget",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const updateBudget = useCallback(async (budgetId, budgetData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const updatedBudget = await budgetAPI.updateBudget(budgetId, budgetData);
+      setBudgets(prev => 
+        prev.map(budget => budget.id === budgetId ? updatedBudget : budget)
+      );
+      if (currentBudget && currentBudget.id === budgetId) {
+        setCurrentBudget(updatedBudget);
+      }
+      toast({
+        title: "Success",
+        description: "Budget updated successfully",
+      });
+      return updatedBudget;
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.response?.data?.detail || "Failed to update budget",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentBudget, toast]);
+
+  const deleteBudget = useCallback(async (budgetId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await budgetAPI.deleteBudget(budgetId);
+      setBudgets(prev => prev.filter(budget => budget.id !== budgetId));
+      if (currentBudget && currentBudget.id === budgetId) {
+        setCurrentBudget(null);
+      }
+      toast({
+        title: "Success",
+        description: "Budget deleted successfully",
+      });
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.response?.data?.detail || "Failed to delete budget",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [currentBudget, toast]);
+
+  const copyBudget = useCallback(async (sourceYearMonth, targetYearMonth) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const newBudget = await budgetAPI.copyBudget(sourceYearMonth, targetYearMonth);
+      setBudgets(prev => [newBudget, ...prev]);
+      toast({
+        title: "Success",
+        description: `Budget copied from ${sourceYearMonth} to ${targetYearMonth}`,
+      });
+      return newBudget;
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.response?.data?.detail || "Failed to copy budget",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   return {
     budgets,
-    totalBudget,
-    totalSpent,
-    selectedDate,
-    setSelectedDate,
-    currentYearMonth
+    currentBudget,
+    budgetSpending,
+    loading,
+    error,
+    fetchBudgets,
+    fetchBudgetByMonth,
+    fetchBudgetSpending,
+    createBudget,
+    updateBudget,
+    deleteBudget,
+    copyBudget,
   };
-}; 
+};

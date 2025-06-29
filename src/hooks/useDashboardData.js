@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import moment from 'moment';
-import { budgetsApi } from '../api/budgets';
+import { transactionsApi } from '../api/transactions';
 
 export const useDashboardData = (initialDate = moment().subtract(1, 'months')) => {
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -33,7 +33,7 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
 
   const fetchDashboardData = async () => {
     try {
-      const data = await budgetsApi.getDashboardData(selectedDate.format('YYYY-MM'));
+      const data = await transactionsApi.getDashboardData(selectedDate.format('YYYY-MM'));
 
       const formattedExpenses = formatTransactions(data.expenses);
       const formattedIncome = formatTransactions(data.income);

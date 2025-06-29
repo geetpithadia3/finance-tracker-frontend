@@ -52,7 +52,19 @@ export default defineConfig({
         cookieDomainRewrite: 'localhost',
       },
       '/budgets': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: 'localhost',
+      },
+      '/budget-plans': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: 'localhost',
+      },
+      '/dev-budget-plans': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
         cookieDomainRewrite: 'localhost',
