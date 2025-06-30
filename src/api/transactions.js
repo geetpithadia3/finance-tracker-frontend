@@ -99,7 +99,7 @@ export const transactionsApi = {
   
   getDashboardData: async (yearMonth) => {
     console.log(`Fetching dashboard data for yearMonth: ${yearMonth}`);
-    const res = await apiClient.get(`/dashboard?yearMonth=${yearMonth}`);
+    const res = await apiClient.get(`/dashboard?year_month=${yearMonth}`);
     return toCamel(res);
   },
 

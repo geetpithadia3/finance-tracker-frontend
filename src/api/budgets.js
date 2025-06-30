@@ -34,6 +34,15 @@ export const budgetAPI = {
     });
   },
 
+  // Rollover management
+  getRolloverStatus: async (yearMonth) => {
+    return await apiClient.get(`/budgets/${yearMonth}/rollover-status`);
+  },
+
+  recalculateRollover: async (yearMonth) => {
+    return await apiClient.post(`/budgets/${yearMonth}/recalculate-rollover`);
+  },
+
   // Get budget spending data
   getBudgetSpending: async (yearMonth) => {
     return await apiClient.get(`/budgets/${yearMonth}/spending`);
@@ -67,11 +76,6 @@ export const budgetAPI = {
     }
   },
 
-  // Get project budget by ID
-  getProjectBudget: async (projectBudgetId) => {
-    return await apiClient.get(`/budgets/projects/${projectBudgetId}`);
-  },
-
   // Update project budget
   updateProjectBudget: async (projectBudgetId, projectBudgetData) => {
     return await apiClient.put(`/budgets/projects/${projectBudgetId}`, projectBudgetData);
@@ -85,5 +89,18 @@ export const budgetAPI = {
   // Get project budget progress
   getProjectBudgetProgress: async (projectBudgetId) => {
     return await apiClient.get(`/budgets/projects/${projectBudgetId}/progress`);
-  }
+  },
+
+  // Advanced Rollover Config
+  getRolloverConfig: async (categoryId) => {
+    return await apiClient.get(`/rollover-config/${categoryId}`);
+  },
+
+  updateRolloverConfig: async (categoryId, config) => {
+    return await apiClient.put(`/rollover-config/${categoryId}`, config);
+  },
+
+  createRolloverConfig: async (config) => {
+    return await apiClient.post('/rollover-config/', config);
+  },
 };

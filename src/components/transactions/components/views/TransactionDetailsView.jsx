@@ -54,6 +54,10 @@ const TransactionDetailsView = ({
       const updatedTransaction = {
         ...localTransaction,
         refunded: willBeRefunded,
+        personalShare: localTransaction.personalShare,
+        owedShare: localTransaction.owedShare,
+        shareMetadata: localTransaction.shareMetadata,
+        recurrence: willBeRefunded ? null : localTransaction.recurrence,
       };
       
       setLocalTransaction(updatedTransaction);
@@ -206,9 +210,11 @@ const TransactionDetailsView = ({
                     {format(new Date(localTransaction.occurredOn), "MMMM d, yyyy")}
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                    <Badge variant="outline" className="mt-1 text-xs sm:text-sm px-2 py-0.5">
-                      {localTransaction.category.name}
-                    </Badge>
+                    {localTransaction.category && (
+                      <Badge variant="outline" className="mt-1 text-xs sm:text-sm px-2 py-0.5">
+                        {localTransaction.category.name}
+                      </Badge>
+                    )}
                     <Badge 
                       variant="outline" 
                       className={`mt-1 text-xs sm:text-sm px-2 py-0.5 ${getTransactionTypeColor(localTransaction.type)}`}

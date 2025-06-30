@@ -321,7 +321,17 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
           yourShares: parseFloat(state.yourShares),
           totalShares: parseFloat(state.totalShares)
         })
-      })
+      }),
+      refunded: transaction.refunded,
+      recurrence: transaction.recurrence,
+      amount: transaction.amount,
+      description: transaction.description,
+      category: transaction.category,
+      categoryId: transaction.categoryId,
+      occurredOn: transaction.occurredOn,
+      id: transaction.id,
+      is_deleted: transaction.is_deleted,
+      created_at: transaction.created_at,
     };
 
     onSave({

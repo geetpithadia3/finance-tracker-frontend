@@ -82,23 +82,14 @@ export const useBudget = () => {
       setError(null);
       const newBudget = await budgetAPI.createBudget(budgetData);
       setBudgets(prev => [newBudget, ...prev]);
-      toast({
-        title: "Success",
-        description: "Budget created successfully",
-      });
       return newBudget;
     } catch (err) {
       setError(err.message);
-      toast({
-        title: "Error",
-        description: err.response?.data?.detail || "Failed to create budget",
-        variant: "destructive",
-      });
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   const updateBudget = useCallback(async (budgetId, budgetData) => {
     try {
@@ -111,23 +102,14 @@ export const useBudget = () => {
       if (currentBudget && currentBudget.id === budgetId) {
         setCurrentBudget(updatedBudget);
       }
-      toast({
-        title: "Success",
-        description: "Budget updated successfully",
-      });
       return updatedBudget;
     } catch (err) {
       setError(err.message);
-      toast({
-        title: "Error",
-        description: err.response?.data?.detail || "Failed to update budget",
-        variant: "destructive",
-      });
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [currentBudget, toast]);
+  }, [currentBudget]);
 
   const deleteBudget = useCallback(async (budgetId) => {
     try {
@@ -161,23 +143,19 @@ export const useBudget = () => {
       setError(null);
       const newBudget = await budgetAPI.copyBudget(sourceYearMonth, targetYearMonth);
       setBudgets(prev => [newBudget, ...prev]);
-      toast({
-        title: "Success",
-        description: `Budget copied from ${sourceYearMonth} to ${targetYearMonth}`,
-      });
       return newBudget;
     } catch (err) {
       setError(err.message);
-      toast({
-        title: "Error",
-        description: err.response?.data?.detail || "Failed to copy budget",
-        variant: "destructive",
-      });
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
+
+  const clearBudgetData = useCallback(() => {
+    setCurrentBudget(null);
+    setBudgetSpending(null);
+  }, []);
 
   return {
     budgets,
@@ -192,5 +170,7 @@ export const useBudget = () => {
     updateBudget,
     deleteBudget,
     copyBudget,
+    // Function to clear budget data when switching months
+    clearBudgetData,
   };
 };

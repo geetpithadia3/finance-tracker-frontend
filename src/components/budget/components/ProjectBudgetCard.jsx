@@ -126,48 +126,20 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
   const status = getProgressStatus();
   const statusConfig = getStatusConfig(status);
 
-  if (loading && !progress) {
-    return (
-      <Card className="animate-pulse">
-        <CardHeader>
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="h-3 bg-gray-200 rounded"></div>
-            <div className="h-8 bg-gray-200 rounded"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className={`transition-all hover:shadow-md ${statusConfig.className}`}>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg">{projectBudget.name}</CardTitle>
-            {projectBudget.description && (
-              <p className="text-sm text-gray-600 mt-1">{projectBudget.description}</p>
-            )}
-            <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {formatDate(projectBudget.start_date)} - {formatDate(projectBudget.end_date)}
-              </div>
-              {progress && (
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {getDurationText()}
-                </div>
-              )}
+            <CardTitle className="text-sm font-medium">{projectBudget.name}</CardTitle>
+            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+              <Clock className="h-3 w-3" />
+              {progress ? getDurationText() : `${formatDate(projectBudget.start_date)} - ${formatDate(projectBudget.end_date)}`}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant={statusConfig.variant} className="text-xs">
+          <div className="flex items-center gap-1">
+            <Badge variant={statusConfig.variant} className="text-xs px-1 py-0">
               {statusConfig.text}
             </Badge>
             <div className="flex gap-1">
@@ -175,7 +147,7 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
                 variant="ghost"
                 size="sm"
                 onClick={() => onEdit(projectBudget)}
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 p-0"
               >
                 <Edit className="h-3 w-3" />
               </Button>
@@ -183,7 +155,7 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -192,79 +164,40 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        {progress && (
+      <CardContent className="space-y-2">
+        {progress ? (
           <>
-            {/* Overall Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Overall Progress</span>
-                <span className="font-medium">{progress.progress_percentage.toFixed(1)}%</span>
-              </div>
+            {/* Compact Progress */}
+            <div className="space-y-1">
               <Progress 
-                value={Math.min(progress.progress_percentage, 100)} 
-                className="h-3"
+                value={Math.min(progress.progress_percentage || 0, 100)} 
+                className="h-1.5"
                 indicatorClassName={statusConfig.color}
               />
             </div>
 
-            {/* Budget Summary */}
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="space-y-1">
-                <div className="text-xs text-gray-600">Total Budget</div>
-                <div className="font-bold text-blue-600">${progress.total_amount.toFixed(2)}</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-600">Spent</div>
-                <div className={`font-bold ${status === 'over' ? 'text-red-600' : 'text-gray-900'}`}>
-                  ${progress.total_spent.toFixed(2)}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-xs text-gray-600">Remaining</div>
-                <div className={`font-bold ${progress.remaining_amount < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  ${progress.remaining_amount.toFixed(2)}
-                </div>
-              </div>
+            {/* Compact Budget Summary */}
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-600">
+                ${(progress.total_spent || 0).toFixed(0)} / ${(progress.total_amount || 0).toFixed(0)}
+              </span>
+              <span className={`font-medium ${
+                (progress.remaining_amount || 0) < 0 ? 'text-red-600' : 'text-green-600'
+              }`}>
+                ${(progress.remaining_amount || 0).toFixed(0)} left
+              </span>
             </div>
 
-            {/* Category Progress */}
-            {progress.category_progress && progress.category_progress.length > 0 && (
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Category Breakdown</div>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {progress.category_progress.map((categoryData, index) => (
-                    <div key={index} className="flex items-center justify-between text-xs">
-                      <span className="truncate flex-1">{categoryData.category_name}</span>
-                      <div className="flex items-center gap-2 ml-2">
-                        <div className="w-16 text-right">
-                          ${categoryData.spent_amount.toFixed(0)}/${categoryData.allocated_amount.toFixed(0)}
-                        </div>
-                        <div className="w-8 text-right">
-                          {categoryData.percentage_used.toFixed(0)}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Over Budget Warning */}
-            {status === 'over' && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-2">
-                <p className="text-xs text-red-800">
-                  <TrendingUp className="h-3 w-3 inline mr-1" />
-                  Over budget by ${Math.abs(progress.remaining_amount).toFixed(2)}
-                </p>
-              </div>
-            )}
+            {/* Progress percentage */}
+            <div className="text-center">
+              <span className="text-xs font-medium text-gray-700">
+                {(progress.progress_percentage || 0).toFixed(1)}% complete
+              </span>
+            </div>
           </>
-        )}
-
-        {!progress && !loading && (
-          <div className="text-center py-4 text-gray-500">
-            <Button variant="outline" size="sm" onClick={fetchProgress}>
+        ) : (
+          <div className="text-center py-2">
+            <Button variant="outline" size="sm" onClick={fetchProgress} className="text-xs h-6">
               Load Progress
             </Button>
           </div>

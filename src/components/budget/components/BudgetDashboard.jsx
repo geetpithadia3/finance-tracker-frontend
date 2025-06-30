@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../ui/dialog';
 import { Badge } from '../../ui/badge';
-import { Progress } from '../../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Plus, Copy, Edit, Trash2, Calendar, FolderOpen, TrendingUp } from 'lucide-react';
 import { useBudget } from '../hooks/useBudget';
@@ -30,6 +28,7 @@ export function BudgetDashboard() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCopyDialog, setShowCopyDialog] = useState(false);
   const [copyFromMonth, setCopyFromMonth] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
   
   // Project budget state
   const [projectBudgets, setProjectBudgets] = useState([]);
@@ -37,11 +36,17 @@ export function BudgetDashboard() {
   const [showEditProjectDialog, setShowEditProjectDialog] = useState(false);
   const [editingProjectBudget, setEditingProjectBudget] = useState(null);
   const [projectBudgetsLoading, setProjectBudgetsLoading] = useState(false);
+
+  console.log('BudgetDashboard render - projectBudgets:', projectBudgets.length, 'loading:', projectBudgetsLoading);
   
   // Overlap conflict state  
   const [showOverlapDialog, setShowOverlapDialog] = useState(false);
   const [overlapConflictData, setOverlapConflictData] = useState(null);
   const [pendingBudgetData, setPendingBudgetData] = useState(null);
+  
+  // Rollover status state
+  const [rolloverStatus, setRolloverStatus] = useState(null);
+  const [rolloverRecalculating, setRolloverRecalculating] = useState(false);
   
   const { toast } = useToast();
 
@@ -57,59 +62,107 @@ export function BudgetDashboard() {
     updateBudget,
     deleteBudget,
     copyBudget,
+    clearBudgetData,
   } = useBudget();
+
+  // Project budget functions
+  const fetchProjectBudgets = useCallback(async () => {
+    try {
+      setProjectBudgetsLoading(true);
+      const data = await budgetAPI.getProjectBudgets(0, 100, true);
+      console.log('Project budgets fetched:', data);
+      setProjectBudgets(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to fetch project budgets:', err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.detail || "Failed to fetch project budgets",
+        variant: "destructive",
+      });
+      setProjectBudgets([]);
+    } finally {
+      setProjectBudgetsLoading(false);
+    }
+  }, [toast]);
+
+  const fetchRolloverStatus = useCallback(async (yearMonth) => {
+    try {
+      const status = await budgetAPI.getRolloverStatus(yearMonth);
+      setRolloverStatus(status);
+    } catch (err) {
+      // Don't show error toast for rollover status - it's not critical
+      console.warn('Failed to fetch rollover status:', err);
+      setRolloverStatus(null);
+    }
+  }, []);
+
+  const handleRecalculateRollover = async () => {
+    if (rolloverRecalculating) return;
+    
+    try {
+      setRolloverRecalculating(true);
+      const result = await budgetAPI.recalculateRollover(selectedMonth);
+      
+      toast({
+        title: "Rollover Recalculated",
+        description: `Updated ${result.updated_categories} categories`,
+      });
+      
+      // Refresh budget data and rollover status
+      fetchBudgetByMonth(selectedMonth);
+      fetchBudgetSpending(selectedMonth);
+      fetchRolloverStatus(selectedMonth);
+      
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to recalculate rollover",
+        variant: "destructive",
+      });
+    } finally {
+      setRolloverRecalculating(false);
+    }
+  };
 
   useEffect(() => {
     fetchBudgets();
     fetchProjectBudgets();
-  }, [fetchBudgets]);
+  }, [fetchBudgets, fetchProjectBudgets]);
 
   useEffect(() => {
+    // Clear current budget and spending data immediately when month changes
+    clearBudgetData();
+    
+    // Fetch new data for the selected month
     fetchBudgetByMonth(selectedMonth);
     fetchBudgetSpending(selectedMonth);
-  }, [selectedMonth, fetchBudgetByMonth, fetchBudgetSpending]);
+    fetchRolloverStatus(selectedMonth);
+  }, [selectedMonth, fetchBudgetByMonth, fetchBudgetSpending, clearBudgetData, fetchRolloverStatus]);
 
-  // Project budget functions
-  const fetchProjectBudgets = async () => {
-    try {
-      console.log('Dashboard: Starting to fetch project budgets...');
-      setProjectBudgetsLoading(true);
-      const data = await budgetAPI.getProjectBudgets(0, 100, true);
-      console.log('Dashboard: Project budgets fetched successfully:', data);
-      console.log('Dashboard: Setting project budgets state with', Array.isArray(data) ? data.length : 'non-array', 'items');
-      setProjectBudgets(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Dashboard: Failed to fetch project budgets:', err);
-      console.error('Dashboard: Error details:', {
-        response: err.response?.data,
-        status: err.response?.status,
-        message: err.message
-      });
-      
-      let errorMessage = "Failed to fetch project budgets";
-      if (err.response?.status === 404) {
-        errorMessage = "Project budgets endpoint not found. Make sure the backend is running and updated.";
-      } else if (err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
-      } else if (err.message) {
-        errorMessage = err.message;
+  // --- WebSocket for real-time rollover updates ---
+  useEffect(() => {
+    const ws = new window.WebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/rollover-updates`);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.month === selectedMonth) {
+          // Refresh budget and rollover status for the updated month
+          fetchBudgetByMonth(selectedMonth);
+          fetchBudgetSpending(selectedMonth);
+          fetchRolloverStatus(selectedMonth);
+        }
+      } catch (e) {
+        // Ignore parse errors
       }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setProjectBudgetsLoading(false);
-    }
-  };
+    };
+    return () => {
+      ws.close();
+    };
+  }, [selectedMonth, fetchBudgetByMonth, fetchBudgetSpending, fetchRolloverStatus]);
 
   const handleCreateProjectBudget = async (projectBudgetData) => {
     try {
-      console.log('Creating project budget with data:', projectBudgetData);
-      const result = await budgetAPI.createProjectBudget(projectBudgetData);
-      console.log('Project budget created successfully:', result);
+      await budgetAPI.createProjectBudget(projectBudgetData);
       setShowCreateProjectDialog(false);
       fetchProjectBudgets();
       toast({
@@ -117,30 +170,15 @@ export function BudgetDashboard() {
         description: "Project budget created successfully",
       });
     } catch (err) {
-      console.error('Failed to create project budget:', err);
-      console.error('Error details:', {
-        response: err.response?.data,
-        status: err.response?.status,
-        message: err.message
-      });
-      
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
-        // Handle project budget overlap conflict
         setOverlapConflictData(err.response.data.detail);
         setPendingBudgetData(projectBudgetData);
         setShowOverlapDialog(true);
         setShowCreateProjectDialog(false);
       } else {
-        let errorMessage = "Failed to create project budget";
-        if (err.response?.data?.detail) {
-          errorMessage = err.response.data.detail;
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-        
         toast({
           title: "Error",
-          description: errorMessage,
+          description: err.response?.data?.detail || "Failed to create project budget",
           variant: "destructive",
         });
       }
@@ -163,10 +201,7 @@ export function BudgetDashboard() {
         description: "Project budget updated successfully",
       });
     } catch (err) {
-      console.error('Failed to update project budget:', err);
-      
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
-        // Handle project budget overlap conflict
         setOverlapConflictData(err.response.data.detail);
         setPendingBudgetData(projectBudgetData);
         setShowOverlapDialog(true);
@@ -187,22 +222,13 @@ export function BudgetDashboard() {
 
   const handleCreateBudget = async (budgetData) => {
     try {
-      await createBudget({
-        ...budgetData,
-        year_month: selectedMonth
-      });
+      await createBudget({ ...budgetData, year_month: selectedMonth });
       setShowCreateDialog(false);
       fetchBudgetByMonth(selectedMonth);
       fetchBudgetSpending(selectedMonth);
-      toast({
-        title: "Success",
-        description: "Budget created successfully",
-      });
+      toast({ title: "Success", description: "Budget created successfully" });
     } catch (err) {
-      console.error('Failed to create budget:', err);
-      
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
-        // Handle budget overlap conflict
         setOverlapConflictData(err.response.data.detail);
         setPendingBudgetData({ ...budgetData, year_month: selectedMonth });
         setShowOverlapDialog(true);
@@ -223,15 +249,9 @@ export function BudgetDashboard() {
       setShowEditDialog(false);
       fetchBudgetByMonth(selectedMonth);
       fetchBudgetSpending(selectedMonth);
-      toast({
-        title: "Success",
-        description: "Budget updated successfully",
-      });
+      toast({ title: "Success", description: "Budget updated successfully" });
     } catch (err) {
-      console.error('Failed to update budget:', err);
-      
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
-        // Handle budget overlap conflict
         setOverlapConflictData(err.response.data.detail);
         setPendingBudgetData(budgetData);
         setShowOverlapDialog(true);
@@ -313,10 +333,7 @@ export function BudgetDashboard() {
         <h1 className="text-3xl font-bold">Budget Management</h1>
       </div>
 
-      {/* REQ-006 & REQ-008: Budget Alerts Section */}
-      <BudgetAlerts compact={true} />
-
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
@@ -332,124 +349,102 @@ export function BudgetDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        {/* REQ-008: Budget Overview Tab - Unified view of all budgets */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Budget Alerts - Full View */}
-            <div className="lg:col-span-2">
-              <BudgetAlerts yearMonth={selectedMonth} />
-            </div>
-            
-            {/* Quick Stats */}
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{budgets.length}</div>
-                      <div className="text-xs text-blue-600">Monthly Budgets</div>
-                    </div>
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">{projectBudgets.length}</div>
-                      <div className="text-xs text-purple-600">Project Budgets</div>
-                    </div>
-                  </div>
-                  
-                  {budgetSpending && (
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">Current Month</span>
-                        <Badge variant="outline">{selectedMonth}</Badge>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Total Budgeted:</span>
-                          <span className="font-medium">${budgetSpending.total_budgeted?.toFixed(2) || '0.00'}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Total Spent:</span>
-                          <span className="font-medium">${budgetSpending.total_spent?.toFixed(2) || '0.00'}</span>
-                        </div>
-                        <div className="flex justify-between text-sm font-bold border-t pt-2">
-                          <span>Remaining:</span>
-                          <span className={`${
-                            budgetSpending.total_remaining < 0 ? 'text-red-600' : 'text-green-600'
-                          }`}>
-                            ${budgetSpending.total_remaining?.toFixed(2) || '0.00'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
 
-          {/* Active Project Budgets Summary */}
-          {projectBudgets.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Project Budgets</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projectBudgets.slice(0, 6).map(project => (
-                    <Card key={project.id} className="border border-gray-200">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-sm truncate">{project.name}</h4>
-                          <Badge variant="outline" className="text-xs">
-                            {Math.ceil((new Date(project.end_date) - new Date()) / (1000 * 60 * 60 * 24))} days
-                          </Badge>
+        <TabsContent value="overview" className="space-y-4">
+          {/* Budget Alerts */}
+          <BudgetAlerts yearMonth={selectedMonth} />
+          
+          {/* Compact Stats Overview */}
+          <div className="space-y-4">
+            {/* Monthly Budget Stats */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Monthly Budget ({selectedMonth})</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="text-xl font-bold text-blue-600">{budgets.length}</div>
+                    <p className="text-xs text-gray-600">Total Budgets</p>
+                  </CardContent>
+                </Card>
+                {budgetSpending && (
+                  <>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="text-xl font-bold text-green-600">
+                          ${budgetSpending.total_budgeted?.toFixed(0) || '0'}
                         </div>
-                        <div className="text-xs text-gray-600 mb-2">
-                          {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Budget:</span>
-                          <span className="font-medium">${project.total_amount.toFixed(2)}</span>
-                        </div>
+                        <p className="text-xs text-gray-600">Budgeted</p>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-                {projectBudgets.length > 6 && (
-                  <div className="text-center mt-4">
-                    <Button variant="outline" size="sm">
-                      View All {projectBudgets.length} Project Budgets
-                    </Button>
-                  </div>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="text-xl font-bold text-red-600">
+                          ${budgetSpending.total_spent?.toFixed(0) || '0'}
+                        </div>
+                        <p className="text-xs text-gray-600">Spent</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className={`text-xl font-bold ${
+                          budgetSpending.total_remaining < 0 ? 'text-red-600' : 'text-green-600'
+                        }`}>
+                          ${budgetSpending.total_remaining?.toFixed(0) || '0'}
+                        </div>
+                        <p className="text-xs text-gray-600">Remaining</p>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </div>
 
-          {/* Current Month Spending Overview */}
-          {budgetSpending && budgetSpending.categories && Object.keys(budgetSpending.categories).length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Month Spending ({selectedMonth})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.values(budgetSpending.categories).slice(0, 6).map((categoryData, index) => (
-                    <BudgetSpendingCard key={index} categoryData={categoryData} />
-                  ))}
-                </div>
-                {Object.keys(budgetSpending.categories).length > 6 && (
-                  <div className="text-center mt-4">
-                    <Button variant="outline" size="sm">
-                      View All {Object.keys(budgetSpending.categories).length} Categories
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+            {/* Project Budget Stats */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Project Budgets</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="text-xl font-bold text-purple-600">{projectBudgets.length}</div>
+                    <p className="text-xs text-gray-600">Active Projects</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="text-xl font-bold text-green-600">
+                      ${projectBudgets.reduce((sum, p) => sum + (p.total_amount || 0), 0).toFixed(0)}
+                    </div>
+                    <p className="text-xs text-gray-600">Total Budget</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="text-xl font-bold text-blue-600">
+                      {projectBudgets.filter(p => {
+                        const endDate = new Date(p.end_date);
+                        const now = new Date();
+                        return endDate > now;
+                      }).length}
+                    </div>
+                    <p className="text-xs text-gray-600">Active</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3">
+                    <div className="text-xl font-bold text-yellow-600">
+                      {projectBudgets.filter(p => {
+                        const endDate = new Date(p.end_date);
+                        const now = new Date();
+                        const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+                        return daysRemaining <= 30 && daysRemaining > 0;
+                      }).length}
+                    </div>
+                    <p className="text-xs text-gray-600">Ending Soon</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="monthly" className="space-y-6">
@@ -567,36 +562,67 @@ export function BudgetDashboard() {
             </div>
           ) : currentBudget ? (
             <div className="space-y-4">
-              {budgetSpending && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-blue-600">
-                        ${budgetSpending.total_budgeted.toFixed(2)}
-                      </div>
-                      <p className="text-sm text-gray-600">Total Budgeted</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-red-600">
-                        ${budgetSpending.total_spent.toFixed(2)}
-                      </div>
-                      <p className="text-sm text-gray-600">Total Spent</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-green-600">
-                        ${budgetSpending.total_remaining.toFixed(2)}
-                      </div>
-                      <p className="text-sm text-gray-600">Remaining</p>
-                    </CardContent>
-                  </Card>
+              {/* Rollover Status Warning */}
+              {rolloverStatus && rolloverStatus.rollover_needs_recalc && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-yellow-800">
+                        Rollover amounts may be outdated
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleRecalculateRollover}
+                      disabled={rolloverRecalculating}
+                      className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                    >
+                      {rolloverRecalculating ? 'Updating...' : 'Update Now'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Recent transaction changes may have affected rollover calculations.
+                  </p>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Rollover Summary */}
+              {budgetSpending && budgetSpending.categories && (
+                (() => {
+                  const totalRollover = Object.values(budgetSpending.categories)
+                    .reduce((sum, cat) => sum + (cat.rollover_amount || 0), 0);
+                  const hasRollover = totalRollover !== 0;
+                  
+                  return hasRollover ? (
+                    <div className={`p-3 rounded-lg border ${
+                      totalRollover > 0 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-red-50 border-red-200'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          Rollover from last month:
+                        </span>
+                        <span className={`font-bold ${
+                          totalRollover > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {totalRollover > 0 ? '+' : ''}${totalRollover.toFixed(0)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {totalRollover > 0 
+                          ? 'Extra budget from unused funds last month'
+                          : 'Reduced budget due to overspending last month'
+                        }
+                      </p>
+                    </div>
+                  ) : null;
+                })()
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {budgetSpending && Object.entries(budgetSpending.categories).map(([categoryId, data]) => (
                   <BudgetSpendingCard
                     key={categoryId}
@@ -617,41 +643,6 @@ export function BudgetDashboard() {
         </CardContent>
       </Card>
 
-      {/* All Budgets List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Budgets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {budgets.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {budgets.map(budget => (
-                <Card key={budget.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedMonth(budget.year_month)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">{budget.year_month}</h3>
-                      <Badge variant={budget.year_month === selectedMonth ? "default" : "secondary"}>
-                        {budget.year_month === selectedMonth ? "Current" : "Archived"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      {budget.category_limits.length} categories
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Created: {new Date(budget.created_at).toLocaleDateString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600">No budgets created yet.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
         </TabsContent>
 
         <TabsContent value="projects" className="space-y-6">
@@ -682,25 +673,25 @@ export function BudgetDashboard() {
 
           {/* Project Budgets List */}
           {projectBudgetsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map(i => (
                 <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <CardHeader className="pb-2">
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-2 bg-gray-200 rounded w-1/2"></div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="h-3 bg-gray-200 rounded"></div>
-                      <div className="h-8 bg-gray-200 rounded"></div>
-                      <div className="h-20 bg-gray-200 rounded"></div>
+                    <div className="space-y-2">
+                      <div className="h-1.5 bg-gray-200 rounded"></div>
+                      <div className="h-2 bg-gray-200 rounded"></div>
+                      <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto"></div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : projectBudgets.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {projectBudgets.map(projectBudget => (
                 <ProjectBudgetCard
                   key={projectBudget.id}

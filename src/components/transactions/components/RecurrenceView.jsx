@@ -150,22 +150,23 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
   };
 
   const handleSave = () => {
-    if (!recurrence) {
-      onSave({
-        ...transaction,
-        recurrence: null
-      });
-      return;
-    }
-
-    if (!recurrence.frequency) {
-      return;
-    }
-    
-    onSave({
+    const updatedTransaction = {
       ...transaction,
-      recurrence
-    });
+      recurrence,
+      refunded: transaction.refunded,
+      personalShare: transaction.personalShare,
+      owedShare: transaction.owedShare,
+      shareMetadata: transaction.shareMetadata,
+      amount: transaction.amount,
+      description: transaction.description,
+      category: transaction.category,
+      categoryId: transaction.categoryId,
+      occurredOn: transaction.occurredOn,
+      id: transaction.id,
+      is_deleted: transaction.is_deleted,
+      created_at: transaction.created_at,
+    };
+    onSave(updatedTransaction);
   };
 
   const handleRemoveRecurrence = () => {
@@ -453,9 +454,11 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
                   {transaction.description}
                 </div>
                 <div className="flex flex-col gap-1 mt-1">
-                  <Badge variant="outline" className="text-xs w-fit">
-                    {transaction.category.name}
-                  </Badge>
+                  {transaction.category && (
+                    <Badge variant="outline" className="text-xs w-fit">
+                      {transaction.category.name}
+                    </Badge>
+                  )}
                   <Badge variant="outline" className="text-xs w-fit text-gray-500">
                     Transaction Date: {format(new Date(transaction.occurredOn), "MMMM d, yyyy")}
                   </Badge>

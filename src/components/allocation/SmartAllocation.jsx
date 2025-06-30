@@ -21,6 +21,7 @@ const SmartAllocation = () => {
   const [loading, setLoading] = useState(true);
   const [recurringTransactions, setRecurringTransactions] = useState([]);
   const [recurringLoading, setRecurringLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('allocation');
 
   useEffect(() => {
     fetchAllocationData();
@@ -153,7 +154,7 @@ const SmartAllocation = () => {
       </Alert>
 
       {/* Tabs for Allocation and Recurring Transactions */}
-      <Tabs defaultValue="allocation" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-4">
           <TabsTrigger value="allocation" className="text-xs sm:text-sm">Paycheck Allocation</TabsTrigger>
           <TabsTrigger value="recurring" className="text-xs sm:text-sm">Recurring Transactions</TabsTrigger>

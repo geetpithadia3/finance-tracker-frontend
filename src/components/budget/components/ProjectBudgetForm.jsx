@@ -198,63 +198,27 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
         </div>
       )}
 
-      {/* Basic Project Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Project Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* Project Details */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Project Details
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Project Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => updateFormField('name', e.target.value)}
               className={errors.name ? 'border-red-500' : ''}
-              placeholder="e.g., Home Renovation, Vacation, New Car"
+              placeholder="e.g., Home Renovation, Vacation"
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => updateFormField('description', e.target.value)}
-              className="w-full p-2 border rounded-md resize-none"
-              rows="3"
-              placeholder="Optional description of the project..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Date *</label>
-              <Input
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => updateFormField('start_date', e.target.value)}
-                className={errors.start_date ? 'border-red-500' : ''}
-              />
-              {errors.start_date && <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">End Date *</label>
-              <Input
-                type="date"
-                value={formData.end_date}
-                onChange={(e) => updateFormField('end_date', e.target.value)}
-                className={errors.end_date ? 'border-red-500' : ''}
-              />
-              {errors.end_date && <p className="text-red-500 text-xs mt-1">{errors.end_date}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Total Budget Amount ($) *</label>
+            <label className="block text-sm font-medium mb-1">Total Budget ($) *</label>
             <Input
               type="number"
               step="0.01"
@@ -266,120 +230,142 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
             />
             {errors.total_amount && <p className="text-red-500 text-xs mt-1">{errors.total_amount}</p>}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Start Date *</label>
+            <Input
+              type="date"
+              value={formData.start_date}
+              onChange={(e) => updateFormField('start_date', e.target.value)}
+              className={errors.start_date ? 'border-red-500' : ''}
+            />
+            {errors.start_date && <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">End Date *</label>
+            <Input
+              type="date"
+              value={formData.end_date}
+              onChange={(e) => updateFormField('end_date', e.target.value)}
+              className={errors.end_date ? 'border-red-500' : ''}
+            />
+            {errors.end_date && <p className="text-red-500 text-xs mt-1">{errors.end_date}</p>}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => updateFormField('description', e.target.value)}
+            className="w-full p-2 border rounded-md resize-none"
+            rows="2"
+            placeholder="Optional description..."
+          />
+        </div>
+      </div>
 
       {/* Category Allocations */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Category Allocations</CardTitle>
-            <Button type="button" onClick={addCategoryAllocation} variant="outline" size="sm">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Category Allocations</h3>
+          <Button type="button" onClick={addCategoryAllocation} variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Category
+          </Button>
+        </div>
+
+        {formData.category_allocations.length === 0 ? (
+          <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+            <p className="text-gray-500 mb-4">No allocations added yet</p>
+            <Button type="button" onClick={addCategoryAllocation} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
-              Add Category
+              Add First Category
             </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {formData.category_allocations.length === 0 ? (
-            <div className="text-center py-6 text-gray-500">
-              No category allocations added yet. Click "Add Category" to get started.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {formData.category_allocations.map((allocation, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium mb-1">
-                          Category
-                        </label>
-                        <select
-                          value={allocation.category_id}
-                          onChange={(e) => updateCategoryAllocation(index, 'category_id', e.target.value)}
-                          className={`w-full p-2 border rounded-md ${
-                            errors[`allocation_${index}_category_id`] ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                        >
-                          <option value="">Select category</option>
-                          {categories.map(category => (
-                            <option 
-                              key={category.id} 
-                              value={category.id}
-                              disabled={formData.category_allocations.some((a, i) => i !== index && a.category_id === category.id)}
-                            >
-                              {category.name}
-                            </option>
-                          ))}
-                        </select>
-                        {errors[`allocation_${index}_category_id`] && (
-                          <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_category_id`]}</p>
-                        )}
-                      </div>
-
-                      <div className="flex-1">
-                        <label className="block text-sm font-medium mb-1">
-                          Allocated Amount ($)
-                        </label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={allocation.allocated_amount}
-                          onChange={(e) => updateCategoryAllocation(index, 'allocated_amount', e.target.value)}
-                          className={errors[`allocation_${index}_allocated_amount`] ? 'border-red-500' : ''}
-                          placeholder="0.00"
-                        />
-                        {errors[`allocation_${index}_allocated_amount`] && (
-                          <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_allocated_amount`]}</p>
-                        )}
-                      </div>
-
-                      <Button
-                        type="button"
-                        onClick={() => removeCategoryAllocation(index)}
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 mt-6"
+        ) : (
+          <div className="space-y-3">
+            {formData.category_allocations.map((allocation, index) => (
+              <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                <div className="flex-1">
+                  <select
+                    value={allocation.category_id}
+                    onChange={(e) => updateCategoryAllocation(index, 'category_id', e.target.value)}
+                    className={`w-full p-2 border rounded-md ${
+                      errors[`allocation_${index}_category_id`] ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value="">Select category</option>
+                    {categories.map(category => (
+                      <option 
+                        key={category.id} 
+                        value={category.id}
+                        disabled={formData.category_allocations.some((a, i) => i !== index && a.category_id === category.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors[`allocation_${index}_category_id`] && (
+                    <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_category_id`]}</p>
+                  )}
+                </div>
+
+                <div className="w-32">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={allocation.allocated_amount}
+                    onChange={(e) => updateCategoryAllocation(index, 'allocated_amount', e.target.value)}
+                    className={errors[`allocation_${index}_allocated_amount`] ? 'border-red-500' : ''}
+                    placeholder="0.00"
+                  />
+                  {errors[`allocation_${index}_allocated_amount`] && (
+                    <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_allocated_amount`]}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => removeCategoryAllocation(index)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Budget Summary */}
       {formData.category_allocations.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Total Budget:</span>
-                <span className="text-lg font-bold text-blue-600">
-                  ${parseFloat(formData.total_amount || 0).toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Total Allocated:</span>
-                <span className={`text-lg font-bold ${totalAllocated > parseFloat(formData.total_amount) ? 'text-red-600' : 'text-green-600'}`}>
-                  ${totalAllocated.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-t pt-2">
-                <span className="font-medium">Remaining:</span>
-                <span className={`text-lg font-bold ${(parseFloat(formData.total_amount) - totalAllocated) < 0 ? 'text-red-600' : 'text-blue-600'}`}>
-                  ${(parseFloat(formData.total_amount) - totalAllocated).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span>Total Budget:</span>
+            <span className="font-bold text-blue-600">
+              ${parseFloat(formData.total_amount || 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Allocated:</span>
+            <span className={`font-bold ${totalAllocated > parseFloat(formData.total_amount) ? 'text-red-600' : 'text-green-600'}`}>
+              ${totalAllocated.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between border-t pt-2">
+            <span>Remaining:</span>
+            <span className={`font-bold ${(parseFloat(formData.total_amount) - totalAllocated) < 0 ? 'text-red-600' : 'text-blue-600'}`}>
+              ${(parseFloat(formData.total_amount) - totalAllocated).toFixed(2)}
+            </span>
+          </div>
+        </div>
       )}
 
       <div className="flex justify-end gap-3">

@@ -133,7 +133,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                   <TableCell className="font-medium">{transaction.description}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
-                      {transaction.category.name}
+                      {transaction.category?.name || 'Uncategorized'}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">
@@ -236,7 +236,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                 <div className="flex items-center mt-1 text-sm text-gray-500">
                   <span className="mr-2">{formatCurrency(Math.abs(transactionToToggle.amount))}</span>
                   <span>•</span>
-                  <span className="mx-2">{transactionToToggle.category.name}</span>
+                  <span className="mx-2">{transactionToToggle.category?.name || 'Uncategorized'}</span>
                   <span>•</span>
                   <span className="ml-2">{getFrequencyLabel(transactionToToggle.frequency)}</span>
                 </div>

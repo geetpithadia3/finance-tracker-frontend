@@ -15,12 +15,24 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2, Plus } from 'lucide-react';
 import { categoriesApi } from '@/api/categories';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { budgetAPI } from '@/api/budgets';
 
 const CategoryConfiguration = () => {
   const { toast } = useToast();
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
+  const [rolloverConfig, setRolloverConfig] = useState(null);
+  const [rolloverDialogOpen, setRolloverDialogOpen] = useState(false);
+  const [rolloverCategoryId, setRolloverCategoryId] = useState(null);
+  const [rolloverForm, setRolloverForm] = useState({
+    rollover_enabled: false,
+    rollover_percentage: 100,
+    max_rollover_amount: '',
+    rollover_expiry_months: ''
+  });
+  const [rolloverLoading, setRolloverLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -136,6 +148,67 @@ const CategoryConfiguration = () => {
     }
   };
 
+  const openRolloverDialog = async (categoryId) => {
+    setRolloverDialogOpen(true);
+    setRolloverCategoryId(categoryId);
+    setRolloverConfig(null);
+    setRolloverForm({
+      rollover_enabled: false,
+      rollover_percentage: 100,
+      max_rollover_amount: '',
+      rollover_expiry_months: ''
+    });
+    setRolloverLoading(true);
+    try {
+      const res = await budgetAPI.getRolloverConfig(categoryId);
+      setRolloverConfig(res);
+      setRolloverForm({
+        rollover_enabled: res.rollover_enabled,
+        rollover_percentage: res.rollover_percentage,
+        max_rollover_amount: res.max_rollover_amount || '',
+        rollover_expiry_months: res.rollover_expiry_months || ''
+      });
+    } catch (e) {
+      // No config yet, use defaults
+    }
+    setRolloverLoading(false);
+  };
+
+  const handleRolloverFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setRolloverForm(f => ({
+      ...f,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSaveRolloverConfig = async () => {
+    setRolloverLoading(true);
+    try {
+      if (rolloverConfig) {
+        await budgetAPI.updateRolloverConfig(rolloverCategoryId, {
+          ...rolloverForm,
+          rollover_percentage: Number(rolloverForm.rollover_percentage),
+          max_rollover_amount: rolloverForm.max_rollover_amount ? Number(rolloverForm.max_rollover_amount) : null,
+          rollover_expiry_months: rolloverForm.rollover_expiry_months ? Number(rolloverForm.rollover_expiry_months) : null
+        });
+        toast({ title: 'Success', description: 'Rollover config updated' });
+      } else {
+        await budgetAPI.createRolloverConfig({
+          category_id: rolloverCategoryId,
+          ...rolloverForm,
+          rollover_percentage: Number(rolloverForm.rollover_percentage),
+          max_rollover_amount: rolloverForm.max_rollover_amount ? Number(rolloverForm.max_rollover_amount) : null,
+          rollover_expiry_months: rolloverForm.rollover_expiry_months ? Number(rolloverForm.rollover_expiry_months) : null
+        });
+        toast({ title: 'Success', description: 'Rollover config created' });
+      }
+      setRolloverDialogOpen(false);
+    } catch (e) {
+      toast({ title: 'Error', description: 'Failed to save rollover config', variant: 'destructive' });
+    }
+    setRolloverLoading(false);
+  };
 
   return (
     <div className="space-y-3 sm:space-y-4 px-1 sm:px-0">
@@ -240,6 +313,45 @@ const CategoryConfiguration = () => {
                         </AlertDialogContent>
                       </AlertDialog>
                     )}
+                    <Dialog open={rolloverDialogOpen && rolloverCategoryId === category.id} onOpenChange={setRolloverDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-xs sm:text-sm h-6 sm:h-8 px-2 sm:px-3" onClick={() => openRolloverDialog(category.id)}>
+                          Rollover Config
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Rollover Configuration</DialogTitle>
+                        </DialogHeader>
+                        {rolloverLoading ? (
+                          <div>Loading...</div>
+                        ) : (
+                          <form className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <label className="text-xs">Rollover Enabled</label>
+                              <input type="checkbox" name="rollover_enabled" checked={!!rolloverForm.rollover_enabled} onChange={handleRolloverFormChange} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="text-xs">Rollover Percentage</label>
+                              <input type="number" name="rollover_percentage" min="0" max="100" value={rolloverForm.rollover_percentage} onChange={handleRolloverFormChange} className="w-16 text-xs" />
+                              <span className="text-xs">%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="text-xs">Max Rollover Amount</label>
+                              <input type="number" name="max_rollover_amount" value={rolloverForm.max_rollover_amount} onChange={handleRolloverFormChange} className="w-20 text-xs" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="text-xs">Rollover Expiry (months)</label>
+                              <input type="number" name="rollover_expiry_months" value={rolloverForm.rollover_expiry_months} onChange={handleRolloverFormChange} className="w-16 text-xs" />
+                            </div>
+                            <div className="flex justify-end gap-2 mt-2">
+                              <Button type="button" variant="outline" size="sm" onClick={() => setRolloverDialogOpen(false)} disabled={rolloverLoading}>Cancel</Button>
+                              <Button type="button" size="sm" onClick={handleSaveRolloverConfig} disabled={rolloverLoading}>Save</Button>
+                            </div>
+                          </form>
+                        )}
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </TableCell>
               </TableRow>
