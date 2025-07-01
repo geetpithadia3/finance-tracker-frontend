@@ -42,196 +42,175 @@ const Dashboard = () => {
   const hasNoData = !expensesByCategory || expensesByCategory.length === 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-card text-card-foreground rounded-lg border p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Sumi Header - Philosophy-Inspired */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary">墨</span>
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">Financial Dashboard</h1>
-              <p className="text-muted-foreground">Track your money, achieve your goals</p>
+              <h1 className="text-2xl font-bold text-foreground">Your Financial Canvas</h1>
+              <p className="text-sm text-muted-foreground">
+                {selectedDate.format('MMMM YYYY')} • Where intention meets insight
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <HelpButton title="How the Dashboard Works" buttonText="How It Works">
-                <DashboardHowItWorks />
-              </HelpButton>
-              <MonthSelector
-                value={selectedDate.format('YYYY-MM')}
-                onChange={(yearMonth) => {
-                  const [year, month] = yearMonth.split('-');
-                  const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
-                  handleMonthChange(newDate.diff(selectedDate, 'months'));
-                }}
-                size="default"
-              />
-            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-4">
+            <MonthSelector
+              value={selectedDate.format('YYYY-MM')}
+              onChange={(yearMonth) => {
+                const [year, month] = yearMonth.split('-');
+                const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
+                handleMonthChange(newDate.diff(selectedDate, 'months'));
+              }}
+              size="default"
+            />
+            <HelpButton title="Understanding Your Canvas" buttonText="Philosophy" size="sm">
+              <DashboardHowItWorks />
+            </HelpButton>
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">${income?.toFixed(0) || '0'}</div>
-              <div className="text-sm text-muted-foreground">Income</div>
+        {/* Essential Flow - Sumi Simplicity */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Primary Focus: Net Flow */}
+          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 sm:col-span-1">
+            <CardContent className="p-6 text-center">
+              <div className="space-y-2">
+                <div className="text-xs text-primary font-medium tracking-wide uppercase">Flow State</div>
+                <div className={`text-3xl font-bold ${netFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  ${Math.abs(netFlow)?.toFixed(0) || '0'}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {netFlow >= 0 ? 'Positive Flow' : 'Outflow Exceeds'}
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">${expenses?.toFixed(0) || '0'}</div>
-              <div className="text-sm text-muted-foreground">Expenses</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">${savings?.toFixed(0) || '0'}</div>
-              <div className="text-sm text-muted-foreground">Savings</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground">${netFlow?.toFixed(0) || '0'}</div>
-              <div className="text-sm text-muted-foreground">Net Flow</div>
-            </CardContent>
-          </Card>
+
+          {/* Supporting Elements: Income & Expenses */}
+          <div className="sm:col-span-2 grid grid-cols-2 gap-4">
+            <Card className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
+              <CardContent className="p-4 text-center">
+                <div className="space-y-1">
+                  <div className="text-xs text-green-700 dark:text-green-400 font-medium">Inflow</div>
+                  <div className="text-xl font-semibold text-green-800 dark:text-green-300">${income?.toFixed(0) || '0'}</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800/30">
+              <CardContent className="p-4 text-center">
+                <div className="space-y-1">
+                  <div className="text-xs text-blue-700 dark:text-blue-400 font-medium">Outflow</div>
+                  <div className="text-xl font-semibold text-blue-800 dark:text-blue-300">${expenses?.toFixed(0) || '0'}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* Quick Insights */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${
-                  financialStatus.status_color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                  financialStatus.status_color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                  financialStatus.status_color === 'yellow' ? 'bg-yellow-100 dark:bg-yellow-900/20' :
-                  financialStatus.status_color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/20' :
-                  financialStatus.status_color === 'red' ? 'bg-red-100 dark:bg-red-900/20' :
-                  'bg-muted'
-                }`}>
-                  <TrendingUp className={`h-5 w-5 ${
-                    financialStatus.status_color === 'green' ? 'text-green-600 dark:text-green-400' :
-                    financialStatus.status_color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
-                    financialStatus.status_color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' :
-                    financialStatus.status_color === 'orange' ? 'text-orange-600 dark:text-orange-400' :
-                    financialStatus.status_color === 'red' ? 'text-red-600 dark:text-red-400' :
-                    'text-muted-foreground'
-                  }`} />
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground font-medium flex items-center gap-1">
-                    Financial Health
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="cursor-pointer">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 16v-4m0-4h.01" /></svg>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs p-3">
-                        <div className="text-xs text-foreground dark:text-gray-100">
-                          <strong>How was your score calculated?</strong><br/>
-                          <span>
-                            Your score (<b>{financialStatus.score}/100</b>: <b>{financialStatus.status}</b>) is based on:
-                            <ul className="list-disc pl-4 mt-1">
-                              <li><b>Budget Utilization (30%)</b>: Lower spending vs. budget = higher score.</li>
-                              <li><b>Spending Velocity (25%)</b>: Are you spending too fast for the month?</li>
-                              <li><b>Category Health (35%)</b>: Each category is scored by % used (over = 0, under 70% = 100).</li>
-                              <li><b>Emergency Fund (10%)</b>: Placeholder for savings rate.</li>
-                            </ul>
-                            <span className="block mt-1">Higher is better. See color legend for status.</span>
-                          </span>
-                          <ul className="list-disc pl-4 mt-1">
-                            <li><span className="text-green-600 font-semibold">80-100:</span> Excellent</li>
-                            <li><span className="text-blue-600 font-semibold">60-79:</span> Good</li>
-                            <li><span className="text-yellow-600 font-semibold">40-59:</span> Caution</li>
-                            <li><span className="text-orange-600 font-semibold">20-39:</span> Warning</li>
-                            <li><span className="text-red-600 font-semibold">0-19:</span> Critical</li>
-                          </ul>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
+        {/* Mindful Insights - What Matters Most */}
+        <Card className="bg-gradient-to-r from-muted/50 to-muted/20 border-muted/50">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">Financial Harmony</h3>
+                <div className="flex items-center justify-center space-x-6">
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${
+                      financialStatus.status_color === 'green' ? 'text-green-600 dark:text-green-400' :
+                      financialStatus.status_color === 'blue' ? 'text-blue-600 dark:text-blue-400' :
+                      financialStatus.status_color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' :
+                      financialStatus.status_color === 'orange' ? 'text-orange-600 dark:text-orange-400' :
+                      financialStatus.status_color === 'red' ? 'text-red-600 dark:text-red-400' :
+                      'text-muted-foreground'
+                    }`}>
+                      {financialStatus.status}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Balance State</div>
                   </div>
-                  <div className="text-lg font-semibold text-foreground">{financialStatus.status}</div>
-                  <div className="text-xs text-muted-foreground">Score: {financialStatus.score}/100</div>
+                  <div className="w-px h-8 bg-border"></div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-foreground">{budgetUtilization.toFixed(0)}%</div>
+                    <div className="text-xs text-muted-foreground">Budget Flow</div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card text-card-foreground border">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted rounded-lg">
-                  <Target className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground font-medium">Budget Used</div>
-                  <div className="text-lg font-semibold text-foreground">{budgetUtilization.toFixed(1)}%</div>
-                  {financialStatus.details && financialStatus.details.length > 0 && (
-                    <div className="text-xs text-muted-foreground mt-1">{financialStatus.details[0]}</div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Charts */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Top Charts Row */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="w-full">
-                {hasNoData ? (
-                  <EmptyChartState 
-                    title="No Financial Data" 
-                    emoji="💰" 
-                    description="Start adding transactions to see your financial story"
-                  />
-                ) : (
-                  <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
-                )}
               </div>
               
-              <div className="w-full">
-                {hasNoData ? (
-                  <EmptyChartState 
-                    title="No Categories" 
-                    emoji="📊" 
-                    description="Categorize your expenses to see spending patterns"
-                  />
-                ) : (
-                  <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
-                )}
-              </div>
+              {financialStatus.details && financialStatus.details.length > 0 && (
+                <div className="text-sm text-muted-foreground italic border-t border-muted pt-3">
+                  "{financialStatus.details[0]}"
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Intentional Insights - Focused Information */}
+        <div className="space-y-8">
+          {/* Primary Focus: Financial Distribution */}
+          <div className="text-center space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">Your Financial Flow</h2>
+            <div className="max-w-2xl mx-auto">
+              {hasNoData ? (
+                <EmptyChartState 
+                  title="Begin Your Journey" 
+                  emoji="🎋" 
+                  description="Like the first brushstroke on rice paper, add your first transaction to create your financial story"
+                />
+              ) : (
+                <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
+              )}
+            </div>
+          </div>
+
+          {/* Secondary Insights: Category & Trends */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-center font-medium text-foreground">Spending Patterns</h3>
+              {hasNoData ? (
+                <EmptyChartState 
+                  title="Mindful Categories" 
+                  emoji="🌸" 
+                  description="Categorize spending to understand your financial habits"
+                />
+              ) : (
+                <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
+              )}
             </div>
 
-            {/* Spending Trends */}
-            <div className="w-full">
+            <div className="space-y-4">
+              <h3 className="text-center font-medium text-foreground">Flow Over Time</h3>
               <SpendingTrendsChart spendingTrends={spendingTrends} />
             </div>
           </div>
 
-          {/* Right Column - Budget */}
-          <div className="space-y-6">
-            {/* Budget Widgets */}
-            <div className="w-full">
+          {/* Budget & Goals: Intentional Planning */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-center font-medium text-foreground">Budget Mindfulness</h3>
               <BudgetWidgets budgetData={budgetCategories} selectedDate={selectedDate} />
             </div>
 
-            {/* Savings Goals Section */}
-            <div className="w-full">
-              <Card className="bg-card text-card-foreground border">
-                <CardContent className="p-4">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Savings Goals</h2>
-                  {/* Goals Summary Stats (copied from GoalList) */}
-                  {/* We'll need to fetch goals here, so add a useEffect and useState for goals */}
+            <div className="space-y-4">
+              <h3 className="text-center font-medium text-foreground">Intentional Goals</h3>
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardContent className="p-6">
                   <GoalsStats />
                 </CardContent>
               </Card>
             </div>
           </div>
+        </div>
+
+        {/* Sumi Wisdom Footer */}
+        <div className="text-center py-8 border-t border-muted/30">
+          <p className="text-sm text-muted-foreground italic">
+            "The master's canvas reveals not just what is painted, but the wisdom of what is left untouched."
+          </p>
         </div>
       </div>
     </div>

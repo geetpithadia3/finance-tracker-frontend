@@ -50,13 +50,13 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
       await onRefresh();
       onClose();
       toast({
-        description: "Transaction split successfully! Your transaction is now organized into categories 🧩",
+        description: "Brushstroke refined successfully! Your mindful action is now organized across intentions ✨",
       });
     } catch (error) {
       console.error('Error saving split:', error);
       toast({
         variant: "destructive",
-        description: "Unable to split transaction. Please try again.",
+        description: "Unable to refine brushstroke. Please try again.",
       });
     }
   };
@@ -74,13 +74,13 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
       await onRefresh();
       onClose();
       toast({
-        description: "Share settings saved! Your transaction is now properly tracked for shared expenses 💰",
+        description: "Mindful sharing established! Your brushstroke now reflects balanced intentions ⚖️",
       });
     } catch (error) {
       console.error('Error saving share:', error);
       toast({
         variant: "destructive",
-        description: "Unable to save share settings. Please try again.",
+        description: "Unable to establish sharing balance. Please try again.",
       });
     }
   };
@@ -117,15 +117,15 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
       toast({
         description: updatedTransaction.recurrence 
           ? (transaction.recurrence 
-              ? "Recurrence updated! Your schedule has been adjusted 🔄" 
-              : "Recurrence set! This transaction will repeat automatically 🔄")
-          : "Recurrence removed! This is now a one-time transaction ✓",
+              ? "Rhythm refined! Your mindful pattern has been adjusted 🔄" 
+              : "Rhythm established! This brushstroke will flow in harmony 🔄")
+          : "Rhythm released! This is now a single, purposeful stroke ✓",
       });
     } catch (error) {
       console.error('Error saving recurrence:', error);
       toast({
         variant: "destructive",
-        description: "Unable to update recurrence settings. Please try again.",
+        description: "Unable to adjust mindful rhythm. Please try again.",
       });
     }
   };

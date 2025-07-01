@@ -65,12 +65,12 @@ const TransactionDetailsView = ({
       
       if (willBeRefunded && hasRecurrence) {
         toast({
-          description: "Transaction marked as refunded and recurring schedule removed.",
+          description: "Brushstroke marked as refunded and rhythmic pattern removed.",
         });
       } else {
         toast({
           description: updatedTransaction.refunded 
-            ? "Transaction marked as refunded." 
+            ? "Brushstroke marked as refunded." 
             : "Refund status removed.",
         });
       }
@@ -250,7 +250,7 @@ const TransactionDetailsView = ({
         <DialogHeader>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <DialogTitle className="text-2xl font-bold text-gray-900">
-              Transaction Details
+              Brushstroke Details
             </DialogTitle>
             <RefundButton />
           </div>
@@ -269,19 +269,19 @@ const TransactionDetailsView = ({
             <MobileActionButton 
               onClick={onSplitStart} 
               icon={Split} 
-              title="Split Transaction" 
+              title="Refine Brushstroke" 
               disabled={localTransaction.refunded}
             />
             <MobileActionButton 
               onClick={onShareStart} 
               icon={Share2} 
-              title="Share Transaction" 
+              title="Mindful Sharing" 
               disabled={localTransaction.refunded}
             />
             <MobileActionButton 
               onClick={onRecurrenceStart} 
               icon={Repeat} 
-              title={localTransaction.recurrence ? "Edit Recurring" : "Make Recurring"} 
+              title={localTransaction.recurrence ? "Edit Rhythm" : "Create Rhythm"} 
               disabled={localTransaction.refunded}
             />
           </div>
@@ -293,22 +293,22 @@ const TransactionDetailsView = ({
               <ActionButton
                 onClick={onSplitStart}
                 icon={Split}
-                title="Split Transaction"
-                description="Divide into multiple categories"
+                title="Refine Brushstroke"
+                description="Separate into mindful intentions"
                 disabled={localTransaction.refunded}
               />
               <ActionButton
                 onClick={onShareStart}
                 icon={Share2}
-                title="Share Transaction"
-                description="Split with someone else"
+                title="Mindful Sharing"
+                description="Share with others mindfully"
                 disabled={localTransaction.refunded}
               />
               <ActionButton
                 onClick={onRecurrenceStart}
                 icon={Repeat}
-                title={localTransaction.recurrence ? "Edit Recurring" : "Make Recurring"}
-                description={localTransaction.recurrence ? "Update schedule" : "Set up recurring payments"}
+                title={localTransaction.recurrence ? "Edit Rhythm" : "Create Rhythm"}
+                description={localTransaction.recurrence ? "Adjust flow" : "Establish mindful pattern"}
                 variant={localTransaction.recurrence ? "secondary" : "outline"}
                 disabled={localTransaction.refunded}
               />

@@ -326,91 +326,99 @@ export function BudgetDashboard() {
   const availableMonths = budgets.map(b => b.month).filter(m => m !== selectedMonth);
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header with Navigation */}
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-1">Budget Management</h1>
-              <p className="text-muted-foreground">Plan, track, and optimize your spending</p>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Sumi Header - Philosophy-Inspired */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary">墨</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div onClick={() => setAlertsExpanded(!alertsExpanded)} className="cursor-pointer">
-                <BudgetAlerts yearMonth={selectedMonth} badge={true} />
-              </div>
-              <HelpButton title="How Budget Management Works" buttonText="How It Works">
-                <BudgetHowItWorks />
-              </HelpButton>
-              <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Mindful Boundaries</h1>
+              <p className="text-sm text-muted-foreground">
+                Creating purposeful limits for intentional living
+              </p>
             </div>
           </div>
           
-          {/* Expandable Detailed Alerts */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-full mt-4 justify-between text-xs"
-            onClick={() => setAlertsExpanded(!alertsExpanded)}
-          >
-            <span>Budget Alert Details</span>
-            {alertsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-          
-          {alertsExpanded && (
-            <div className="mt-2 border-t pt-4">
-              <BudgetAlerts yearMonth={selectedMonth} compact={true} />
+          <div className="flex items-center justify-center gap-4">
+            <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
+            <HelpButton title="The Art of Conscious Limits" buttonText="Philosophy" size="sm">
+              <BudgetHowItWorks />
+            </HelpButton>
+            <div onClick={() => setAlertsExpanded(!alertsExpanded)} className="cursor-pointer">
+              <BudgetAlerts yearMonth={selectedMonth} badge={true} />
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Section Navigation */}
+        {/* Mindful Insights - Expandable Alerts */}
+        {alertsExpanded && (
+          <Card className="bg-gradient-to-r from-muted/50 to-muted/20 border-muted/50">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Budget Mindfulness</h3>
+                <BudgetAlerts yearMonth={selectedMonth} compact={true} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Mindful Navigation */}
         <div className="flex items-center justify-center">
-          <div className="bg-card rounded-lg border p-1 inline-flex">
+          <div className="bg-card/50 backdrop-blur-sm rounded-full border border-muted/30 p-1 inline-flex">
             <button
               onClick={() => setActiveSection('monthly')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
                 activeSection === 'monthly'
                   ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
             >
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Monthly Budgets
+                Monthly Rhythms
               </div>
             </button>
             <button
               onClick={() => setActiveSection('projects')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
                 activeSection === 'projects'
                   ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
             >
               <div className="flex items-center gap-2">
                 <FolderOpen className="h-4 w-4" />
-                Project Budgets
+                Extended Visions
               </div>
             </button>
           </div>
         </div>
 
-        {/* Monthly Budgets Section */}
+        {/* Monthly Rhythms Section */}
         {activeSection === 'monthly' && (
           <div className="space-y-6">
-            {/* Quick Actions Card */}
-            <Card className="bg-card border">
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-foreground mb-2">Monthly Rhythms</h2>
+              <p className="text-sm text-muted-foreground">
+                Setting mindful boundaries for the current cycle
+              </p>
+            </div>
+            
+            {/* Current Boundary Card */}
+            <Card className="bg-gradient-to-r from-muted/50 to-muted/20 border-muted/50">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+                    <div className="p-3 bg-primary/10 rounded-lg">
                       <Target className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground">Budget for {selectedMonth}</h3>
+                      <h3 className="text-lg font-semibold text-foreground">Boundaries for {selectedMonth}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {currentBudget ? 'Manage your current budget' : 'Create a new budget to start tracking'}
+                        {currentBudget ? 'Refine your mindful limits' : 'Set intentional spending boundaries to begin your practice'}
                       </p>
                     </div>
                   </div>
@@ -419,14 +427,14 @@ export function BudgetDashboard() {
                       <>
                         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="rounded-full">
                               <Edit className="h-4 w-4 mr-2" />
-                              Edit
+                              Refine
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Edit Budget for {selectedMonth}</DialogTitle>
+                              <DialogTitle>Refine Boundaries for {selectedMonth}</DialogTitle>
                             </DialogHeader>
                             <BudgetForm
                               initialData={currentBudget}
@@ -437,23 +445,23 @@ export function BudgetDashboard() {
                           </DialogContent>
                         </Dialog>
                         
-                        <Button variant="outline" size="sm" onClick={handleDeleteBudget}>
+                        <Button variant="outline" size="sm" onClick={handleDeleteBudget} className="rounded-full">
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          Release
                         </Button>
                       </>
                     ) : (
                       <div className="flex items-center gap-2">
                         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                           <DialogTrigger asChild>
-                            <Button className="bg-primary hover:bg-primary/90">
+                            <Button className="bg-primary hover:bg-primary/90 rounded-full">
                               <Plus className="h-4 w-4 mr-2" />
-                              Create Budget
+                              Set Boundaries
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
+                              <DialogTitle>Set Mindful Boundaries for {selectedMonth}</DialogTitle>
                             </DialogHeader>
                             <BudgetForm
                               onSubmit={handleCreateBudget}
@@ -466,18 +474,18 @@ export function BudgetDashboard() {
                         {availableMonths.length > 0 && (
                           <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
                             <DialogTrigger asChild>
-                              <Button variant="outline">
+                              <Button variant="outline" className="rounded-full">
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copy from Previous
+                                Adapt from Previous
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Copy Budget</DialogTitle>
+                                <DialogTitle>Adapt Previous Boundaries</DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4">
                                 <div>
-                                  <label className="text-sm font-medium">Copy from month:</label>
+                                  <label className="text-sm font-medium">Adapt from month:</label>
                                   <select
                                     value={copyFromMonth}
                                     onChange={(e) => setCopyFromMonth(e.target.value)}
@@ -499,8 +507,9 @@ export function BudgetDashboard() {
                                   <Button
                                     onClick={handleCopyBudget}
                                     disabled={!copyFromMonth}
+                                    className="rounded-full"
                                   >
-                                    Copy Budget
+                                    Adapt Boundaries
                                   </Button>
                                 </div>
                               </div>
@@ -610,26 +619,27 @@ export function BudgetDashboard() {
                 </div>
               </div>
             ) : (
-              <Card className="bg-card border">
-                <CardContent className="text-center py-12">
-                  <div className="p-3 bg-muted rounded-full w-fit mx-auto mb-4">
-                    <Target className="h-8 w-8 text-muted-foreground" />
+              <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
+                <CardContent className="text-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <span className="text-2xl font-bold text-primary">墨</span>
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">No Budget Found</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    You haven't created a budget for {selectedMonth} yet. Create your first budget to start tracking your spending goals.
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Mindful Practice</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
+                    Like setting the boundaries of your canvas, establish mindful spending limits for {selectedMonth} 
+                    to create space for intentional choices.
                   </p>
                   <div className="flex items-center justify-center gap-3">
                     <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                       <DialogTrigger asChild>
-                        <Button className="bg-primary hover:bg-primary/90">
+                        <Button className="bg-primary hover:bg-primary/90 rounded-full">
                           <Plus className="h-4 w-4 mr-2" />
-                          Create Budget
+                          Set First Boundaries
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
+                          <DialogTitle>Set Mindful Boundaries for {selectedMonth}</DialogTitle>
                         </DialogHeader>
                         <BudgetForm
                           onSubmit={handleCreateBudget}
@@ -641,18 +651,18 @@ export function BudgetDashboard() {
                     {availableMonths.length > 0 && (
                       <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
                         <DialogTrigger asChild>
-                          <Button variant="outline">
+                          <Button variant="outline" className="rounded-full">
                             <Copy className="h-4 w-4 mr-2" />
-                            Copy from Previous
+                            Adapt from Previous
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Copy Budget</DialogTitle>
+                            <DialogTitle>Adapt Previous Boundaries</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <label className="text-sm font-medium">Copy from month:</label>
+                              <label className="text-sm font-medium">Adapt from month:</label>
                               <select
                                 value={copyFromMonth}
                                 onChange={(e) => setCopyFromMonth(e.target.value)}
@@ -668,20 +678,25 @@ export function BudgetDashboard() {
                               <Button
                                 variant="outline"
                                 onClick={() => setShowCopyDialog(false)}
+                                className="rounded-full"
                               >
                                 Cancel
                               </Button>
                               <Button
                                 onClick={handleCopyBudget}
                                 disabled={!copyFromMonth}
+                                className="rounded-full"
                               >
-                                Copy Budget
+                                Adapt Boundaries
                               </Button>
                             </div>
                           </div>
                         </DialogContent>
                       </Dialog>
                     )}
+                    <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
+                      "Boundaries create freedom. Within limits, infinite possibility exists."
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -689,44 +704,36 @@ export function BudgetDashboard() {
           </div>
         )}
 
-        {/* Project Budgets Section */}
+        {/* Extended Visions Section */}
         {activeSection === 'projects' && (
           <div className="space-y-6">
-            {/* Project Budgets Header */}
-            <Card className="bg-card border">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <FolderOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">Project Budgets</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Manage multi-month project budgets and track long-term goals
-                      </p>
-                    </div>
-                  </div>
-                  <Dialog open={showCreateProjectDialog} onOpenChange={setShowCreateProjectDialog}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Project Budget
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Create New Project Budget</DialogTitle>
-                      </DialogHeader>
-                      <ProjectBudgetForm
-                        onSubmit={handleCreateProjectBudget}
-                        onCancel={() => setShowCreateProjectDialog(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-foreground mb-2">Extended Visions</h2>
+              <p className="text-sm text-muted-foreground">
+                Long-term aspirations that span multiple cycles
+              </p>
+            </div>
+            
+            {/* Simple Action Card */}
+            <div className="flex justify-center">
+              <Dialog open={showCreateProjectDialog} onOpenChange={setShowCreateProjectDialog}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary hover:bg-primary/90 rounded-full shadow-lg">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Extended Vision
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Extended Vision</DialogTitle>
+                  </DialogHeader>
+                  <ProjectBudgetForm
+                    onSubmit={handleCreateProjectBudget}
+                    onCancel={() => setShowCreateProjectDialog(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
 
             {/* Project Budgets List */}
             {projectBudgetsLoading ? (
@@ -760,22 +767,26 @@ export function BudgetDashboard() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-card border">
-                <CardContent className="text-center py-12">
-                  <div className="p-3 bg-muted rounded-full w-fit mx-auto mb-4">
-                    <FolderOpen className="h-8 w-8 text-muted-foreground" />
+              <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
+                <CardContent className="text-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <span className="text-2xl font-bold text-primary">墨</span>
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">No Project Budgets</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    Create your first project budget to track spending across multiple months and achieve long-term financial goals.
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Envision Extended Aspirations</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
+                    Like planning a multi-panel painting, create boundaries that span multiple months 
+                    to support your most meaningful aspirations.
                   </p>
                   <Button 
                     onClick={() => setShowCreateProjectDialog(true)}
-                    className="bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 rounded-full"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Project Budget
+                    Paint Extended Vision
                   </Button>
+                  <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
+                    "Great works require sustained intention across time"
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -784,7 +795,7 @@ export function BudgetDashboard() {
             <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Edit Project Budget</DialogTitle>
+                  <DialogTitle>Refine Extended Vision</DialogTitle>
                 </DialogHeader>
                 <ProjectBudgetForm
                   initialData={editingProjectBudget}
@@ -808,6 +819,13 @@ export function BudgetDashboard() {
           pendingData={pendingBudgetData}
           onEditExisting={handleEditExisting}
         />
+
+        {/* Sumi Wisdom Footer */}
+        <div className="text-center py-8 border-t border-muted/30 mt-16">
+          <p className="text-sm text-muted-foreground italic">
+            "True freedom comes not from unlimited choice, but from conscious boundaries that guide our intentions."
+          </p>
+        </div>
       </div>
     </div>
   );

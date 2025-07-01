@@ -66,17 +66,77 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-6 px-2 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-xs sm:max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-2 sm:mb-4">
-            <PiggyBank className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 px-2 sm:px-6 lg:px-8">
+      <div className="w-full max-w-6xl flex items-center gap-8">
+        {/* Philosophy Panel */}
+        <div className="hidden lg:flex flex-1 flex-col justify-center space-y-6 pr-8">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-2xl font-bold text-primary">墨</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Sumi</h1>
+                <p className="text-sm text-muted-foreground">The Art of Intentional Finance</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+              <p className="italic">
+                "Just as a Sumi master achieves perfect balance with deliberate brushstrokes, 
+                Sumi Finance helps you achieve financial harmony through mindful, intentional money management."
+              </p>
+              
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2">
+                  <span className="text-primary mt-1">🖌️</span>
+                  <span><strong>Simplicity over Complexity</strong> - Strip away financial clutter to see what truly matters</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <span className="text-primary mt-1">✨</span>
+                  <span><strong>Intentional Action</strong> - Every financial decision is a deliberate brushstroke</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <span className="text-primary mt-1">⚖️</span>
+                  <span><strong>Balance & Flow</strong> - Money should move with purpose and grace</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <span className="text-primary mt-1">🎯</span>
+                  <span><strong>Mindful Minimalism</strong> - Focus on essential goals, eliminate the unnecessary</span>
+                </div>
+              </div>
+              
+              <p className="italic text-xs border-l-2 border-primary/30 pl-3 mt-4">
+                "In Sumi, the empty space is as important as the ink. In finance, knowing when NOT to spend is as valuable as knowing when to invest."
+              </p>
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to your Sumi Finance account
-          </CardDescription>
-        </CardHeader>
+        </div>
+
+        {/* Login Form */}
+        <Card className="w-full max-w-md lg:max-w-sm flex-shrink-0">
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <PiggyBank className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+            <CardDescription>
+              Sign in to your Sumi Finance account
+            </CardDescription>
+            
+            {/* Mobile Philosophy Preview */}
+            <div className="lg:hidden mt-4 p-3 bg-muted/50 rounded-lg text-left">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">墨</span>
+                <span className="text-xs text-muted-foreground font-medium">The Art of Intentional Finance</span>
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                "Mindful money management through simplicity, intention, and balance"
+              </p>
+            </div>
+          </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -153,7 +213,8 @@ const Login = () => {
             </p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };

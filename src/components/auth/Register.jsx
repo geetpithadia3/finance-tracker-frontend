@@ -88,17 +88,94 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-6 px-2 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-xs sm:max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-2 sm:mb-4">
-            <PiggyBank className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 px-2 sm:px-6 lg:px-8">
+      <div className="w-full max-w-6xl flex items-center gap-8">
+        {/* Philosophy Panel */}
+        <div className="hidden lg:flex flex-1 flex-col justify-center space-y-6 pr-8">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-2xl font-bold text-primary">墨</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Begin Your Sumi Journey</h1>
+                <p className="text-sm text-muted-foreground">Master the Art of Financial Balance</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+              <p className="italic">
+                "Every financial master begins with a single, intentional stroke. Today, you take the first step toward mindful wealth creation."
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-primary mt-1">🎯</span>
+                    <div>
+                      <div className="font-medium text-foreground">Set Clear Intentions</div>
+                      <div className="text-xs">Define your financial goals with precision</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-primary mt-1">⚖️</span>
+                    <div>
+                      <div className="font-medium text-foreground">Find Your Balance</div>
+                      <div className="text-xs">Harmony between spending and saving</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-primary mt-1">🧘</span>
+                    <div>
+                      <div className="font-medium text-foreground">Practice Mindfulness</div>
+                      <div className="text-xs">Each transaction becomes deliberate</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-primary mt-1">✨</span>
+                    <div>
+                      <div className="font-medium text-foreground">Embrace Simplicity</div>
+                      <div className="text-xs">Complex finances, simple insights</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-primary/5 rounded-lg border-l-4 border-primary/30">
+                <p className="text-xs italic">
+                  "The journey of a thousand miles begins with a single step. The journey to financial freedom begins with mindful intention."
+                </p>
+              </div>
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Create account</CardTitle>
-          <CardDescription>
-            Enter your details to create your Sumi Finance account
-          </CardDescription>
-        </CardHeader>
+        </div>
+
+        {/* Register Form */}
+        <Card className="w-full max-w-md lg:max-w-sm flex-shrink-0">
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <PiggyBank className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold">Begin Your Journey</CardTitle>
+            <CardDescription>
+              Create your Sumi Finance account
+            </CardDescription>
+            
+            {/* Mobile Philosophy Preview */}
+            <div className="lg:hidden mt-4 p-3 bg-muted/50 rounded-lg text-left">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">墨</span>
+                <span className="text-xs text-muted-foreground font-medium">Master the Art of Financial Balance</span>
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                "Every financial master begins with a single, intentional stroke"
+              </p>
+            </div>
+          </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -197,7 +274,8 @@ const Register = () => {
             </p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };

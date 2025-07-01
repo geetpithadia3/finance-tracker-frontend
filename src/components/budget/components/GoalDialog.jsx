@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
-import { Button } from '../../ui/button';
+import { SumiButton } from '../../ui/sumi-button';
 import { Input } from '../../ui/input';
 import { goalsApi } from '@/api/goals';
 import { useToast } from '../../ui/use-toast';
@@ -82,7 +82,7 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
             <label className="block text-sm font-medium mb-1">Deadline</label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
+                <SumiButton
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
@@ -91,7 +91,7 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {form.deadline ? form.deadline : <span>Pick a date</span>}
-                </Button>
+                </SumiButton>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
@@ -114,8 +114,8 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
             </div>
           )}
           <div className="flex gap-2 justify-end mt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
-            <Button type="submit" loading={loading} disabled={loading}>{isEdit ? 'Save Changes' : 'Create Goal'}</Button>
+            <SumiButton type="button" variant="outline" onClick={onClose} disabled={loading}>Cancel</SumiButton>
+            <SumiButton type="submit" loading={loading} disabled={loading}>{isEdit ? 'Save Changes' : 'Create Goal'}</SumiButton>
           </div>
         </form>
       </DialogContent>

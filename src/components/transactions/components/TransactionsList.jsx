@@ -64,8 +64,31 @@ const TransactionsList = () => {
 
   if (showRecurring) {
     return (
-      <div className="min-h-screen bg-background text-foreground p-4 sm:p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+        <div className="max-w-5xl mx-auto space-y-8">
+          {/* Sumi Header for Recurring */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">墨</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Repeating Patterns</h1>
+                <p className="text-sm text-muted-foreground">
+                  Life's rhythms reflected in mindful repetition
+                </p>
+              </div>
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowRecurring(false)}
+              className="rounded-full"
+            >
+              ← Return to Current Month
+            </Button>
+          </div>
+          
           <RecurringTransactionsList onBack={() => setShowRecurring(false)} />
         </div>
       </div>
@@ -73,13 +96,23 @@ const TransactionsList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto flex flex-col">
-        <SectionHeader title="Transactions">
-          <div className="flex gap-1 sm:gap-2 items-center">
-            <HelpButton title="How Transaction Management Works" size="sm">
-              <TransactionsHowItWorks />
-            </HelpButton>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Sumi Header - Philosophy-Inspired */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary">墨</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Financial Brushstrokes</h1>
+              <p className="text-sm text-muted-foreground">
+                {selectedDate.format('MMMM YYYY')} • Every transaction tells your story
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-4">
             <MonthSelector
               value={selectedDate.format('YYYY-MM')}
               onChange={(yearMonth) => {
@@ -89,106 +122,137 @@ const TransactionsList = () => {
               }}
               size="default"
             />
+            <HelpButton title="The Art of Mindful Spending" buttonText="Philosophy" size="sm">
+              <TransactionsHowItWorks />
+            </HelpButton>
+          </div>
+        </div>
+
+        {/* Intentional Actions - Simplified */}
+        <div className="flex justify-center">
+          <div className="flex items-center gap-3 bg-card/50 backdrop-blur-sm rounded-full px-6 py-3 border border-muted/30">
             <Button 
-              variant="ghost" 
+              variant={showFilters ? "default" : "ghost"}
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
+              className="rounded-full"
             >
-              <Filter className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">
-                {selectedCategory && selectedCategory !== 'all' ? selectedCategory : "Filter"}
-              </span>
+              <Filter className="h-4 w-4 mr-2" />
+              Focus
             </Button>
+            <div className="w-px h-6 bg-border"></div>
             <Button
-              variant="outline"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowRecurring(true)}
+              className="rounded-full"
+            >
+              <Repeat className="h-4 w-4 mr-2" />
+              Patterns
+            </Button>
+            <div className="w-px h-6 bg-border"></div>
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setShowImportDialog(true)}
+              className="rounded-full"
             >
-              <Upload className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Import</span>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
             </Button>
           </div>
-        </SectionHeader>
+        </div>
 
-        {/* Expandable filters panel */}
+        {/* Mindful Focus - Category Filter */}
         {showFilters && (
-          <div className="p-2 sm:p-3 bg-muted/30 rounded-lg mb-3 sm:mb-4 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 items-start sm:items-center">
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs sm:text-sm h-8 sm:h-9 flex-1 sm:flex-none"
-                onClick={() => setShowRecurring(true)}
-              >
-                <Repeat className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                Recurring
-              </Button>
+          <div className="max-w-md mx-auto">
+            <div className="bg-gradient-to-r from-muted/30 to-muted/10 rounded-xl p-6 border border-muted/30">
+              <div className="text-center space-y-4">
+                <h3 className="text-sm font-medium text-foreground">Focus Your Intention</h3>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="w-full rounded-full bg-background/50 border-muted/50">
+                    <SelectValue placeholder="All Spending Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground italic">
+                  "Focus reveals patterns, patterns reveal wisdom"
+                </p>
+              </div>
             </div>
           </div>
         )}
         
-        {/* Transaction Table with inline edit mode */}
-        {filteredTransactions.length === 0 ? (
-          <EmptyState selectedDate={selectedDate} />
-        ) : (
-          <div className="relative rounded-lg border overflow-hidden">
-            {editMode && (
-              <div className="p-2 bg-muted/50 flex justify-between items-center border-b">
-                <span className="text-xs sm:text-sm text-muted-foreground">Editing mode</span>
-                <div className="flex gap-1 sm:gap-2">
-                  <Button size="sm" variant="ghost" className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3" onClick={() => setEditMode(false)}>
-                    Cancel
-                  </Button>
-                  <Button size="sm" variant="default" className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3" onClick={handleSaveChanges}>
-                    Save
+        {/* Your Financial Story */}
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Your Financial Journey</h2>
+            <p className="text-sm text-muted-foreground">
+              {filteredTransactions.length === 0 
+                ? "Awaiting your first intentional brushstroke"
+                : `${filteredTransactions.length} mindful actions${selectedCategory && selectedCategory !== 'all' ? ` in ${selectedCategory}` : ''}`
+              }
+            </p>
+          </div>
+
+          {filteredTransactions.length === 0 ? (
+            <EmptyState selectedDate={selectedDate} />
+          ) : (
+            <div className="relative rounded-xl border border-muted/30 overflow-hidden bg-card/30 backdrop-blur-sm">
+              {editMode && (
+                <div className="p-4 bg-primary/5 flex justify-between items-center border-b border-primary/20">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <span className="text-sm text-foreground font-medium">Refining Your Story</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => setEditMode(false)} className="rounded-full">
+                      Cancel
+                    </Button>
+                    <Button size="sm" variant="default" onClick={handleSaveChanges} className="rounded-full">
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <TransactionTable
+                transactions={filteredTransactions}
+                categories={categories}
+                editMode={editMode}
+                sortConfig={sortConfig}
+                inputRef={inputRef}
+                onEdit={handleEdit}
+                onTransactionClick={handleTransactionClick}
+                onRequestSort={handleRequestSort}
+              />
+              
+              {!editMode && (
+                <div className="p-4 flex justify-center border-t border-muted/30">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditMode(true)}
+                    className="rounded-full text-muted-foreground hover:text-foreground"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Refine Your Story
                   </Button>
                 </div>
-              </div>
-            )}
-            
-            <TransactionTable
-              transactions={filteredTransactions}
-              categories={categories}
-              editMode={editMode}
-              sortConfig={sortConfig}
-              inputRef={inputRef}
-              onEdit={handleEdit}
-              onTransactionClick={handleTransactionClick}
-              onRequestSort={handleRequestSort}
-            />
-            
-            {!editMode && (
-              <div className="p-2 flex justify-end border-t">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  onClick={() => setEditMode(true)}
-                >
-                  <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  Edit
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Dialogs */}
         <TransactionDialog
@@ -211,33 +275,46 @@ const TransactionsList = () => {
           />
         )}
 
-        {/* Add Transaction Floating Button */}
-        <Button
-          variant="default"
-          size="icon"
-          className="fixed bottom-6 right-6 z-50 shadow-lg rounded-full w-14 h-14 flex items-center justify-center text-primary-foreground bg-primary hover:bg-primary/90"
-          onClick={() => {
-            // Find the 'General' category if it exists
-            const generalCategory = categories.find(cat => cat.name === 'General') || categories[0] || { id: '', name: 'General' };
-            setSelectedTransaction({
-              id: `new-${Date.now()}`,
-              description: '',
-              amount: '',
-              type: 'DEBIT',
-              occurredOn: selectedDate.clone().startOf('month').format('YYYY-MM-DD'),
-              category: generalCategory,
-              categoryId: generalCategory.id,
-              personalShare: 0,
-              owedShare: 0,
-              shareMetadata: '',
-              isNew: true
-            });
-            setTransactionModalOpen(true);
-          }}
-          title="Add Transaction"
-        >
-          <Plus className="w-7 h-7" />
-        </Button>
+        {/* Mindful Action - Add New Brushstroke */}
+        <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end space-y-3">
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-muted/30">
+              Add a mindful action
+            </p>
+          </div>
+          <Button
+            variant="default"
+            size="icon"
+            className="shadow-lg rounded-full w-16 h-16 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 border border-primary/20"
+            onClick={() => {
+              const generalCategory = categories.find(cat => cat.name === 'General') || categories[0] || { id: '', name: 'General' };
+              setSelectedTransaction({
+                id: `new-${Date.now()}`,
+                description: '',
+                amount: '',
+                type: 'DEBIT',
+                occurredOn: selectedDate.clone().startOf('month').format('YYYY-MM-DD'),
+                category: generalCategory,
+                categoryId: generalCategory.id,
+                personalShare: 0,
+                owedShare: 0,
+                shareMetadata: '',
+                isNew: true
+              });
+              setTransactionModalOpen(true);
+            }}
+            title="Record Mindful Transaction"
+          >
+            <Plus className="w-8 h-8" />
+          </Button>
+        </div>
+
+        {/* Sumi Wisdom Footer */}
+        <div className="text-center py-8 border-t border-muted/30 mt-16">
+          <p className="text-sm text-muted-foreground italic">
+            "Each transaction is a brushstroke. What story are you painting with your money?"
+          </p>
+        </div>
       </div>
     </div>
   );

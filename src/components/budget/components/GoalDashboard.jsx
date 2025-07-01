@@ -5,24 +5,37 @@ import GoalsHowItWorks from './GoalsHowItWorks';
 
 const GoalDashboard = () => {
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-card rounded-lg border p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Sumi Header - Philosophy-Inspired */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary">墨</span>
+            </div>
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-1">Savings Goals</h1>
-              <p className="text-muted-foreground">Set, track, and achieve your financial targets</p>
+              <h1 className="text-2xl font-bold text-foreground">Intentional Aspirations</h1>
+              <p className="text-sm text-muted-foreground">
+                Where dreams take shape through mindful commitment
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <HelpButton title="How Savings Goals Work" buttonText="How It Works">
-                <GoalsHowItWorks />
-              </HelpButton>
-            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-4">
+            <HelpButton title="The Art of Purposeful Saving" buttonText="Philosophy" size="sm">
+              <GoalsHowItWorks />
+            </HelpButton>
           </div>
         </div>
 
         <GoalList />
+
+        {/* Sumi Wisdom Footer */}
+        <div className="text-center py-8 border-t border-muted/30 mt-16">
+          <p className="text-sm text-muted-foreground italic">
+            "A goal without intention is merely a wish. With mindful action, wishes become reality."
+          </p>
+        </div>
       </div>
     </div>
   );

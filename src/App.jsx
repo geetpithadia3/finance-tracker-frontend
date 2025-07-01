@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/toaster"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 // Import your components
 import TransactionsList from './components/transactions/components/TransactionsList';
@@ -51,19 +51,20 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
   const NavItem = ({ icon: Icon, children, to }) => {
     const content = (
       <>
-        <Icon className="h-4 w-4" />
+        <Icon className={cn("h-5 w-5", collapsed && "h-6 w-6")} />
         {!collapsed && <span className="text-sm sm:text-base">{children}</span>}
       </>
     );
 
-    return (
+    const linkElement = (
       <Link
         to={to}
         className={cn(
-          "flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
-          "text-sm sm:text-base",
-          collapsed && "justify-center px-2"
+          "flex items-center gap-3 rounded-xl px-4 py-3 text-muted-foreground transition-all duration-300 hover:text-foreground",
+          "hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10 hover:shadow-sm",
+          "text-sm sm:text-base font-medium",
+          "relative overflow-hidden group",
+          collapsed && "justify-center px-1 py-4"
         )}
         onClick={onNavClick}
       >
@@ -76,15 +77,30 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
         )}
       </Link>
     );
+
+    if (collapsed && !onNavClick) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {linkElement}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="ml-2">
+            {children}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return linkElement;
   };
 
   return (
-    <nav className={cn("flex flex-col gap-1", className)} {...props}>
-      <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
-      <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
-      <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
-      <NavItem icon={Target} to="/goals">Goals</NavItem>
-      <NavItem icon={Calculator} to="/allocation">Smart Allocation</NavItem>
+    <nav className={cn("flex flex-col gap-2", className)} {...props}>
+      <NavItem icon={LayoutDashboard} to="/">Canvas</NavItem>
+      <NavItem icon={ListOrdered} to="/transactions">Brushstrokes</NavItem>
+      <NavItem icon={PiggyBank} to="/budget">Boundaries</NavItem>
+      <NavItem icon={Target} to="/goals">Aspirations</NavItem>
+      <NavItem icon={Calculator} to="/allocation">Mindful Flow</NavItem>
     </nav>
   );
 };
@@ -101,7 +117,7 @@ const UserNav = ({ onLogout, username }) => {
         <DropdownMenuItem asChild>
           <Link to="/configuration">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Configuration</span>
+            <span>Practice Settings</span>
           </Link>
         </DropdownMenuItem>
         {/* Keep logout for UI consistency, but it just reloads the page */}
@@ -118,27 +134,35 @@ const Sidebar = ({ collapsed, className, onNavClick, showHeader = true }) => {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r bg-background",
-        collapsed ? "w-16" : "w-64",
+        "flex h-full flex-col border-r bg-gradient-to-b from-background to-muted/20",
+        "backdrop-blur-sm border-muted/30",
+        collapsed ? "w-20" : "w-64",
         className
       )}
     >
       {showHeader && (
-        <div className="flex h-14 items-center border-b px-3 justify-center">
+        <div className="flex h-16 items-center border-b border-muted/30 px-4 justify-center bg-gradient-to-r from-primary/5 to-primary/10">
           {!collapsed && (
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-sm sm:text-lg">Sumi</span>
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-sm sm:text-base font-bold text-primary">墨</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm sm:text-lg leading-tight">Sumi</span>
+                <span className="text-xs text-muted-foreground leading-tight">Mindful Finance</span>
+              </div>
             </Link>
           )}
           {collapsed && (
             <Link to="/" className="flex items-center justify-center">
-              <PiggyBank className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-base sm:text-lg font-bold text-primary">墨</span>
+              </div>
             </Link>
           )}
         </div>
       )}
-      <ScrollArea className="flex-1 p-2 sm:p-3">
+      <ScrollArea className="flex-1 p-4 sm:p-6">
         <MainNav collapsed={collapsed} onNavClick={onNavClick} />
       </ScrollArea>
     </div>
@@ -188,18 +212,18 @@ const AppContent = () => {
   const MainLayout = ({ children }) => (
     <div className="min-h-screen flex">
       {/* Desktop Sidebar - only visible on lg screens and above */}
-      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-30" style={{ width: collapsed ? '64px' : '256px' }}>
+      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-30" style={{ width: collapsed ? '80px' : '256px' }}>
         <Sidebar collapsed={collapsed} className="h-full" />
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen w-full" 
-           style={{ marginLeft: isMobile ? '0' : (collapsed ? '64px' : '256px') }}>
+           style={{ marginLeft: isMobile ? '0' : (collapsed ? '80px' : '256px') }}>
         {/* Header */}
-        <header className="h-14 border-b bg-background px-4 flex items-center justify-between fixed z-20 w-full"
+        <header className="h-14 border-b border-muted/30 bg-gradient-to-r from-background to-muted/10 backdrop-blur-sm px-4 flex items-center justify-between fixed z-20 w-full"
                style={{ 
-                 left: isMobile ? '0' : (collapsed ? '64px' : '256px'),
-                 width: isMobile ? '100%' : `calc(100% - ${collapsed ? '64px' : '256px'})`
+                 left: isMobile ? '0' : (collapsed ? '80px' : '256px'),
+                 width: isMobile ? '100%' : `calc(100% - ${collapsed ? '80px' : '256px'})`
                }}>
           <div className="flex items-center gap-3">
             {isMobile ? (
@@ -212,8 +236,10 @@ const AppContent = () => {
                 <SheetContent side="left" className="p-0 w-[260px] sm:w-[300px]">
                   <SheetHeader className="h-14 px-3 sm:px-4 border-b flex-row justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                      <SheetTitle className="text-left text-sm sm:text-base">Sumi Finance</SheetTitle>
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">墨</span>
+                      </div>
+                      <SheetTitle className="text-left text-sm sm:text-base">Sumi</SheetTitle>
                     </div>
                   </SheetHeader>
                   <div className="h-[calc(100vh-3.5rem)]">
@@ -237,7 +263,9 @@ const AppContent = () => {
               </Button>
             )}
             <div className="lg:hidden flex items-center gap-2">
-              <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-sm font-bold text-primary">墨</span>
+              </div>
               <span className="font-semibold text-sm sm:text-base">Sumi</span>
             </div>
           </div>
@@ -247,7 +275,7 @@ const AppContent = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  title="How It Works"
+                  title="Philosophy Guide"
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Button>
@@ -261,7 +289,7 @@ const AppContent = () => {
               size="icon"
               onClick={toggleTheme}
               className="mr-2"
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              title={theme === 'light' ? 'Night Practice' : 'Day Practice'}
             >
               {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </Button>

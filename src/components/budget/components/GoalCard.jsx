@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../../ui/card';
+import { SumiCard, SumiCardContent } from '../../ui/sumi-card';
 import { Progress } from '../../ui/progress';
 import { Badge } from '../../ui/badge';
 import { CheckCircle, Target, AlertTriangle, TrendingUp, Edit, Trash2, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '../../ui/button';
+import { SumiButton } from '../../ui/sumi-button';
 import { goalsApi } from '@/api/goals';
 import { useToast } from '../../ui/use-toast';
 import {
@@ -130,11 +130,11 @@ const GoalCard = ({ goal, onEdit, onDelete, onStatusChange }) => {
   })() : null;
 
   return (
-    <Card className={cn(
+    <SumiCard className={cn(
       'transition-all duration-200 hover:shadow-md hover:scale-[1.02] group',
       statusConfig.className
     )}>
-      <CardContent className="p-4">
+      <SumiCardContent className="p-4">
         {/* Header with Goal and Status */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -165,7 +165,7 @@ const GoalCard = ({ goal, onEdit, onDelete, onStatusChange }) => {
             {statusConfig.text}
           </Badge>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-            <Button
+            <SumiButton
               variant="ghost"
               size="sm"
               onClick={() => onEdit(goal)}
@@ -174,8 +174,8 @@ const GoalCard = ({ goal, onEdit, onDelete, onStatusChange }) => {
               aria-label="Edit goal"
             >
               <Edit className="h-3 w-3" />
-            </Button>
-            <Button
+            </SumiButton>
+            <SumiButton
               variant="ghost"
               size="sm"
               onClick={() => onDelete(goal)}
@@ -184,12 +184,12 @@ const GoalCard = ({ goal, onEdit, onDelete, onStatusChange }) => {
               aria-label="Delete goal"
             >
               <Trash2 className="h-3 w-3" />
-            </Button>
+            </SumiButton>
             {/* Status Actions Dropdown */}
             {(status !== 'complete' && status !== 'archive') && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0" aria-label="More actions"><MoreVertical className="h-4 w-4" /></Button>
+                  <SumiButton variant="ghost" size="icon" className="h-6 w-6 p-0" aria-label="More actions"><MoreVertical className="h-4 w-4" /></SumiButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {status === 'abandon' ? (
@@ -246,8 +246,8 @@ const GoalCard = ({ goal, onEdit, onDelete, onStatusChange }) => {
         {deadline && (
           <div className="mt-2 text-xs text-muted-foreground">Deadline: {new Date(deadline).toLocaleDateString()}</div>
         )}
-      </CardContent>
-    </Card>
+      </SumiCardContent>
+    </SumiCard>
   );
 };
 

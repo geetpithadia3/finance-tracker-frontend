@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import GoalCard from './GoalCard';
 import { goalsApi } from '@/api/goals';
-import { Button } from '../../ui/button';
+import { SumiButton } from '../../ui/sumi-button';
 import { useToast } from '../../ui/use-toast';
 import GoalDialog from './GoalDialog';
-import { Card, CardContent } from '../../ui/card';
+import { SumiCard, SumiCardContent } from '../../ui/sumi-card';
 
 const GoalList = () => {
   const [goals, setGoals] = useState([]);
@@ -70,66 +70,87 @@ const GoalList = () => {
   const totalSaved = goals.reduce((sum, g) => sum + (g.currentAmount || 0), 0);
 
   return (
-    <div className="space-y-6">
-      {/* Goals Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card text-card-foreground border">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-foreground">{activeGoals}</div>
-            <div className="text-sm text-muted-foreground">Active Goals</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card text-card-foreground border">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{completedGoals}</div>
-            <div className="text-sm text-muted-foreground">Completed</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card text-card-foreground border">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-mono font-bold text-foreground">${totalTarget.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Total Target</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card text-card-foreground border">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-mono font-bold text-blue-600">${totalSaved.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Total Saved</div>
-          </CardContent>
-        </Card>
+    <div className="space-y-8">
+      {/* Essential Harmony - Simplified Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <SumiCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <SumiCardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-primary">{activeGoals}</div>
+            <div className="text-xs text-muted-foreground">Active Intentions</div>
+          </SumiCardContent>
+        </SumiCard>
+        <SumiCard className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
+          <SumiCardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400">{completedGoals}</div>
+            <div className="text-xs text-muted-foreground">Realized Dreams</div>
+          </SumiCardContent>
+        </SumiCard>
+        <SumiCard className="border-muted/50 bg-muted/20">
+          <SumiCardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-foreground">${totalTarget.toFixed(0)}</div>
+            <div className="text-xs text-muted-foreground">Total Vision</div>
+          </SumiCardContent>
+        </SumiCard>
+        <SumiCard className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800/30">
+          <SumiCardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">${totalSaved.toFixed(0)}</div>
+            <div className="text-xs text-muted-foreground">Current Progress</div>
+          </SumiCardContent>
+        </SumiCard>
       </div>
-      {/* Goals List Section */}
-      <Card className="bg-card text-card-foreground border">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-foreground">Your Goals</h2>
-            <Button onClick={handleAdd}>
-              + Add Goal
-            </Button>
-          </div>
-          
-          <GoalDialog open={dialogOpen} onClose={handleDialogClose} initialGoal={editGoal} onSaved={handleDialogSaved} />
-          
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="text-muted-foreground">Loading goals...</div>
+      {/* Aspiration Canvas */}
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-lg font-semibold text-foreground mb-2">Your Aspiration Canvas</h2>
+          <p className="text-sm text-muted-foreground">
+            Each intention painted with purpose, progress with mindfulness
+          </p>
+        </div>
+        
+        <GoalDialog open={dialogOpen} onClose={handleDialogClose} initialGoal={editGoal} onSaved={handleDialogSaved} />
+        
+        {loading ? (
+          <SumiCard className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
+            <SumiCardContent className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <div className="text-muted-foreground italic">Gathering your aspirations...</div>
+            </SumiCardContent>
+          </SumiCard>
+        ) : goals.length === 0 ? (
+          <SumiCard className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
+            <SumiCardContent className="text-center py-16">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl font-bold text-primary">墨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Intentional Journey</h3>
+              <div className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
+                Like preparing your canvas before the first brushstroke, set your first aspiration 
+                and watch it take shape through mindful action.
+              </div>
+              <SumiButton onClick={handleAdd} className="rounded-full">
+                Paint Your First Intention
+              </SumiButton>
+              <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
+                "Every master began with a single, purposeful stroke"
+              </p>
+            </SumiCardContent>
+          </SumiCard>
+        ) : (
+          <>
+            <div className="flex justify-center">
+              <SumiButton onClick={handleAdd} className="rounded-full shadow-lg">
+                + Paint New Intention
+              </SumiButton>
             </div>
-          ) : goals.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-muted-foreground mb-4">No goals found. Start by adding a new goal.</div>
-              <Button onClick={handleAdd} variant="outline">
-                Create Your First Goal
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {goals.map(goal => (
                 <GoalCard key={goal.id} goal={goal} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
+      </div>
     </div>
   );
 };

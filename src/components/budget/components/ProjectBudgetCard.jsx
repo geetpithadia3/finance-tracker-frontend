@@ -35,18 +35,18 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete the project budget "${projectBudget.name}"?`)) {
+    if (window.confirm(`Are you sure you want to release the extended vision "${projectBudget.name}"?`)) {
       try {
         await budgetAPI.deleteProjectBudget(projectBudget.id);
         toast({
-          title: "Success",
-          description: "Project budget deleted successfully",
+          title: "Vision Released",
+          description: `"${projectBudget.name}" has been mindfully released`,
         });
         onDelete(projectBudget.id);
       } catch (err) {
         toast({
           title: "Error",
-          description: "Failed to delete project budget",
+          description: "Failed to release extended vision",
           variant: "destructive",
         });
       }
@@ -55,11 +55,23 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      year: 'numeric'
     });
   };
+
+  // Check if project is still active (end date hasn't passed)
+  const isProjectActive = () => {
+    const endDate = new Date(projectBudget.end_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+    return endDate >= today;
+  };
+
+  // Don't render if project has ended
+  if (!isProjectActive()) {
+    return null;
+  }
 
   const getDurationText = () => {
     if (!progress) return '';
@@ -155,189 +167,95 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
   };
 
   return (
-    <Card className={cn(
-      "transition-all duration-200 hover:shadow-lg hover:scale-[1.02] group",
-      statusConfig.className
-    )}>
-      <CardHeader className="pb-3">
+    <Card className="bg-card/50 backdrop-blur-sm border-muted/30 hover:shadow-md transition-all duration-200 group">
+      <CardContent className="p-6 space-y-4">
+        {/* Vision Header */}
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={cn(
-                "p-2 rounded-lg",
-                status === 'good' ? 'bg-green-100/50' :
-              status === 'warning' ? 'bg-yellow-100/50' :
-              status === 'over' ? 'bg-red-100/50' : 'bg-muted'
-              )}>
-                <StatusIcon className={cn("h-4 w-4", statusConfig.iconColor)} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <CardTitle className="text-sm font-semibold text-foreground truncate">
-                  {projectBudget.name}
-                </CardTitle>
-              </div>
+            <h3 className="font-semibold text-foreground truncate mb-1">{projectBudget.name}</h3>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(projectBudget.start_date)} - {formatDate(projectBudget.end_date)}</span>
             </div>
-            
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>{formatDate(projectBudget.start_date)} - {formatDate(projectBudget.end_date)}</span>
-              </div>
-              {getUrgencyIcon()}
-            </div>
-
-            {progress && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>{getDurationText()}</span>
-              </div>
-            )}
           </div>
           
-          <div className="flex items-center gap-1">
-            <Badge 
-              variant={statusConfig.variant} 
-              className={cn(
-                "text-xs px-2 py-1 font-medium",
-                status === 'good' ? 'bg-green-100/50 text-green-700 border-green-200' :
-              status === 'warning' ? 'bg-yellow-100/50 text-yellow-700 border-yellow-200' :
-              status === 'over' ? 'bg-red-100/50 text-red-700 border-red-200' :
-              'bg-muted text-muted-foreground border-border'
-              )}
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(projectBudget)}
+              className="h-8 w-8 p-0 rounded-full hover:bg-muted"
             >
-              {statusConfig.text}
-            </Badge>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(projectBudget)}
-                className="h-6 w-6 p-0 hover:bg-gray-200"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDelete}
-                className="h-6 w-6 p-0 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              className="h-8 w-8 p-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-3">
+        {/* Essential Progress */}
         {loading ? (
           <div className="space-y-2">
-            <div className="h-2 bg-muted rounded animate-pulse"></div>
-            <div className="h-2 bg-muted rounded w-3/4 animate-pulse"></div>
+            <div className="h-2 bg-muted rounded-full animate-pulse"></div>
+            <div className="text-center text-xs text-muted-foreground italic">Gathering insights...</div>
           </div>
         ) : progress ? (
-          <>
-            {/* Enhanced Progress Bar */}
+          <div className="space-y-3">
+            {/* Simplified Progress */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-muted-foreground">Budget Progress</span>
-                <span className="text-xs font-bold text-foreground">
+                <span className="text-sm text-muted-foreground">Flow</span>
+                <span className="text-sm font-semibold text-foreground">
                   {Math.min(progress.progress_percentage || 0, 100).toFixed(0)}%
                 </span>
               </div>
-              <div className="relative">
-                <Progress 
-                  value={Math.min(progress.progress_percentage || 0, 100)} 
-                  className="h-2 bg-muted"
-                  indicatorClassName={cn(
-                    "transition-all duration-300",
-                    status === 'good' ? 'bg-gradient-to-r from-green-400 to-green-500' :
-                    status === 'warning' ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
-                    status === 'over' ? 'bg-gradient-to-r from-red-400 to-red-500' :
-                    'bg-gradient-to-r from-muted-foreground to-foreground'
-                  )}
-                />
-                {/* Progress markers */}
-                <div className="absolute top-0 left-0 right-0 h-2 flex justify-between pointer-events-none">
-                  <div className="w-0.5 h-2 bg-border"></div>
-                  <div className="w-0.5 h-2 bg-border"></div>
-                  <div className="w-0.5 h-2 bg-border"></div>
-                </div>
+              <Progress 
+                value={Math.min(progress.progress_percentage || 0, 100)} 
+                className="h-2 bg-muted rounded-full"
+                indicatorClassName={cn(
+                  "transition-all duration-300 rounded-full",
+                  isOverBudget ? 'bg-red-500' :
+                  status === 'warning' ? 'bg-yellow-500' :
+                  'bg-primary'
+                )}
+              />
+            </div>
+
+            {/* Essential Info */}
+            <div className="flex justify-between items-center text-sm">
+              <div className="text-center">
+                <div className="font-semibold text-foreground">${(progress.remaining_amount || 0).toFixed(0)}</div>
+                <div className="text-xs text-muted-foreground">Remaining</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold text-foreground">{progress.days_remaining || 0}</div>
+                <div className="text-xs text-muted-foreground">Days Left</div>
               </div>
             </div>
 
-            {/* Budget Summary */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Spent</span>
-                  <span className="font-medium text-foreground">
-                    ${(progress.total_spent || 0).toFixed(0)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Budget</span>
-                  <span className="font-medium text-foreground">
-                    ${(progress.total_amount || 0).toFixed(0)}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Remaining</span>
-                  <span className={cn(
-                    "font-bold",
-                    isOverBudget ? 'text-destructive' : 'text-green-500'
-                  )}>
-                    ${(progress.remaining_amount || 0).toFixed(0)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Days Left</span>
-                  <span className={cn(
-                    "font-medium",
-                    isUrgent ? 'text-destructive' : 
-                    isNearDeadline ? 'text-yellow-500' : 'text-foreground'
-                  )}>
-                    {progress.days_remaining || 0}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Indicators */}
+            {/* Mindful Guidance */}
             {isOverBudget && (
-              <div className="p-2 bg-destructive/10 rounded-lg border border-destructive/20">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-3 w-3 text-destructive" />
-                  <span className="text-xs font-medium text-destructive">Budget exceeded - review needed</span>
-                </div>
+              <div className="text-center text-xs text-red-600 italic bg-red-50/50 rounded-full py-2 px-3">
+                "When boundaries are crossed, wisdom guides the return"
               </div>
             )}
             
             {isUrgent && !isOverBudget && (
-              <div className="p-2 bg-yellow-100/50 rounded-lg border border-yellow-200">
-                <div className="flex items-center gap-2">
-                  <Flag className="h-3 w-3 text-yellow-500" />
-                  <span className="text-xs font-medium text-yellow-700">Deadline approaching</span>
-                </div>
+              <div className="text-center text-xs text-amber-600 italic bg-amber-50/50 rounded-full py-2 px-3">
+                "The completion draws near, maintain mindful pace"
               </div>
             )}
-            
-            {isExcellent && (
-              <div className="p-2 bg-green-100/50 rounded-lg border border-green-200">
-                <div className="flex items-center gap-2">
-                  <Rocket className="h-3 w-3 text-green-500" />
-                  <span className="text-xs font-medium text-green-700">Excellent progress</span>
-                </div>
-              </div>
-            )}
-          </>
+          </div>
         ) : (
           <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-xs text-gray-500">Loading progress...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-xs text-muted-foreground italic">Gathering insights...</p>
           </div>
         )}
       </CardContent>

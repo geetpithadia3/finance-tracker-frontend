@@ -160,27 +160,28 @@ const SmartAllocation = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-4 sm:p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <SectionHeader
-            title="Smart Allocation"
-            subtitle="Plan your spending and see which bills are due before your next paycheck."
-          >
-            <MonthSelector
-              value={selectedDate.format('YYYY-MM')}
-              onChange={(yearMonth) => {
-                const [year, month] = yearMonth.split('-');
-                const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
-                handleMonthChange(newDate.diff(selectedDate, 'months'));
-              }}
-              size="default"
-            />
-          </SectionHeader>
-          <Card className="bg-card text-card-foreground border shadow-md">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+        <div className="max-w-5xl mx-auto space-y-8">
+          {/* Sumi Header */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">墨</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Mindful Planning</h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDate.format('MMMM YYYY')} • Balance your resources with wisdom
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
             <CardContent className="flex justify-center items-center h-64">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading allocation data...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground italic">Gathering your resources...</p>
               </div>
             </CardContent>
           </Card>
@@ -190,184 +191,196 @@ const SmartAllocation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <SectionHeader
-          title="Smart Allocation"
-          subtitle="Plan your spending and see which bills are due before your next paycheck."
-        >
-          <div className="flex items-center gap-3">
-            <HelpButton title="How Smart Allocation Works" buttonText="How It Works">
-              <SmartAllocationHowItWorks />
-            </HelpButton>
-            <MonthSelector
-              value={selectedDate.format('YYYY-MM')}
-              onChange={(yearMonth) => {
-                const [year, month] = yearMonth.split('-');
-                const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
-                handleMonthChange(newDate.diff(selectedDate, 'months'));
-              }}
-              size="default"
-            />
-          </div>
-        </SectionHeader>
-
-        {/* Financial Health Status Card */}
-        <Card className="bg-card text-card-foreground border shadow-md">
-          <CardContent>
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`p-3 rounded-lg ${statusConfig.bg}`}>
-                <StatusIcon className={`h-6 w-6 ${statusConfig.text}`} />
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 text-foreground p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <>
+          {/* Sumi Header - Philosophy-Inspired */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl font-bold text-primary">墨</span>
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">Financial Health</h2>
-                <p className="text-sm text-muted-foreground">Your spending allocation status for {selectedDate.format('MMMM YYYY')}</p>
+                <h1 className="text-2xl font-bold text-foreground">Mindful Planning</h1>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDate.format('MMMM YYYY')} • Balance your resources with wisdom
+                </p>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-foreground">
-                  {financialStatus.score}/100
-                </div>
-                <div className="text-sm text-muted-foreground">Health Score</div>
-              </div>
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold text-foreground capitalize">
-                  {financialStatus.status.replace('-', ' ')}
-                </div>
-                <div className="text-sm text-muted-foreground">Status</div>
-              </div>
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">
-                  {financialStatus.details[0]}
-                </div>
-              </div>
+            <div className="flex items-center justify-center gap-4">
+              <MonthSelector
+                value={selectedDate.format('YYYY-MM')}
+                onChange={(yearMonth) => {
+                  const [year, month] = yearMonth.split('-');
+                  const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
+                  handleMonthChange(newDate.diff(selectedDate, 'months'));
+                }}
+                size="default"
+              />
+              <HelpButton title="The Art of Intentional Resources" buttonText="Philosophy" size="sm">
+                <SmartAllocationHowItWorks />
+              </HelpButton>
             </div>
+          </div>
 
-            {/* Action Indicators */}
-            {financialStatus.status === 'critical' && (
-              <Alert className="border-red-200 bg-red-50 dark:bg-red-900/30 dark:border-red-700">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertTitle className="text-red-800">Immediate Action Required</AlertTitle>
-                <AlertDescription className="text-red-700">
-                  Your bills exceed your income. Consider reducing expenses or using savings to cover the shortfall.
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {financialStatus.status === 'warning' && (
-              <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-900/30 dark:border-orange-700">
-                <Target className="h-4 w-4 text-orange-600" />
-                <AlertTitle className="text-orange-800">Monitor Your Spending</AlertTitle>
-                <AlertDescription className="text-orange-700">
-                  You're allocating a high percentage of your income to bills. Consider reviewing your budget.
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {financialStatus.status === 'excellent' && (
-              <Alert className="border-green-200 bg-green-50 dark:bg-green-900/30 dark:border-green-700">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Excellent Financial Health</AlertTitle>
-                <AlertDescription className="text-green-700">
-                  You have a healthy balance between bills and discretionary spending. Keep up the great work!
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Monthly Overview Section */}
-        {allocationData && allocationData.paychecks && allocationData.paychecks.length > 0 && (
-          <Card className="bg-card text-card-foreground border shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-foreground">Monthly Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="bg-blue-50 dark:bg-muted border-blue-100 dark:border-border">
-                  <CardContent className="pt-4 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <h3 className="font-medium text-sm text-blue-700 dark:text-blue-400">Total Income</h3>
+          {/* Financial Harmony - Simplified Insight */}
+          <Card className="bg-gradient-to-r from-muted/50 to-muted/20 border-muted/50">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center space-x-3">
+                  <div className={`p-3 rounded-lg ${statusConfig.bg}`}>
+                    <StatusIcon className={`h-6 w-6 ${statusConfig.text}`} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">Resource Harmony</h2>
+                    <p className="text-sm text-muted-foreground">Your balance state for {selectedDate.format('MMMM YYYY')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-center space-x-8">
+                  <div className="text-center">
+                    <div className={`text-3xl font-bold ${statusConfig.text}`}>
+                      {financialStatus.status.replace('-', ' ').split(' ').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ')}
                     </div>
-                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">
-                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.amount), 0).toFixed(2)}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-red-50 dark:bg-muted border-red-100 dark:border-border">
-                  <CardContent className="pt-4 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      <h3 className="font-medium text-sm text-red-700 dark:text-red-400">Total Bills</h3>
-                    </div>
-                    <p className="text-2xl font-bold text-red-900 dark:text-red-300">
-                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.totalAllocationAmount), 0).toFixed(2)}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-green-50 dark:bg-muted border-green-100 dark:border-border">
-                  <CardContent className="pt-4 p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      <h3 className="font-medium text-sm text-green-700 dark:text-green-400">Available</h3>
-                    </div>
-                    <p className="text-2xl font-bold text-green-900 dark:text-green-300">
-                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.remainingAmount), 0).toFixed(2)}
-                    </p>
-                  </CardContent>
-                </Card>
+                    <div className="text-xs text-muted-foreground">Flow State</div>
+                  </div>
+                  <div className="w-px h-8 bg-border"></div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-foreground">{financialStatus.score}%</div>
+                    <div className="text-xs text-muted-foreground">Balance Score</div>
+                  </div>
+                </div>
+                
+                {financialStatus.details && financialStatus.details.length > 0 && (
+                  <div className="text-sm text-muted-foreground italic border-t border-muted pt-3">
+                    "{financialStatus.details[0]}"
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {/* Paychecks Section */}
-        {allocationData && allocationData.paychecks && allocationData.paychecks.length > 0 && (
-          <Card className="bg-card text-card-foreground border shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-foreground">Your Paychecks</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Mindful Guidance - Action Indicators */}
+          {financialStatus.status === 'critical' && (
+            <Alert className="border-red-200 bg-red-50 dark:bg-red-900/30 dark:border-red-700">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800">Restore Balance</AlertTitle>
+              <AlertDescription className="text-red-700">
+                Your obligations exceed your resources. Like a master adjusting their brush, consider refining your approach.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {financialStatus.status === 'warning' && (
+            <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-900/30 dark:border-orange-700">
+              <Target className="h-4 w-4 text-orange-600" />
+              <AlertTitle className="text-orange-800">Mindful Attention</AlertTitle>
+              <AlertDescription className="text-orange-700">
+                Your resources flow heavily toward obligations. Consider the balance between necessity and choice.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {financialStatus.status === 'excellent' && (
+            <Alert className="border-green-200 bg-green-50 dark:bg-green-900/30 dark:border-green-700">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-800">Harmonious Flow</AlertTitle>
+              <AlertDescription className="text-green-700">
+                Your resources flow with wisdom and intention. Like a master's perfect brushstroke, maintain this balance.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Essential Flow - Monthly Overview */}
+          {allocationData && allocationData.paychecks && allocationData.paychecks.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <Card className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
+                <CardContent className="p-6 text-center">
+                  <div className="space-y-2">
+                    <div className="text-xs text-green-700 dark:text-green-400 font-medium tracking-wide uppercase">Inflow</div>
+                    <div className="text-3xl font-bold text-green-800 dark:text-green-300">
+                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.amount), 0).toFixed(0)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Resources Received</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800/30">
+                <CardContent className="p-6 text-center">
+                  <div className="space-y-2">
+                    <div className="text-xs text-blue-700 dark:text-blue-400 font-medium tracking-wide uppercase">Obligations</div>
+                    <div className="text-3xl font-bold text-blue-800 dark:text-blue-300">
+                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.totalAllocationAmount), 0).toFixed(0)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Committed Flow</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardContent className="p-6 text-center">
+                  <div className="space-y-2">
+                    <div className="text-xs text-primary font-medium tracking-wide uppercase">Freedom</div>
+                    <div className="text-3xl font-bold text-foreground">
+                      ${allocationData.paychecks.reduce((sum, p) => sum + parseFloat(p.remainingAmount), 0).toFixed(0)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Intentional Choice</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Resource Streams - Your Income Sources */}
+          {allocationData && allocationData.paychecks && allocationData.paychecks.length > 0 && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-lg font-semibold text-foreground mb-2">Your Resource Streams</h2>
+                <p className="text-sm text-muted-foreground">
+                  Each stream flows with purpose, supporting your intentions
+                </p>
+              </div>
               <div className="space-y-4">
                 {allocationData.paychecks.map((paycheckAllocation, _index) => (
-                  <Card key={paycheckAllocation.id} className="border-gray-200 hover:shadow-md transition-all duration-200">
-                    {/* Paycheck Header */}
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 dark:bg-muted dark:from-none dark:to-none border-b py-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-                        <div>
-                          <CardTitle className="text-lg flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <Card key={paycheckAllocation.id} className="bg-card/50 backdrop-blur-sm border-muted/30 hover:shadow-md transition-all duration-200">
+                    {/* Stream Header - Simplified */}
+                    <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/20 py-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div className="space-y-2">
+                          <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
                             <span>{paycheckAllocation.source}</span>
-                            <Badge variant="secondary" className="text-xs font-normal text-blue-700 w-fit">
+                            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
                               {getFrequencyLabel(paycheckAllocation.frequency)}
                             </Badge>
                           </CardTitle>
-                          <div className="flex items-center gap-1 text-sm text-blue-600">
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Calendar className="h-3 w-3" />
                             {format(new Date(paycheckAllocation.date), "MMMM d, yyyy")}
                           </div>
                         </div>
-                        <div className="text-2xl font-bold text-blue-700">
-                          ${parseFloat(paycheckAllocation.amount).toFixed(2)}
+                        <div className="text-2xl font-bold text-primary">
+                          ${parseFloat(paycheckAllocation.amount).toFixed(0)}
                         </div>
                       </div>
                     </CardHeader>
 
                     <CardContent className="pt-6 p-6">
-                      {/* Allocation Progress */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Allocation Progress</span>
-                          <span className="text-sm font-medium text-gray-700">
-                            ${paycheckAllocation.totalAllocationAmount.toFixed(2)} of ${paycheckAllocation.amount.toFixed(2)}
+                      {/* Flow Balance */}
+                      <div className="mb-6 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-foreground">Resource Allocation</span>
+                          <span className="text-sm text-muted-foreground">
+                            ${paycheckAllocation.totalAllocationAmount.toFixed(0)} of ${paycheckAllocation.amount.toFixed(0)}
                           </span>
                         </div>
                         <Progress 
                           value={(paycheckAllocation.totalAllocationAmount / paycheckAllocation.amount) * 100} 
                           className={cn(
-                            "h-3",
+                            "h-2 rounded-full",
                             paycheckAllocation.remainingAmount < 0 && "bg-red-100 [&>div]:bg-red-500",
                             paycheckAllocation.remainingAmount >= 0 && paycheckAllocation.remainingAmount < paycheckAllocation.amount * 0.2 && "bg-yellow-100 [&>div]:bg-yellow-500",
                             paycheckAllocation.remainingAmount >= paycheckAllocation.amount * 0.2 && "bg-green-100 [&>div]:bg-green-500"
@@ -375,16 +388,16 @@ const SmartAllocation = () => {
                         />
                       </div>
 
-                      {/* Remaining Amount Status */}
-                      <div className={`p-4 rounded-lg mb-6 ${
+                      {/* Freedom Flow Status */}
+                      <div className={`p-4 rounded-xl mb-6 ${
                         paycheckAllocation.remainingAmount < 0 
-                          ? 'bg-red-50 border border-red-200' 
+                          ? 'bg-red-50/50 border border-red-200/50' 
                           : paycheckAllocation.remainingAmount < paycheckAllocation.amount * 0.2
-                          ? 'bg-yellow-50 border border-yellow-200'
-                          : 'bg-green-50 border border-green-200'
+                          ? 'bg-yellow-50/50 border border-yellow-200/50'
+                          : 'bg-green-50/50 border border-green-200/50'
                       }`}>
                         <div className="flex justify-between items-center w-full">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             {paycheckAllocation.remainingAmount < 0 ? (
                               <AlertCircle className="h-5 w-5 text-red-600" />
                             ) : paycheckAllocation.remainingAmount < paycheckAllocation.amount * 0.2 ? (
@@ -392,8 +405,8 @@ const SmartAllocation = () => {
                             ) : (
                               <CheckCircle className="h-5 w-5 text-green-600" />
                             )}
-                            <span className="font-semibold text-gray-900">
-                              Available for discretionary spending:
+                            <span className="font-medium text-foreground">
+                              Available for mindful choices:
                             </span>
                           </div>
                           <span className={cn("font-bold text-xl", 
@@ -401,62 +414,59 @@ const SmartAllocation = () => {
                             paycheckAllocation.remainingAmount < paycheckAllocation.amount * 0.2 ? "text-yellow-600" : 
                             "text-green-600"
                           )}>
-                            ${paycheckAllocation.remainingAmount.toFixed(2)}
+                            ${paycheckAllocation.remainingAmount.toFixed(0)}
                           </span>
                         </div>
                         
                         {paycheckAllocation.remainingAmount < 0 && (
-                          <div className="mt-3 text-sm text-red-700">
-                            <div className="flex items-start gap-2">
-                              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                              <p>
-                                Your upcoming bills exceed your paycheck by ${Math.abs(paycheckAllocation.remainingAmount).toFixed(2)}. 
-                                Consider adjusting your budget or using savings.
-                              </p>
-                            </div>
+                          <div className="mt-3 text-sm text-red-700 italic">
+                            <p>
+                              Your obligations exceed this stream by ${Math.abs(paycheckAllocation.remainingAmount).toFixed(0)}. 
+                              Consider rebalancing your flow or drawing from reserves.
+                            </p>
                           </div>
                         )}
                       </div>
 
-                      {/* Bills Section */}
+                      {/* Obligations Section */}
                       {paycheckAllocation.expenses.length === 0 ? (
-                        <Alert className="border-green-200 bg-green-50 dark:bg-green-900/30 dark:border-green-700">
+                        <Alert className="border-green-200 bg-green-50/50 dark:bg-green-900/30 dark:border-green-700">
                           <CheckCircle className="h-4 w-4 text-green-600" />
-                          <AlertTitle className="text-green-800">No bills due before your next paycheck!</AlertTitle>
+                          <AlertTitle className="text-green-800">Complete Freedom</AlertTitle>
                           <AlertDescription className="text-green-700">
-                            Your entire paycheck is available for discretionary spending.
+                            No obligations before your next resource stream. Pure intentional choice awaits.
                           </AlertDescription>
                         </Alert>
                       ) : (
                         <div>
-                          <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                            <Clock className="h-5 w-5 text-amber-500" />
-                            Bills Due Before Next Paycheck
+                          <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-primary" />
+                            Upcoming Obligations
                           </h4>
                           
                           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                             {paycheckAllocation.expenses.map((expense) => (
-                              <Card key={expense.id} className="border-gray-200 hover:bg-gray-50 transition-colors">
+                              <Card key={expense.id} className="bg-muted/30 border-muted/50 hover:bg-muted/50 transition-colors">
                                 <CardContent className="p-4">
                                   <div className="flex justify-between items-start">
                                     <div className="flex-1">
-                                      <div className="font-medium text-gray-900">{expense.description}</div>
+                                      <div className="font-medium text-foreground">{expense.description}</div>
                                       <div className="flex flex-wrap items-center gap-2 mt-2">
-                                        <Badge variant="outline" className="text-xs">
+                                        <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                                           {expense.category}
                                         </Badge>
                                         <Badge variant={expense.isRecurring ? "secondary" : "outline"} className="text-xs">
-                                          {expense.isRecurring ? "Recurring" : "One-time"}
+                                          {expense.isRecurring ? "Rhythmic" : "Single"}
                                         </Badge>
-                                        <span className="text-xs text-gray-500 flex items-center">
+                                        <span className="text-xs text-muted-foreground flex items-center">
                                           <Calendar className="h-3 w-3 mr-1" />
-                                          Due: {format(new Date(expense.dueDate), "MMM d")} 
+                                          {format(new Date(expense.dueDate), "MMM d")} 
                                           <span className="ml-1">({getDaysUntil(expense.dueDate)} days)</span>
                                         </span>
                                       </div>
                                     </div>
-                                    <div className="text-lg font-semibold text-red-600 ml-4">
-                                      ${Math.abs(parseFloat(expense.amount)).toFixed(2)}
+                                    <div className="text-lg font-semibold text-foreground ml-4">
+                                      ${Math.abs(parseFloat(expense.amount)).toFixed(0)}
                                     </div>
                                   </div>
                                 </CardContent>
@@ -466,18 +476,18 @@ const SmartAllocation = () => {
                         </div>
                       )}
 
-                      {/* Next Paycheck Info */}
+                      {/* Next Stream Info */}
                       {paycheckAllocation.nextPaycheckDate && (
                         <>
                           <Separator className="my-6" />
                           <div className="flex items-center gap-2 mb-2">
-                            <Wallet className="h-5 w-5 text-blue-600" />
-                            <h4 className="font-semibold text-gray-900">Next Paycheck</h4>
+                            <Wallet className="h-5 w-5 text-primary" />
+                            <h4 className="font-medium text-foreground">Next Resource Stream</h4>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             {format(new Date(paycheckAllocation.nextPaycheckDate), "MMMM d, yyyy")} 
                             <span className="ml-1 text-xs">
-                              ({getDaysUntil(paycheckAllocation.nextPaycheckDate)} days from now)
+                              ({getDaysUntil(paycheckAllocation.nextPaycheckDate)} days ahead)
                             </span>
                           </p>
                         </>
@@ -486,26 +496,39 @@ const SmartAllocation = () => {
                   </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
 
-        {/* Empty State */}
-        {!loading && (!allocationData || !allocationData.paychecks || allocationData.paychecks.length === 0) && (
-          <Card className="bg-card text-card-foreground border shadow-md">
-            <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-              <Wallet className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No allocation data available</h3>
-              <p className="text-muted-foreground mb-4 max-w-md">
-                We couldn&apos;t find any allocation data for this period. This could be because you don&apos;t have any recurring expenses or paycheck information set up.
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline">Set Up Recurring Transactions</Button>
-                <Button>Add Paycheck Information</Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Empty State - Begin Your Practice */}
+          {!loading && (!allocationData || !allocationData.paychecks || allocationData.paychecks.length === 0) && (
+            <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
+              <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                  <span className="text-2xl font-bold text-primary">墨</span>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Mindful Planning</h3>
+                <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
+                  Like preparing your canvas before the first brushstroke, set up your resource streams and obligations 
+                  to see the full picture of your financial flow.
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="rounded-full">Set Up Rhythmic Patterns</Button>
+                  <Button className="rounded-full">Add Resource Streams</Button>
+                </div>
+                <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
+                  "The wise painter knows their materials before touching brush to paper"
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Sumi Wisdom Footer */}
+          <div className="text-center py-8 border-t border-muted/30 mt-16">
+            <p className="text-sm text-muted-foreground italic">
+              "Like water finding its path, let your resources flow with intention and wisdom."
+            </p>
+          </div>
+        </>
       </div>
     </div>
   );
