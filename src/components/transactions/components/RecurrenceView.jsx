@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Trash2, Repeat, DollarSign, Tag, CalendarDays, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const RECURRENCE_OPTIONS = [
   { value: 'DAILY', label: 'Daily' },
@@ -237,14 +239,15 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
     // Common flexibility selector for all frequency types
     const flexibilitySelector = (
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+          <Settings className="h-4 w-4" />
           {recurrence.frequency === 'WEEKLY' ? 'Day Flexibility' : 'Date Flexibility'}
         </label>
         <Select
           value={recurrence.dateFlexibility || 'EXACT'}
           onValueChange={handleDateFlexibilityChange}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-12">
             <SelectValue placeholder={`Select ${recurrence.frequency === 'WEEKLY' ? 'day' : 'date'} flexibility`} />
           </SelectTrigger>
           <SelectContent>
@@ -278,7 +281,7 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
                     ...recurrence, 
                     rangeStart: parseInt(e.target.value) || labels.startMin 
                   })}
-                  className="h-8 text-sm"
+                  className="h-12"
                 />
               </div>
               <div className="space-y-2">
@@ -292,7 +295,7 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
                     ...recurrence, 
                     rangeEnd: parseInt(e.target.value) || labels.endMin 
                   })}
-                  className="h-8 text-sm"
+                  className="h-12"
                 />
               </div>
             </>
@@ -306,7 +309,10 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
       if (recurrence.frequency === 'WEEKLY' && recurrence.dateFlexibility === 'EXACT') {
         return (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Day of Week</label>
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Day of Week
+            </label>
             <Select
               value={recurrence.preference || getDayOfWeek(transaction.occurredOn)}
               onValueChange={(day) => setRecurrence({ ...recurrence, preference: day })}
@@ -379,108 +385,136 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
     if (!recurrence) return null;
 
     return (
-      <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Variable Amount</label>
-          <Switch
-            checked={recurrence.isVariableAmount || false}
-            onCheckedChange={handleVariableAmountChange}
-          />
-        </div>
-        
-        {recurrence.isVariableAmount && (
-          <div className="space-y-4 mt-2 p-3 bg-blue-50 rounded-md">
-            <div className="text-sm text-blue-700">
-              This transaction varies in amount each time it occurs.
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Variable Amount
+              </label>
+              <Switch
+                checked={recurrence.isVariableAmount || false}
+                onCheckedChange={handleVariableAmountChange}
+              />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Minimum Amount ($)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={recurrence.estimatedMinAmount || ''}
-                  onChange={(e) => handleMinAmountChange(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder={`${Math.abs(transaction.amount) * 0.8}`}
-                />
+            {recurrence.isVariableAmount && (
+              <div className="space-y-4 mt-4 p-4 bg-white rounded-lg border border-blue-200">
+                <div className="text-sm text-blue-700">
+                  This transaction varies in amount each time it occurs.
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Minimum Amount ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={recurrence.estimatedMinAmount || ''}
+                      onChange={(e) => handleMinAmountChange(e.target.value)}
+                      className="h-12"
+                      placeholder={`${Math.abs(transaction.amount) * 0.8}`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Maximum Amount ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={recurrence.estimatedMaxAmount || ''}
+                      onChange={(e) => handleMaxAmountChange(e.target.value)}
+                      className="h-12"
+                      placeholder={`${Math.abs(transaction.amount) * 1.2}`}
+                    />
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 mt-2">
+                  Tip: Set a typical range to help with budget planning. The current transaction amount is ${Math.abs(transaction.amount).toFixed(2)}.
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Maximum Amount ($)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={recurrence.estimatedMaxAmount || ''}
-                  onChange={(e) => handleMaxAmountChange(e.target.value)}
-                  className="h-8 text-sm"
-                  placeholder={`${Math.abs(transaction.amount) * 1.2}`}
-                />
-              </div>
-            </div>
-            
-            <div className="text-xs text-gray-500 mt-2">
-              Tip: Set a typical range to help with budget planning. The current transaction amount is ${Math.abs(transaction.amount).toFixed(2)}.
-            </div>
+            )}
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     );
   };
 
+  const TransactionSummary = () => (
+    <Card className="bg-gray-50 border-gray-200">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div className="min-w-0 flex-1 mr-6">
+            <div className="text-lg font-semibold text-gray-900 mb-2">
+              {transaction.description}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {transaction.category && (
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {transaction.category.name}
+                </Badge>
+              )}
+              <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
+                <CalendarDays className="h-3 w-3 mr-1" />
+                {format(new Date(transaction.occurredOn), "MMMM d, yyyy")}
+              </Badge>
+              {isExistingRecurrence && (
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-blue-100 text-blue-700 border-blue-200">
+                  <Repeat className="h-3 w-3 mr-1" />
+                  Currently Recurring: {getFrequencyLabel(transaction.recurrence.frequency)}
+                </Badge>
+              )}
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+            <DollarSign className="h-6 w-6 inline mr-1" />
+            {Math.abs(transaction.amount).toFixed(2)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0">
+      {/* Header */}
+      <div className="p-6 flex-shrink-0 border-b border-gray-200">
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-semibold">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <DialogTitle className="text-2xl font-bold text-gray-900">
               {isExistingRecurrence ? 'Edit Recurring Transaction' : 'Set Up Recurring Transaction'}
             </DialogTitle>
-            <div className="text-xl font-semibold text-gray-700">
-              ${Math.abs(transaction.amount).toFixed(2)}
+            <div className="text-2xl font-bold text-gray-900">
+              <DollarSign className="h-6 w-6 inline mr-1" />
+              {Math.abs(transaction.amount).toFixed(2)}
             </div>
           </div>
         </DialogHeader>
       </div>
 
-      <div className="p-6 pt-2 flex-1 overflow-y-auto">
-        <div className="space-y-6">
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <div className="flex justify-between items-start">
-              <div className="min-w-0 flex-1 mr-4">
-                <div className="text-base font-semibold truncate">
-                  {transaction.description}
-                </div>
-                <div className="flex flex-col gap-1 mt-1">
-                  {transaction.category && (
-                    <Badge variant="outline" className="text-xs w-fit">
-                      {transaction.category.name}
-                    </Badge>
-                  )}
-                  <Badge variant="outline" className="text-xs w-fit text-gray-500">
-                    Transaction Date: {format(new Date(transaction.occurredOn), "MMMM d, yyyy")}
-                  </Badge>
-                  {isExistingRecurrence && (
-                    <Badge variant="outline" className="text-xs w-fit bg-blue-100 text-blue-700 border-blue-200">
-                      Currently Recurring: {getFrequencyLabel(transaction.recurrence.frequency)}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Content */}
+      <div className="p-6 flex-1 overflow-y-auto">
+        <div className="space-y-6 max-w-4xl">
+          {/* Transaction Summary */}
+          <TransactionSummary />
 
           {recurrence ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Frequency Selection */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Frequency</label>
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Repeat className="h-4 w-4" />
+                  Frequency
+                </label>
                 <Select
                   value={recurrence.frequency}
                   onValueChange={handleFrequencyChange}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
@@ -501,38 +535,44 @@ export const RecurrenceView = ({ transaction, onSave, onCancel }) => {
 
               <Button
                 variant="destructive"
-                className="w-full"
+                className="w-full h-12 text-base font-medium gap-2"
                 onClick={handleRemoveRecurrence}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
                 Remove Recurrence
               </Button>
             </div>
           ) : (
-            <div className="text-center space-y-4 py-4">
-              <div className="text-gray-500">
-                This transaction is not set to recur.
-              </div>
-              <Button onClick={handleSetupRecurrence}>
-                Set Up Recurrence
-              </Button>
-            </div>
+            <Card className="bg-gray-50 border-gray-200">
+              <CardContent className="p-8 text-center">
+                <div className="space-y-4">
+                  <Repeat className="h-12 w-12 text-gray-400 mx-auto" />
+                  <div className="text-gray-500 text-lg">
+                    This transaction is not set to recur.
+                  </div>
+                  <Button onClick={handleSetupRecurrence} className="h-12 text-base font-medium">
+                    Set Up Recurrence
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
 
-      <div className="p-6 pt-4 border-t flex-shrink-0">
-        <div className="flex w-full gap-2">
+      {/* Footer */}
+      <div className="p-6 flex-shrink-0 border-t border-gray-200">
+        <div className="flex w-full gap-4">
           <Button 
             variant="outline" 
-            className="flex-1 h-10 text-base font-medium"
+            className="flex-1 h-12 text-base font-medium"
             onClick={onCancel}
           >
             Cancel
           </Button>
           <Button
             variant="default"
-            className="flex-1 h-10 text-base font-medium"
+            className="flex-1 h-12 text-base font-medium"
             onClick={handleSave}
           >
             {recurrence 

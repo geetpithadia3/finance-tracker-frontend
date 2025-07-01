@@ -14,7 +14,7 @@ export const SumiCard: React.FC<SumiCardProps> = ({
   variant = 'default',
   withInkFlow = false
 }) => {
-  const baseClasses = 'bg-card text-card-foreground rounded-2xl border transition-all duration-300';
+  const baseClasses = 'bg-card text-card-foreground rounded-xl border transition-all duration-300';
   
   const variantClasses = {
     default: 'border-border/50 shadow-sumi hover:shadow-sumi-lg',

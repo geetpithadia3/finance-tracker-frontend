@@ -110,6 +110,37 @@ Create a financial management experience that transforms complex data into intui
 - **Forms**: Consistent validation and error states
 - **Navigation**: Breadcrumbs and clear page structure
 - **Modals**: Focus management and escape key support
+- **Month Selector**: Standardized date navigation component
+
+### Month Selector Component
+```jsx
+// Standardized month selector pattern
+<MonthSelector
+  value="2024-01"
+  onChange={(yearMonth) => handleMonthChange(yearMonth)}
+  size="default" // "compact" | "default" | "large"
+  showTodayButton={true}
+  className=""
+/>
+```
+
+#### Month Selector Specifications
+- **Consistent Design**: Follows dashboard style across all components
+- **Size Variants**: 
+  - `compact`: Small buttons (h-8 w-8), small text (text-sm), tight spacing
+  - `default`: Standard buttons (h-9 w-9), medium text (text-lg), normal spacing
+  - `large`: Large buttons (h-10 w-10), large text (text-xl), loose spacing
+- **Features**:
+  - Previous/Next month navigation with chevron icons
+  - Current month display with calendar icon
+  - "Today" button to quickly return to current month
+  - Accessible with proper ARIA labels
+  - Responsive design with consistent spacing
+- **Styling**:
+  - Outline button variant with gray borders
+  - Hover states with subtle background changes
+  - Consistent typography and spacing
+  - Calendar icon for visual context
 
 ---
 
@@ -146,9 +177,42 @@ Create a financial management experience that transforms complex data into intui
 
 ### Navigation Patterns
 - **Breadcrumbs**: Show current location
-- **Tab Navigation**: For related content sections
+- **Card-Based Layout**: Replace tabs with contextual card sections
 - **Sidebar**: For main application sections
 - **Search**: Global search for transactions and data
+- **Progressive Disclosure**: Show essential information first, reveal details on demand
+
+### Layout Without Tabs
+```jsx
+// Card-based layout pattern replacing tabs
+<div className="space-y-6">
+  {/* Overview Section */}
+  <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 className="text-xl font-semibold text-gray-900 mb-4">Overview</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Overview cards */}
+    </div>
+  </div>
+  
+  {/* Monthly Budgets Section */}
+  <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold text-gray-900">Monthly Budgets</h2>
+      <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
+    </div>
+    {/* Budget content */}
+  </div>
+  
+  {/* Project Budgets Section */}
+  <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold text-gray-900">Project Budgets</h2>
+      <Button>Create Project Budget</Button>
+    </div>
+    {/* Project budget content */}
+  </div>
+</div>
+```
 
 ### Feedback Patterns
 - **Success States**: Clear confirmation of actions
@@ -177,10 +241,51 @@ Create a financial management experience that transforms complex data into intui
 ```
 
 ### Budget Progress
-- **Visual Progress Bars**: Clear indication of budget usage
+- **Visual Progress Bars**: Clear indication of budget usage with gradient indicators
 - **Color Coding**: Green (under 70%), Yellow (70-90%), Red (over 90%)
-- **Remaining Amount**: Always show available budget
+- **Remaining Amount**: Always show available budget with contextual colors
 - **Time Context**: Consider days remaining in period
+- **Action Indicators**: Contextual alerts for over-budget, near-limit, and excellent progress
+- **Status Icons**: Visual status indicators with appropriate icons and colors
+- **Hover Effects**: Subtle animations and scale effects for interactive feedback
+- **Progress Markers**: Visual dividers on progress bars for better readability
+
+### Creative Budget Card Patterns
+```jsx
+// Enhanced budget card with status indicators
+<Card className="transition-all duration-200 hover:shadow-md hover:scale-[1.02] group">
+  <CardContent className="p-4">
+    {/* Status Icon Header */}
+    <div className="flex items-center gap-2 mb-3">
+      <div className="p-1.5 rounded-lg bg-green-100">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+      </div>
+      <h4 className="font-semibold text-sm">Category Name</h4>
+    </div>
+    
+    {/* Enhanced Progress Bar */}
+    <div className="mb-3">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-xs font-medium text-gray-600">Progress</span>
+        <span className="text-xs font-bold text-gray-900">75%</span>
+      </div>
+      <Progress 
+        value={75} 
+        className="h-2 bg-gray-100"
+        indicatorClassName="bg-gradient-to-r from-yellow-400 to-yellow-500"
+      />
+    </div>
+    
+    {/* Action Indicators */}
+    <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-100">
+      <div className="flex items-center gap-2">
+        <Target className="h-3 w-3 text-yellow-500" />
+        <span className="text-xs font-medium text-yellow-700">Monitor spending</span>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+```
 
 ### Transaction Display
 - **Categorization**: Clear category labels with icons

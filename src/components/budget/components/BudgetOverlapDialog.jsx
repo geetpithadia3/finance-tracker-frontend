@@ -45,7 +45,7 @@ export function BudgetOverlapDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-orange-600">
+          <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
             Budget Overlap Detected
           </DialogTitle>
@@ -57,11 +57,11 @@ export function BudgetOverlapDialog({
 
         <div className="space-y-4">
           {conflictData.overlapping_categories.map((categoryConflict, index) => (
-            <Card key={index} className="border-orange-200">
+            <Card key={index} className="border-destructive">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-lg">{categoryConflict.category_name}</h4>
-                  <Badge variant="outline" className="text-orange-700 border-orange-300">
+                  <h4 className="font-medium text-lg text-foreground">{categoryConflict.category_name}</h4>
+                  <Badge variant="outline" className="text-destructive border-destructive">
                     {categoryConflict.conflicts.length} Conflict{categoryConflict.conflicts.length > 1 ? 's' : ''}
                   </Badge>
                 </div>
@@ -70,23 +70,23 @@ export function BudgetOverlapDialog({
                   {categoryConflict.conflicts.map((conflict, conflictIndex) => (
                     <div 
                       key={conflictIndex}
-                      className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200"
+                      className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           {getBudgetTypeIcon(conflict.type)}
-                          <span className="font-medium text-sm">
+                          <span className="font-medium text-sm text-foreground">
                             {getBudgetTypeLabel(conflict.type)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700">{conflict.budget_name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm text-muted-foreground">{conflict.budget_name}</p>
+                        <p className="text-xs text-muted-foreground">
                           Period: {formatPeriod(conflict.period)}
                         </p>
                       </div>
                       
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-sm font-medium text-foreground">
                           ${conflict.allocated_amount.toFixed(2)}
                         </p>
                         <Button
@@ -115,7 +115,7 @@ export function BudgetOverlapDialog({
             <Button 
               variant="destructive" 
               onClick={onForceCreate}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-destructive hover:bg-destructive/80"
             >
               Force Create Anyway
             </Button>

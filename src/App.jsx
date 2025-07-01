@@ -12,12 +12,13 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Toaster } from "@/components/ui/toaster"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 // Import your components
 import TransactionsList from './components/transactions/components/TransactionsList';
 import Dashboard from './components/dashboard/components/Dashboard';
 import Configuration from './components/configuration/Configuration';
-import { Toaster } from "@/components/ui/toaster"
 import { BudgetDashboard } from './components/budget/components/BudgetDashboard';
 import Avvvatars from 'avvvatars-react'
 import SmartAllocation from './components/allocation/SmartAllocation';
@@ -27,6 +28,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PrivateRoute from './components/auth/PrivateRoute';
+import GoalDashboard from './components/budget/components/GoalDashboard';
 
 import { 
   Menu,
@@ -39,6 +41,7 @@ import {
   HelpCircle,
   Moon,
   Sun,
+  Target,
 } from 'lucide-react';
 
 // Import the API client to use the theme functions
@@ -80,6 +83,7 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
       <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
       <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
       <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
+      <NavItem icon={Target} to="/goals">Goals</NavItem>
       <NavItem icon={Calculator} to="/allocation">Smart Allocation</NavItem>
     </nav>
   );
@@ -332,6 +336,13 @@ const AppContent = () => {
             </MainLayout>
           </PrivateRoute>
         } />
+        <Route path="/goals" element={
+          <PrivateRoute>
+            <MainLayout>
+              <GoalDashboard />
+            </MainLayout>
+          </PrivateRoute>
+        } />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Toaster />
@@ -342,7 +353,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <TooltipProvider>
+        <AppContent />
+      </TooltipProvider>
     </AuthProvider>
   );
 };

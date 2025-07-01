@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Plus, DollarSign, Tag, Calculator } from "lucide-react";
 import { SplitItem } from './SplitItem';
 import { SplitViewContext } from '../context/SplitViewContext';
 import { splitReducer } from '../../../reducers/splitReducer';
@@ -16,24 +16,37 @@ const SplitEntryStep = ({ transaction, categories }) => {
   const { state, dispatch, calculations } = useSplitViewContext();
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="p-3">
+    <div className="space-y-6">
+      {/* Original Transaction Card */}
+      <Card className="bg-gray-50 border-gray-200">
+        <CardContent className="p-6">
           <div className="flex justify-between items-start">
-            <div>
-              <div className="text-base font-semibold">{transaction.description}</div>
-              <Badge variant="outline" className="mt-1 text-xs">
-                {transaction.category.name}
-              </Badge>
+            <div className="flex-1 min-w-0 mr-6">
+              <div className="text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {transaction.category.name}
+                </Badge>
+              </div>
             </div>
-            <div className="text-xl font-bold text-gray-700">
-              ${Math.abs(transaction.amount).toFixed(2)}
+            <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+              <DollarSign className="h-6 w-6 inline mr-1" />
+              {Math.abs(transaction.amount).toFixed(2)}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      {/* Split Items */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Split Details</h3>
+          <span className="text-sm text-gray-500">
+            {state.splits.length} split{state.splits.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        
         {state.splits.map((split, index) => (
           <SplitItem
             key={index}
@@ -44,26 +57,37 @@ const SplitEntryStep = ({ transaction, categories }) => {
         ))}
       </div>
 
+      {/* Add Split Button */}
       <Button
         variant="outline"
-        className="w-full h-10 text-base"
+        className="w-full h-12 text-base font-medium gap-2"
         onClick={() => dispatch({
           type: 'ADD_SPLIT',
           category: transaction.category
         })}
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="h-5 w-5" />
         Add Split
       </Button>
 
-      <Card>
-        <CardContent className="p-4">
+      {/* Remaining Amount Card */}
+      <Card className={`${calculations.remainingAmount < 0 ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
+        <CardContent className="p-6">
           <div className="flex justify-between items-center">
-            <span className="font-medium">Remaining Amount:</span>
-            <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
-              ${calculations.remainingAmount.toFixed(2)}
+            <div className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-gray-600" />
+              <span className="font-semibold text-gray-900">Remaining Amount:</span>
+            </div>
+            <span className={`text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-blue-600'}`}>
+              <DollarSign className="h-5 w-5 inline mr-1" />
+              {calculations.remainingAmount.toFixed(2)}
             </span>
           </div>
+          {calculations.remainingAmount < 0 && (
+            <p className="text-sm text-red-600 mt-2">
+              Warning: Total split amount exceeds original transaction amount.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -74,20 +98,23 @@ const SummaryStep = ({ transaction }) => {
   const { state, calculations } = useSplitViewContext();
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="p-4">
-          <div className="space-y-2">
+    <div className="space-y-6">
+      {/* Summary Header */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="font-medium">Original Transaction</span>
-              <span className="font-semibold line-through text-gray-500">
-                ${Math.abs(transaction.amount).toFixed(2)}
+              <span className="font-semibold text-gray-900">Original Transaction</span>
+              <span className="font-bold text-gray-500 line-through">
+                <DollarSign className="h-5 w-5 inline mr-1" />
+                {Math.abs(transaction.amount).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-medium">Updated Amount</span>
-              <span className="font-semibold text-blue-600">
-                ${Math.abs(calculations.remainingAmount).toFixed(2)}
+              <span className="font-semibold text-gray-900">Updated Amount</span>
+              <span className="font-bold text-blue-600">
+                <DollarSign className="h-5 w-5 inline mr-1" />
+                {Math.abs(calculations.remainingAmount).toFixed(2)}
               </span>
             </div>
             <div className="text-sm text-gray-600">{transaction.description}</div>
@@ -95,35 +122,48 @@ const SummaryStep = ({ transaction }) => {
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      {/* Split Summary */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Split Summary</h3>
         {state.splits.map((split, index) => (
-          <Card key={index}>
-            <CardContent className="p-3">
+          <Card key={index} className="border-gray-200">
+            <CardContent className="p-4">
               <div className="flex justify-between items-start">
-                <div>
-                  <div className="font-medium">Split {index + 1}</div>
-                  <Badge variant="outline" className="mt-1">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="font-semibold text-gray-900">Split {index + 1}</div>
+                  <Badge variant="outline" className="mt-2 text-sm px-3 py-1">
+                    <Tag className="h-3 w-3 mr-1" />
                     {split.category.name}
                   </Badge>
                   {split.description && (
-                    <div className="mt-1 text-sm text-gray-600">{split.description}</div>
+                    <div className="mt-2 text-sm text-gray-600">{split.description}</div>
                   )}
                 </div>
-                <div className="font-semibold">${parseFloat(split.amount).toFixed(2)}</div>
+                <div className="font-bold text-gray-900">
+                  <DollarSign className="h-4 w-4 inline mr-1" />
+                  {parseFloat(split.amount).toFixed(2)}
+                </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <Card>
-        <CardContent className="p-4">
+      {/* Final Remaining Amount */}
+      <Card className={`${calculations.remainingAmount < 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+        <CardContent className="p-6">
           <div className="flex justify-between items-center">
-            <span className="font-medium">Remaining Amount</span>
-            <span className={`font-semibold ${calculations.remainingAmount < 0 ? 'text-red-600' : ''}`}>
-              ${calculations.remainingAmount.toFixed(2)}
+            <span className="font-semibold text-gray-900">Remaining Amount</span>
+            <span className={`text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <DollarSign className="h-5 w-5 inline mr-1" />
+              {calculations.remainingAmount.toFixed(2)}
             </span>
           </div>
+          {calculations.remainingAmount < 0 && (
+            <p className="text-sm text-red-600 mt-2">
+              Please adjust split amounts to match the original transaction.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -155,23 +195,26 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
   return (
     <SplitViewContext.Provider value={{ state, dispatch, calculations }}>
       <div className="flex flex-col h-full">
-        <div className="p-4 sm:p-6 flex-shrink-0">
+        {/* Header */}
+        <div className="p-6 flex-shrink-0 border-b border-gray-200">
           <DialogHeader>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-              <DialogTitle className="text-xl font-semibold">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <DialogTitle className="text-2xl font-bold text-gray-900">
                 {state.step === 1 ? 'Split Transaction' : 'Review Split'}
               </DialogTitle>
               {state.step === 1 && (
-                <div className="text-xl font-semibold text-red-600">
-                  ${Math.abs(transaction.amount).toFixed(2)}
+                <div className="text-2xl font-bold text-gray-900">
+                  <DollarSign className="h-6 w-6 inline mr-1" />
+                  {Math.abs(transaction.amount).toFixed(2)}
                 </div>
               )}
             </div>
           </DialogHeader>
-          <Progress className="mt-2" value={state.step === 1 ? 50 : 100} />
+          <Progress className="mt-4" value={state.step === 1 ? 50 : 100} />
         </div>
 
-        <div className="p-4 sm:p-6 pt-2 flex-1 overflow-y-auto">
+        {/* Content */}
+        <div className="p-6 flex-1 overflow-y-auto">
           {state.step === 1 ? (
             <SplitEntryStep transaction={transaction} categories={categories} />
           ) : (
@@ -179,12 +222,12 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
           )}
         </div>
 
-        <Separator />
-        <div className="p-6 flex-shrink-0">
-          <div className="flex w-full gap-2">
+        {/* Footer */}
+        <div className="p-6 flex-shrink-0 border-t border-gray-200">
+          <div className="flex w-full gap-4">
             <Button
               variant="outline"
-              className="flex-1 h-10 text-base font-medium"
+              className="flex-1 h-12 text-base font-medium"
               onClick={() => {
                 if (state.step === 1) {
                   onCancel();
@@ -197,8 +240,7 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
             </Button>
             <Button
               variant="default"
-              className="flex-1 h-10 text-base font-medium"
-              disabled={!calculations.isValid}
+              className="flex-1 h-12 text-base font-medium gap-2"
               onClick={() => {
                 if (state.step === 1) {
                   dispatch({ type: 'SET_STEP', step: 2 });
@@ -206,12 +248,13 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
                   handleSave();
                 }
               }}
+              disabled={calculations.remainingAmount < 0}
             >
               {state.step === 1 ? (
-                <div className="flex items-center justify-center">
+                <>
                   Review
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </div>
+                  <ArrowRight className="h-5 w-5" />
+                </>
               ) : (
                 'Confirm Split'
               )}

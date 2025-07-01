@@ -6,7 +6,7 @@ import { Switch } from '../../ui/switch';
 import { Trash2, Plus } from 'lucide-react';
 import { categoriesApi } from '../../../api/categories';
 
-export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false }) {
+export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false, yearMonth }) {
   const [categories, setCategories] = useState([]);
   const [categoryLimits, setCategoryLimits] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -111,6 +111,7 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
     setLoading(true);
     try {
       await onSubmit({
+        year_month: yearMonth,
         category_limits: categoryLimits.map(limit => ({
           category_id: limit.category_id,
           budget_amount: parseFloat(limit.budget_amount),
@@ -134,8 +135,8 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-red-800 text-sm">{errors.general}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+          <p className="text-destructive text-sm">{errors.general}</p>
         </div>
       )}
 
@@ -150,26 +151,26 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
 
         {/* Global Rollover Controls */}
         {categoryLimits.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Apply to All Categories:</h4>
+          <div className="bg-muted rounded-lg p-4">
+            <h4 className="text-sm font-medium text-foreground mb-3">Apply to All Categories:</h4>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <Switch
                   checked={categoryLimits.every(limit => limit.rollover_enabled)}
                   onCheckedChange={(checked) => applyRolloverToAll('rollover_enabled', checked)}
                 />
-                <label className="text-sm text-gray-700 font-medium">Rollover funds</label>
+                <label className="text-sm text-muted-foreground font-medium">Rollover funds</label>
               </div>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               These settings will apply to all categories. You can still customize individual categories below.
             </p>
           </div>
         )}
 
         {categoryLimits.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-            <p className="text-gray-500 mb-4">No categories added yet</p>
+          <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground mb-4">No categories added yet</p>
             <Button type="button" onClick={addCategoryLimit} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               Add First Category
@@ -185,7 +186,7 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
                       value={limit.category_id}
                       onChange={(e) => updateCategoryLimit(index, 'category_id', e.target.value)}
                       className={`w-full p-2 border rounded-md ${
-                        errors[`category_${index}_category_id`] ? 'border-red-500' : 'border-gray-300'
+                        errors[`category_${index}_category_id`] ? 'border-destructive' : 'border-border'
                       }`}
                     >
                       <option value="">Select category</option>
@@ -200,7 +201,7 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
                       ))}
                     </select>
                     {errors[`category_${index}_category_id`] && (
-                      <p className="text-red-500 text-xs mt-1">{errors[`category_${index}_category_id`]}</p>
+                      <p className="text-destructive text-xs mt-1">{errors[`category_${index}_category_id`]}</p>
                     )}
                   </div>
 
@@ -211,11 +212,11 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
                       min="0"
                       value={limit.budget_amount}
                       onChange={(e) => updateCategoryLimit(index, 'budget_amount', e.target.value)}
-                      className={errors[`category_${index}_budget_amount`] ? 'border-red-500' : ''}
+                      className={errors[`category_${index}_budget_amount`] ? 'border-destructive' : ''}
                       placeholder="0.00"
                     />
                     {errors[`category_${index}_budget_amount`] && (
-                      <p className="text-red-500 text-xs mt-1">{errors[`category_${index}_budget_amount`]}</p>
+                      <p className="text-destructive text-xs mt-1">{errors[`category_${index}_budget_amount`]}</p>
                     )}
                   </div>
 
@@ -224,20 +225,20 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
                     onClick={() => removeCategoryLimit(index)}
                     variant="ghost"
                     size="sm"
-                    className="text-red-600 hover:text-red-700"
+                    className="text-destructive hover:text-destructive/80"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* Rollover Options */}
-                <div className="flex items-center gap-6 pl-2 border-l-2 border-gray-100">
+                <div className="flex items-center gap-6 pl-2 border-l-2 border-border">
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={limit.rollover_enabled || false}
                       onCheckedChange={(checked) => updateCategoryLimit(index, 'rollover_enabled', checked)}
                     />
-                    <label className="text-sm text-gray-700">Rollover funds</label>
+                    <label className="text-sm text-muted-foreground">Rollover funds</label>
                   </div>
                 </div>
               </div>
@@ -247,9 +248,9 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false 
       </div>
 
       {categoryLimits.length > 0 && (
-        <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-          <span className="font-medium">Total Budget:</span>
-          <span className="text-xl font-bold text-blue-600">
+        <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+          <span className="font-medium text-foreground">Total Budget:</span>
+          <span className="text-xl font-bold text-primary">
             ${totalBudget.toFixed(2)}
           </span>
         </div>

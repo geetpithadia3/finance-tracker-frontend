@@ -92,17 +92,17 @@
     --popover: 216 19% 8%;
     --popover-foreground: 210 20% 95%;
     
-    --card: 216 19% 10%;
+    --card: 216 19% 14%;
     --card-foreground: 210 20% 95%;
     
-    --border: 216 19% 18%;
+    --border: 216 19% 28%;
     --input: 216 19% 18%;
     
     /* Lighter ink for dark mode */
     --primary: 210 20% 95%;
     --primary-foreground: 216 19% 8%;
     
-    --secondary: 216 19% 12%;
+    --secondary: 216 19% 18%;
     --secondary-foreground: 210 20% 95%;
     
     /* Warmer gold for dark mode */

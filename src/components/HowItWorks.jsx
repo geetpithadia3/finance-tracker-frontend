@@ -24,6 +24,11 @@ import {
   ExternalLink,
   Repeat,
   DollarSign,
+  Target,
+  CheckCircle,
+  Calendar,
+  TrendingUp,
+  Settings,
 } from 'lucide-react';
 
 const HowItWorks = () => {
@@ -35,54 +40,104 @@ const HowItWorks = () => {
       {
         icon: Upload,
         title: "Upload CSV Statement",
-        description: "Start by uploading your bank or credit card statements in CSV format in the Transactions tab.",
-        image: "/images/upload-csv.png" // Replace with actual screenshot
+        description: "Start by uploading your bank or credit card statements in CSV format. Supports most bank formats with automatic column mapping.",
+        image: "/images/upload-csv.png"
       },
       {
         icon: Tag,
         title: "Categorize Transactions",
-        description: "Review your transactions and assign appropriate categories to track your spending patterns.",
-        image: "/images/categorize.png" // Replace with actual screenshot
+        description: "Review your transactions and assign appropriate categories. The system learns your preferences and suggests categories for future transactions.",
+        image: "/images/categorize.png"
       },
       {
         icon: CreditCard,
         title: "Set Up Recurring Transactions",
         description: "Click 'Make Recurring' on any transaction to set up recurring income (paychecks) and expenses (bills). Configure frequency, date flexibility, and variable amounts.",
-        image: "/images/recurring.png" // Replace with actual screenshot
+        image: "/images/recurring.png"
       },
       {
         icon: Search,
         title: "Advanced Transaction Management",
-        description: "Split transactions between categories, process refunds, and share transactions with others.",
-        image: "/images/advanced.png" // Replace with actual screenshot
+        description: "Split transactions between categories, process refunds, share transactions, and use bulk actions for efficient management.",
+        image: "/images/advanced.png"
       }
     ],
     dashboard: [
       {
         icon: BarChart3,
-        title: "View Spending Breakdown",
-        description: "See visual charts that break down your spending by category and track month-over-month trends.",
-        image: "/images/spending-breakdown.png" // Replace with actual screenshot
+        title: "Financial Health Score",
+        description: "Monitor your financial health with a comprehensive score (0-100) based on budget utilization, spending velocity, category health, and emergency fund status.",
+        image: "/images/financial-health.png"
       },
       {
-        icon: CreditCard,
-        title: "Monthly Spending Overview",
-        description: "Get a comprehensive view of your monthly expenditures and identify spending patterns.",
-        image: "/images/monthly-overview.png" // Replace with actual screenshot
+        icon: TrendingUp,
+        title: "Spending Trends & Analytics",
+        description: "View interactive charts showing spending trends, category breakdowns, and month-over-month comparisons to identify patterns.",
+        image: "/images/spending-trends.png"
+      },
+      {
+        icon: Target,
+        title: "Budget vs Actual Overview",
+        description: "See at-a-glance how your actual spending compares to your budget with visual progress indicators and alerts.",
+        image: "/images/budget-overview.png"
+      },
+      {
+        icon: PiggyBank,
+        title: "Goals Summary",
+        description: "Track your savings goals progress with summary stats showing active goals, completion rate, and total targets vs savings.",
+        image: "/images/goals-summary.png"
       }
     ],
     budget: [
       {
-        icon: PiggyBank,
-        title: "Set Budget Limits",
-        description: "Create monthly budget limits for each spending category based on your financial goals.",
-        image: "/images/budget-limits.png" // Replace with actual screenshot
+        icon: Calendar,
+        title: "Create Monthly Budgets",
+        description: "Create detailed monthly budgets by selecting a month and setting limits for each category. Copy budgets from previous months to save time.",
+        image: "/images/create-budget.png"
       },
       {
         icon: BarChart3,
-        title: "Track Progress",
-        description: "Monitor how well you're sticking to your budget with visual progress indicators for each category.",
-        image: "/images/budget-progress.png" // Replace with actual screenshot
+        title: "Track Category Progress",
+        description: "Monitor spending vs budget for each category with color-coded progress bars. Green = on track, Yellow = warning, Red = over budget.",
+        image: "/images/budget-progress.png"
+      },
+      {
+        icon: Settings,
+        title: "Manage Budget Categories",
+        description: "Edit, delete, or modify budget amounts throughout the month. Budgets automatically track your actual spending from categorized transactions.",
+        image: "/images/budget-management.png"
+      },
+      {
+        icon: TrendingUp,
+        title: "Budget Analytics",
+        description: "View budget performance over time with charts showing spending patterns and budget adherence across multiple months.",
+        image: "/images/budget-analytics.png"
+      }
+    ],
+    goals: [
+      {
+        icon: Target,
+        title: "Create Savings Goals",
+        description: "Set specific savings targets with deadlines. Optionally create temporary categories to automatically track progress from transactions.",
+        image: "/images/create-goals.png"
+      },
+      {
+        icon: TrendingUp,
+        title: "Track Goal Progress",
+        description: "Monitor your progress with visual indicators showing saved amount vs target. Goals display progress percentage and remaining amount.",
+        image: "/images/goal-progress.png"
+      },
+      {
+        icon: CheckCircle,
+        title: "Manage Goal Status",
+        description: "Mark goals as complete, archive them, or abandon if plans change. Use the status dropdown to take actions on each goal.",
+        image: "/images/goal-status.png"
+      },
+      {
+        icon: BarChart3,
+        title: "Goal Analytics & Summary",
+        description: "View goal statistics including active vs completed goals, total targets, and savings progress across all goals.",
+        image: "/images/goal-analytics.png"
       }
     ],
     allocation: [
@@ -118,6 +173,7 @@ const HowItWorks = () => {
     transactions: '/transactions',
     dashboard: '/',
     budget: '/budget',
+    goals: '/budget', // Goals are part of the budget section
     allocation: '/allocation'
   };
 
@@ -144,24 +200,29 @@ const HowItWorks = () => {
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList
-            className="grid grid-cols-4 mb-3 sm:mb-4 lg:mb-6 h-8 sm:h-10 gap-0 px-0"
+            className="grid grid-cols-5 mb-3 sm:mb-4 lg:mb-6 h-8 sm:h-10 gap-0 px-0"
           >
-            <TabsTrigger value="transactions" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
+            <TabsTrigger value="transactions" className="flex items-center gap-1 text-[10px] px-0.5 sm:px-2 sm:text-xs min-w-0 justify-center">
               <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Transactions</span>
               <span className="sm:hidden">Trans</span>
             </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
+            <TabsTrigger value="dashboard" className="flex items-center gap-1 text-[10px] px-0.5 sm:px-2 sm:text-xs min-w-0 justify-center">
               <LayoutDashboard className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Dashboard</span>
               <span className="sm:hidden">Dash</span>
             </TabsTrigger>
-            <TabsTrigger value="budget" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
+            <TabsTrigger value="budget" className="flex items-center gap-1 text-[10px] px-0.5 sm:px-2 sm:text-xs min-w-0 justify-center">
               <PiggyBank className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Budget</span>
               <span className="sm:hidden">Budget</span>
             </TabsTrigger>
-            <TabsTrigger value="allocation" className="flex items-center gap-1 text-[11px] px-0.5 sm:px-3 sm:text-sm min-w-0 justify-center">
+            <TabsTrigger value="goals" className="flex items-center gap-1 text-[10px] px-0.5 sm:px-2 sm:text-xs min-w-0 justify-center">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Goals</span>
+              <span className="sm:hidden">Goals</span>
+            </TabsTrigger>
+            <TabsTrigger value="allocation" className="flex items-center gap-1 text-[10px] px-0.5 sm:px-2 sm:text-xs min-w-0 justify-center">
               <Calculator className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Smart Allocation</span>
               <span className="sm:hidden">Alloc</span>

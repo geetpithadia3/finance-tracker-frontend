@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
           'Authorization': `Bearer ${token}`
         }
       }).then(response => {
+        console.log("response", response);
         if (!response.ok) {
           // Token is invalid or expired
           localStorage.removeItem('token');
@@ -37,17 +38,20 @@ export const AuthProvider = ({ children }) => {
           setUser({ username, token });
           setIsAuthenticated(true);
         }
+        setIsLoading(false);
       }).catch(() => {
+        console.log("error");
         // Network error or other issue
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         setUser(null);
         setIsAuthenticated(false);
         window.location.href = '/login';
+        setIsLoading(false);
       });
+    } else {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }, []);
 
   const login = (userData) => {

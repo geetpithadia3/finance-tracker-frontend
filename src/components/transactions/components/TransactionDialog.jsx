@@ -50,13 +50,13 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
       await onRefresh();
       onClose();
       toast({
-        description: "Split saved! Your transaction is now in pieces 🧩",
+        description: "Transaction split successfully! Your transaction is now organized into categories 🧩",
       });
     } catch (error) {
       console.error('Error saving split:', error);
       toast({
         variant: "destructive",
-        description: "Oops! Couldn't split that transaction 😅",
+        description: "Unable to split transaction. Please try again.",
       });
     }
   };
@@ -74,13 +74,13 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
       await onRefresh();
       onClose();
       toast({
-        description: "Share saved! Time to collect from your friends 💰",
+        description: "Share settings saved! Your transaction is now properly tracked for shared expenses 💰",
       });
     } catch (error) {
       console.error('Error saving share:', error);
       toast({
         variant: "destructive",
-        description: "Sharing failed - maybe keep this one to yourself 😅",
+        description: "Unable to save share settings. Please try again.",
       });
     }
   };
@@ -118,21 +118,21 @@ export const TransactionDialog = ({ open, transaction, categories, onClose, onRe
         description: updatedTransaction.recurrence 
           ? (transaction.recurrence 
               ? "Recurrence updated! Your schedule has been adjusted 🔄" 
-              : "Recurrence set! This transaction will keep coming back 🔄")
+              : "Recurrence set! This transaction will repeat automatically 🔄")
           : "Recurrence removed! This is now a one-time transaction ✓",
       });
     } catch (error) {
       console.error('Error saving recurrence:', error);
       toast({
         variant: "destructive",
-        description: "Couldn't set up the recurrence - try again? 🤔",
+        description: "Unable to update recurrence settings. Please try again.",
       });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl p-0 sm:p-6">
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-white border-gray-200">
         {view === 'details' && (
           <TransactionDetailsView
             transaction={transaction}

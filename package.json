@@ -82,6 +82,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:kill": "kill-port 3000 && vite",
     "build": "vite build",
     "build:prod": "vite build --mode production",
     "build:netlify": "npm run type-check && npm run lint && vite build --mode production",

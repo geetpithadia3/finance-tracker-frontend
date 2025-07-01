@@ -3,10 +3,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const BudgetProgressChart = ({ budgetCategories }) => {
   const filteredBudgets = budgetCategories
-    ?.filter(cat => cat.effective_budget > 0)
+    ?.filter(cat => (cat.effective_budget ?? cat.budget_amount) > 0)
     .sort((a, b) => {
-      const aProgress = (a.spent_amount / a.effective_budget) * 100;
-      const bProgress = (b.spent_amount / b.effective_budget) * 100;
+      const aEff = a.effective_budget ?? a.budget_amount;
+      const bEff = b.effective_budget ?? b.budget_amount;
+      const aProgress = (a.spent_amount / aEff) * 100;
+      const bProgress = (b.spent_amount / bEff) * 100;
       return bProgress - aProgress;
     })
     .slice(0, 6) || [];
@@ -39,8 +41,9 @@ const BudgetProgressChart = ({ budgetCategories }) => {
         ) : (
           <div className="space-y-4">
             {filteredBudgets.map((budget, index) => {
-              const progress = (budget.spent_amount / budget.effective_budget) * 100;
-              const remaining = budget.effective_budget - budget.spent_amount;
+              const eff = budget.effective_budget ?? budget.budget_amount;
+              const progress = (budget.spent_amount / eff) * 100;
+              const remaining = eff - budget.spent_amount;
               
               return (
                 <div key={index} className="space-y-2">
@@ -50,7 +53,7 @@ const BudgetProgressChart = ({ budgetCategories }) => {
                         {budget.category_name}
                       </div>
                       <div className="text-xs text-gray-500">
-                        ${budget.spent_amount.toFixed(2)} / ${budget.effective_budget.toFixed(2)}
+                        ${budget.spent_amount.toFixed(2)} / ${eff.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-right">

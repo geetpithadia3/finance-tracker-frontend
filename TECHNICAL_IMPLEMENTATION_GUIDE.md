@@ -36,6 +36,35 @@ const ComponentName = ({ data, onAction }) => {
 export default ComponentName;
 ```
 
+### Month Selector Component
+```jsx
+// Standardized month navigation component
+import { MonthSelector } from '@/components/ui/MonthSelector';
+
+const ComponentWithMonthSelector = () => {
+  const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'months'));
+  
+  const handleMonthChange = (direction) => {
+    setSelectedDate(prev => prev.clone().add(direction, 'months'));
+  };
+  
+  return (
+    <div>
+      <MonthSelector
+        value={selectedDate.format('YYYY-MM')}
+        onChange={(yearMonth) => {
+          const [year, month] = yearMonth.split('-');
+          const newDate = selectedDate.clone().year(parseInt(year)).month(parseInt(month) - 1);
+          handleMonthChange(newDate.diff(selectedDate, 'months'));
+        }}
+        size="default" // Use "compact" for smaller spaces, "large" for prominent display
+        showTodayButton={true}
+      />
+    </div>
+  );
+};
+```
+
 ### Status Component Pattern
 ```jsx
 // Reusable status indicator

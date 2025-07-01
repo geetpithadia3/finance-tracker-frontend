@@ -6,7 +6,7 @@ import { AlertTriangle, AlertCircle, TrendingUp, Bell, Calendar, DollarSign } fr
 import { budgetAlertsAPI } from '../../../api/budgetAlerts';
 import { useToast } from '../../../hooks/use-toast';
 
-export function BudgetAlerts({ yearMonth = null, compact = false }) {
+export function BudgetAlerts({ yearMonth = null, compact = false, badge = false }) {
   const [alerts, setAlerts] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,10 +14,10 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
 
   useEffect(() => {
     fetchAlerts();
-    if (!compact) {
+    if (!compact && !badge) {
       fetchSummary();
     }
-  }, [yearMonth, compact]);
+  }, [yearMonth, compact, badge]);
 
   const fetchAlerts = async () => {
     try {
@@ -47,11 +47,11 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
 
   const getAlertIcon = (alert) => {
     if (alert.type === 'over_budget') {
-      return <AlertCircle className="h-4 w-4 text-red-600" />;
+      return <AlertCircle className="h-4 w-4 text-destructive" />;
     } else if (alert.type === 'approaching_limit') {
-      return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
     }
-    return <Bell className="h-4 w-4 text-blue-600" />;
+    return <Bell className="h-4 w-4 text-primary" />;
   };
 
   const getAlertVariant = (alert) => {
@@ -61,9 +61,9 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
   };
 
   const getAlertBorderColor = (alert) => {
-    if (alert.severity === 'high') return 'border-red-200';
-    if (alert.severity === 'medium') return 'border-yellow-200';
-    return 'border-blue-200';
+    if (alert.severity === 'high') return 'border-destructive';
+    if (alert.severity === 'medium') return 'border-yellow-500';
+    return 'border-primary';
   };
 
   const getBudgetTypeIcon = (budgetType) => {
@@ -72,17 +72,50 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
 
   if (loading && !alerts.length) {
     return (
-      <Card className="animate-pulse">
+      <Card className="animate-pulse bg-card">
         <CardHeader>
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-4 bg-muted rounded w-1/3"></div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="h-16 bg-gray-200 rounded"></div>
-            <div className="h-16 bg-gray-200 rounded"></div>
+            <div className="h-16 bg-muted rounded"></div>
+            <div className="h-16 bg-muted rounded"></div>
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (badge) {
+    const highPriorityAlerts = alerts.filter(a => a.severity === 'high');
+    const totalAlerts = alerts.length;
+
+    if (totalAlerts === 0) {
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <div className="h-2 w-2 bg-green-500 rounded-full mr-1"></div>
+          On Track
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge 
+        variant={highPriorityAlerts.length > 0 ? "destructive" : "secondary"}
+        className="cursor-pointer"
+      >
+        {highPriorityAlerts.length > 0 ? (
+          <>
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {totalAlerts} Alert{totalAlerts > 1 ? 's' : ''}
+          </>
+        ) : (
+          <>
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            {totalAlerts} Warning{totalAlerts > 1 ? 's' : ''}
+          </>
+        )}
+      </Badge>
     );
   }
 
@@ -92,7 +125,7 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
 
     if (alerts.length === 0) {
       return (
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-green-200 bg-green-50/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 bg-green-500 rounded-full"></div>
@@ -104,14 +137,14 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
     }
 
     return (
-      <Card className={`${highPriorityAlerts.length > 0 ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}>
+      <Card className={`${highPriorityAlerts.length > 0 ? 'border-destructive bg-destructive/10' : 'border-yellow-500 bg-yellow-100/50'}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {highPriorityAlerts.length > 0 ? (
-                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertCircle className="h-4 w-4 text-destructive" />
               ) : (
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
               )}
               <span className="text-sm font-medium">
                 {highPriorityAlerts.length > 0 ? (
@@ -131,7 +164,7 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
   }
 
   return (
-    <Card>
+    <Card className="bg-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -152,28 +185,28 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
       <CardContent>
         {alerts.length === 0 ? (
           <div className="text-center py-8">
-            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <TrendingUp className="h-6 w-6 text-green-600" />
+            <div className="h-12 w-12 bg-green-100/50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <TrendingUp className="h-6 w-6 text-green-500" />
             </div>
-            <p className="text-gray-600">All budgets are on track!</p>
-            <p className="text-sm text-gray-500 mt-1">No alerts at this time.</p>
+            <p className="text-muted-foreground">All budgets are on track!</p>
+            <p className="text-sm text-muted-foreground mt-1">No alerts at this time.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {alerts.map((alert, index) => (
-              <Card key={index} className={`${getAlertBorderColor(alert)} transition-all hover:shadow-sm`}>
+              <Card key={index} className={`${getAlertBorderColor(alert)} bg-card transition-all hover:shadow-sm`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         {getAlertIcon(alert)}
-                        <span className="font-medium text-sm">{alert.message}</span>
+                        <span className="font-medium text-sm text-foreground">{alert.message}</span>
                         <Badge variant={getAlertVariant(alert)} className="text-xs">
                           {alert.severity === 'high' ? 'Critical' : 'Warning'}
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
                         <div className="flex items-center gap-1">
                           {getBudgetTypeIcon(alert.budget_type)}
                           <span>{alert.budget_type === 'monthly' ? 'Monthly Budget' : 'Project Budget'}</span>
@@ -186,29 +219,29 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
 
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="text-gray-600">Budget: </span>
-                          <span className="font-medium">
+                          <span className="text-muted-foreground">Budget: </span>
+                          <span className="font-medium text-foreground">
                             ${alert.details.budget_amount?.toFixed(2) || alert.details.allocated_amount?.toFixed(2)}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-600">Spent: </span>
-                          <span className={`font-medium ${alert.type === 'over_budget' ? 'text-red-600' : 'text-gray-900'}`}>
+                          <span className="text-muted-foreground">Spent: </span>
+                          <span className={`font-medium ${alert.type === 'over_budget' ? 'text-destructive' : 'text-foreground'}`}>
                             ${alert.details.spent_amount.toFixed(2)}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-600">Usage: </span>
-                          <span className={`font-medium ${alert.type === 'over_budget' ? 'text-red-600' : 'text-yellow-600'}`}>
+                          <span className="text-muted-foreground">Usage: </span>
+                          <span className={`font-medium ${alert.type === 'over_budget' ? 'text-destructive' : 'text-yellow-500'}`}>
                             {alert.details.percentage_used.toFixed(1)}%
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-600">
+                          <span className="text-muted-foreground">
                             {alert.type === 'over_budget' ? 'Over by: ' : 'Remaining: '}
                           </span>
                           <span className={`font-medium ${
-                            alert.type === 'over_budget' ? 'text-red-600' : 'text-green-600'
+                            alert.type === 'over_budget' ? 'text-destructive' : 'text-green-500'
                           }`}>
                             ${Math.abs(alert.details.overspend_amount || alert.details.remaining_amount || 0).toFixed(2)}
                           </span>
@@ -223,12 +256,12 @@ export function BudgetAlerts({ yearMonth = null, compact = false }) {
         )}
 
         {summary && summary.recommendations && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Recommendations</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <h4 className="font-medium text-primary mb-2">Recommendations</h4>
+            <ul className="text-sm text-primary space-y-1">
               {summary.recommendations.filter(Boolean).map((rec, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-0.5">•</span>
+                  <span className="text-primary mt-0.5">•</span>
                   {rec}
                 </li>
               ))}

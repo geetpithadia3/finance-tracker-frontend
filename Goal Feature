@@ -1,0 +1,130 @@
+
+---
+
+# Implementation Plan: Temporary Category for Goal Allocation
+
+## Overview
+
+This feature enables users to create a temporary, goal-linked category when setting up a savings goal. Any transaction allocated to this category is automatically counted toward the goal’s progress. The temporary category is managed alongside the goal and can be archived or deleted upon goal completion.
+
+---
+
+## Objectives
+
+- Allow users to create a temporary category linked to a specific savings goal.
+- Automatically allocate transactions in this category to the goal’s progress.
+- Provide clear UI/UX for managing temporary categories and tracking goal progress.
+- Ensure seamless cleanup or archiving of temporary categories when goals are completed or deleted.
+
+---
+
+## Data Model Changes
+
+### 1. **Goal Model**
+Add a field to link a goal to a category:
+- `linked_category_id` (nullable, foreign key to Category)
+
+### 2. **Category Model**
+Add fields to support temporary/goal-linked categories:
+- `is_temporary` (boolean, default: false)
+- `linked_goal_id` (nullable, foreign key to Goal)
+
+### 3. **Transaction Model**
+No changes required, but ensure transactions reference categories as usual.
+
+---
+
+## API Changes
+
+### 1. **Goal Endpoints**
+- **POST /goals**
+  - Accepts an option to create a temporary category.
+  - Returns the created goal and (if applicable) the new category.
+- **PUT /goals/{id}**
+  - Allows linking/unlinking a category.
+- **DELETE /goals/{id}**
+  - Optionally archives or deletes the linked temporary category.
+
+### 2. **Category Endpoints**
+- **POST /categories**
+  - Accepts `is_temporary` and `linked_goal_id`.
+- **GET /categories**
+  - Returns a flag for temporary/goal-linked categories.
+- **PUT /categories/{id}**
+  - Allows archiving or deleting temporary categories.
+
+### 3. **Transaction Endpoints**
+- No changes, but ensure transactions categorized under a temporary category are included in goal progress calculations.
+
+---
+
+## Backend Logic
+
+1. **Goal Creation**
+   - If the user opts for a temporary category, create a new category with `is_temporary=true` and `linked_goal_id` set to the new goal’s ID.
+   - Store the category’s ID in the goal’s `linked_category_id`.
+
+2. **Transaction Allocation**
+   - When a transaction is created or updated, check if its category is linked to a goal.
+   - If so, automatically add the transaction amount to the goal’s `current_amount` (or equivalent field).
+
+3. **Goal Completion/Deletion**
+   - When a goal is completed or deleted, prompt the user to archive or delete the linked temporary category.
+   - If archived, set a flag; if deleted, remove the category and optionally reassign or delete related transactions.
+
+---
+
+## Frontend/UI
+
+1. **Goal Creation/Edit Dialog**
+   - Add an option: “Create a temporary category for this goal.”
+   - If selected, allow the user to name the category (default: “[Goal Name] Savings”).
+
+2. **Category Picker**
+   - Visually distinguish temporary/goal-linked categories (e.g., with a badge or icon).
+   - Option to filter or hide temporary categories in regular views.
+
+3. **Goal Progress View**
+   - Show all transactions allocated via the temporary category.
+   - Display progress bar, amount saved, and amount remaining.
+
+4. **Goal Completion/Deletion**
+   - Prompt user: “Do you want to archive or delete the temporary category linked to this goal?”
+
+---
+
+## Example User Flow
+
+1. User creates a goal “New Bike” and opts to create a temporary category “Bike Savings.”
+2. User allocates funds by categorizing transactions as “Bike Savings.”
+3. The system automatically updates the goal’s progress.
+4. Upon reaching the goal, the user is prompted to archive or delete the “Bike Savings” category.
+
+---
+
+## Optional Enhancements
+
+- Allow users to convert a temporary category to a permanent one.
+- Support multiple categories linked to a single goal.
+- Provide analytics on contributions by category.
+
+---
+
+## Testing
+
+- Unit tests for backend logic (goal creation, transaction allocation, category cleanup).
+- Integration tests for API endpoints.
+- UI tests for goal creation, allocation, and completion flows.
+
+---
+
+## Rollout Plan
+
+1. Implement backend changes and test thoroughly.
+2. Update frontend to support new flows and UI elements.
+3. Deploy to staging for user acceptance testing.
+4. Roll out to production with user documentation and in-app guidance.
+
+---
+
+**End of Document**

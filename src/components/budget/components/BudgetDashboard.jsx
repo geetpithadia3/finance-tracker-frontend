@@ -3,11 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../ui/dialog';
 import { Badge } from '../../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Plus, Copy, Edit, Trash2, Calendar, FolderOpen, TrendingUp } from 'lucide-react';
+import { Plus, Copy, Edit, Trash2, Calendar, FolderOpen, TrendingUp, Target, DollarSign, Clock, AlertTriangle, CheckCircle, XCircle, InfoIcon, Sparkles, Zap, ArrowUpDown } from 'lucide-react';
 import { useBudget } from '../hooks/useBudget';
 import { BudgetForm } from './BudgetForm';
-import { MonthSelector } from './MonthSelector';
+import { MonthSelector } from '@/components/ui/MonthSelector';
 import { BudgetSpendingCard } from './BudgetSpendingCard';
 import { ProjectBudgetForm } from './ProjectBudgetForm';
 import { ProjectBudgetCard } from './ProjectBudgetCard';
@@ -15,6 +14,9 @@ import { BudgetOverlapDialog } from './BudgetOverlapDialog';
 import { BudgetAlerts } from './BudgetAlerts';
 import { budgetAPI } from '../../../api/budgets';
 import { useToast } from '../../../hooks/use-toast';
+import HelpButton from '../../ui/HelpButton';
+import BudgetHowItWorks from './BudgetHowItWorks';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export function BudgetDashboard() {
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -28,7 +30,7 @@ export function BudgetDashboard() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCopyDialog, setShowCopyDialog] = useState(false);
   const [copyFromMonth, setCopyFromMonth] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeSection, setActiveSection] = useState('monthly'); // 'monthly' or 'projects'
   
   // Project budget state
   const [projectBudgets, setProjectBudgets] = useState([]);
@@ -47,6 +49,9 @@ export function BudgetDashboard() {
   // Rollover status state
   const [rolloverStatus, setRolloverStatus] = useState(null);
   const [rolloverRecalculating, setRolloverRecalculating] = useState(false);
+  
+  // Alerts expansion state
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
   
   const { toast } = useToast();
 
@@ -217,20 +222,21 @@ export function BudgetDashboard() {
   };
 
   const handleDeleteProjectBudget = (projectBudgetId) => {
-    setProjectBudgets(prev => prev.filter(pb => pb.id !== projectBudgetId));
+    setProjectBudgets(prev => prev.filter(p => p.id !== projectBudgetId));
   };
 
   const handleCreateBudget = async (budgetData) => {
     try {
-      await createBudget({ ...budgetData, year_month: selectedMonth });
+      await createBudget(budgetData);
       setShowCreateDialog(false);
-      fetchBudgetByMonth(selectedMonth);
-      fetchBudgetSpending(selectedMonth);
-      toast({ title: "Success", description: "Budget created successfully" });
+      toast({
+        title: "Success",
+        description: "Budget created successfully",
+      });
     } catch (err) {
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
         setOverlapConflictData(err.response.data.detail);
-        setPendingBudgetData({ ...budgetData, year_month: selectedMonth });
+        setPendingBudgetData(budgetData);
         setShowOverlapDialog(true);
         setShowCreateDialog(false);
       } else {
@@ -245,11 +251,12 @@ export function BudgetDashboard() {
 
   const handleUpdateBudget = async (budgetData) => {
     try {
-      await updateBudget(currentBudget.id, budgetData);
+      await updateBudget(budgetData);
       setShowEditDialog(false);
-      fetchBudgetByMonth(selectedMonth);
-      fetchBudgetSpending(selectedMonth);
-      toast({ title: "Success", description: "Budget updated successfully" });
+      toast({
+        title: "Success",
+        description: "Budget updated successfully",
+      });
     } catch (err) {
       if (err.response?.status === 409 && err.response?.data?.detail?.overlapping_categories) {
         setOverlapConflictData(err.response.data.detail);
@@ -267,58 +274,47 @@ export function BudgetDashboard() {
   };
 
   const handleDeleteBudget = async () => {
-    if (window.confirm('Are you sure you want to delete this budget?')) {
-      try {
-        await deleteBudget(currentBudget.id);
-        fetchBudgetByMonth(selectedMonth);
-        fetchBudgetSpending(selectedMonth);
-      } catch (err) {
-        console.error('Failed to delete budget:', err);
-      }
+    try {
+      await deleteBudget();
+      toast({
+        title: "Success",
+        description: "Budget deleted successfully",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete budget",
+        variant: "destructive",
+      });
     }
   };
 
   const handleCopyBudget = async () => {
-    if (!copyFromMonth) return;
     try {
-      await copyBudget(copyFromMonth, selectedMonth);
+      await copyBudget(copyFromMonth);
       setShowCopyDialog(false);
       setCopyFromMonth('');
-      fetchBudgetByMonth(selectedMonth);
-      fetchBudgetSpending(selectedMonth);
+      toast({
+        title: "Success",
+        description: "Budget copied successfully",
+      });
     } catch (err) {
-      console.error('Failed to copy budget:', err);
+      toast({
+        title: "Error",
+        description: "Failed to copy budget",
+        variant: "destructive",
+      });
     }
   };
 
-  const availableMonths = budgets.map(b => b.year_month).filter(m => m !== selectedMonth);
-
-  // Overlap dialog handlers
   const handleEditExisting = (conflict) => {
-    // Close overlap dialog
     setShowOverlapDialog(false);
     setOverlapConflictData(null);
     setPendingBudgetData(null);
     
-    // Navigate to edit the conflicting budget
-    if (conflict.type === 'monthly') {
-      // For monthly budgets, we need to select the correct month and open edit
-      const [year, month] = conflict.period.split('-');
-      setSelectedMonth(conflict.period);
-      setShowEditDialog(true);
-    } else {
-      // For project budgets, find and edit the project
-      const projectBudget = projectBudgets.find(pb => pb.id === conflict.budget_id);
-      if (projectBudget) {
-        setEditingProjectBudget(projectBudget);
-        setShowEditProjectDialog(true);
-      }
-    }
-    
-    toast({
-      title: "Redirected to Edit",
-      description: `Opened ${conflict.budget_name} for editing`,
-    });
+    // Navigate to the conflicting budget for editing
+    setSelectedMonth(conflict.month);
+    setShowEditDialog(true);
   };
 
   const handleCloseOverlapDialog = () => {
@@ -327,424 +323,492 @@ export function BudgetDashboard() {
     setPendingBudgetData(null);
   };
 
+  const availableMonths = budgets.map(b => b.month).filter(m => m !== selectedMonth);
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Budget Management</h1>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="monthly" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Monthly Budgets
-          </TabsTrigger>
-          <TabsTrigger value="projects" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" />
-            Project Budgets
-          </TabsTrigger>
-        </TabsList>
-
-
-        <TabsContent value="overview" className="space-y-4">
-          {/* Budget Alerts */}
-          <BudgetAlerts yearMonth={selectedMonth} />
+    <div className="min-h-screen bg-background p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header with Navigation */}
+        <div className="bg-card rounded-lg border p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground mb-1">Budget Management</h1>
+              <p className="text-muted-foreground">Plan, track, and optimize your spending</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div onClick={() => setAlertsExpanded(!alertsExpanded)} className="cursor-pointer">
+                <BudgetAlerts yearMonth={selectedMonth} badge={true} />
+              </div>
+              <HelpButton title="How Budget Management Works" buttonText="How It Works">
+                <BudgetHowItWorks />
+              </HelpButton>
+              <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
+            </div>
+          </div>
           
-          {/* Compact Stats Overview */}
-          <div className="space-y-4">
-            {/* Monthly Budget Stats */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Monthly Budget ({selectedMonth})</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="text-xl font-bold text-blue-600">{budgets.length}</div>
-                    <p className="text-xs text-gray-600">Total Budgets</p>
-                  </CardContent>
-                </Card>
-                {budgetSpending && (
-                  <>
-                    <Card>
-                      <CardContent className="p-3">
-                        <div className="text-xl font-bold text-green-600">
-                          ${budgetSpending.total_budgeted?.toFixed(0) || '0'}
-                        </div>
-                        <p className="text-xs text-gray-600">Budgeted</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-3">
-                        <div className="text-xl font-bold text-red-600">
-                          ${budgetSpending.total_spent?.toFixed(0) || '0'}
-                        </div>
-                        <p className="text-xs text-gray-600">Spent</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-3">
-                        <div className={`text-xl font-bold ${
-                          budgetSpending.total_remaining < 0 ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          ${budgetSpending.total_remaining?.toFixed(0) || '0'}
-                        </div>
-                        <p className="text-xs text-gray-600">Remaining</p>
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
+          {/* Expandable Detailed Alerts */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full mt-4 justify-between text-xs"
+            onClick={() => setAlertsExpanded(!alertsExpanded)}
+          >
+            <span>Budget Alert Details</span>
+            {alertsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+          
+          {alertsExpanded && (
+            <div className="mt-2 border-t pt-4">
+              <BudgetAlerts yearMonth={selectedMonth} compact={true} />
+            </div>
+          )}
+        </div>
+
+        {/* Section Navigation */}
+        <div className="flex items-center justify-center">
+          <div className="bg-card rounded-lg border p-1 inline-flex">
+            <button
+              onClick={() => setActiveSection('monthly')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeSection === 'monthly'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Monthly Budgets
               </div>
-            </div>
-
-            {/* Project Budget Stats */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Project Budgets</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="text-xl font-bold text-purple-600">{projectBudgets.length}</div>
-                    <p className="text-xs text-gray-600">Active Projects</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="text-xl font-bold text-green-600">
-                      ${projectBudgets.reduce((sum, p) => sum + (p.total_amount || 0), 0).toFixed(0)}
-                    </div>
-                    <p className="text-xs text-gray-600">Total Budget</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="text-xl font-bold text-blue-600">
-                      {projectBudgets.filter(p => {
-                        const endDate = new Date(p.end_date);
-                        const now = new Date();
-                        return endDate > now;
-                      }).length}
-                    </div>
-                    <p className="text-xs text-gray-600">Active</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="text-xl font-bold text-yellow-600">
-                      {projectBudgets.filter(p => {
-                        const endDate = new Date(p.end_date);
-                        const now = new Date();
-                        const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-                        return daysRemaining <= 30 && daysRemaining > 0;
-                      }).length}
-                    </div>
-                    <p className="text-xs text-gray-600">Ending Soon</p>
-                  </CardContent>
-                </Card>
+            </button>
+            <button
+              onClick={() => setActiveSection('projects')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeSection === 'projects'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <FolderOpen className="h-4 w-4" />
+                Project Budgets
               </div>
-            </div>
+            </button>
           </div>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="monthly" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
-          </div>
-
-      {/* Current Budget Overview */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Budget for {selectedMonth}</CardTitle>
-            <div className="flex items-center gap-2">
-              {currentBudget ? (
-                <>
-                  <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Edit Budget for {selectedMonth}</DialogTitle>
-                      </DialogHeader>
-                      <BudgetForm
-                        initialData={currentBudget}
-                        onSubmit={handleUpdateBudget}
-                        onCancel={() => setShowEditDialog(false)}
-                        isEditing={true}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                  
-                  <Button variant="outline" size="sm" onClick={handleDeleteBudget}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Budget
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
-                      </DialogHeader>
-                      <BudgetForm
-                        onSubmit={handleCreateBudget}
-                        onCancel={() => setShowCreateDialog(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-
-                  {availableMonths.length > 0 && (
-                    <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline">
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy from Previous
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Copy Budget</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-sm font-medium">Copy from month:</label>
-                            <select
-                              value={copyFromMonth}
-                              onChange={(e) => setCopyFromMonth(e.target.value)}
-                              className="w-full mt-1 p-2 border rounded-md"
-                            >
-                              <option value="">Select month</option>
-                              {availableMonths.map(month => (
-                                <option key={month} value={month}>{month}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setShowCopyDialog(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              onClick={handleCopyBudget}
-                              disabled={!copyFromMonth}
-                            >
-                              Copy Budget
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading budget data...</p>
-            </div>
-          ) : currentBudget ? (
-            <div className="space-y-4">
-              {/* Rollover Status Warning */}
-              {rolloverStatus && rolloverStatus.rollover_needs_recalc && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium text-yellow-800">
-                        Rollover amounts may be outdated
-                      </span>
+        {/* Monthly Budgets Section */}
+        {activeSection === 'monthly' && (
+          <div className="space-y-6">
+            {/* Quick Actions Card */}
+            <Card className="bg-card border">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Target className="h-6 w-6 text-primary" />
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleRecalculateRollover}
-                      disabled={rolloverRecalculating}
-                      className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
-                    >
-                      {rolloverRecalculating ? 'Updating...' : 'Update Now'}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-yellow-700 mt-1">
-                    Recent transaction changes may have affected rollover calculations.
-                  </p>
-                </div>
-              )}
-
-              {/* Rollover Summary */}
-              {budgetSpending && budgetSpending.categories && (
-                (() => {
-                  const totalRollover = Object.values(budgetSpending.categories)
-                    .reduce((sum, cat) => sum + (cat.rollover_amount || 0), 0);
-                  const hasRollover = totalRollover !== 0;
-                  
-                  return hasRollover ? (
-                    <div className={`p-3 rounded-lg border ${
-                      totalRollover > 0 
-                        ? 'bg-green-50 border-green-200' 
-                        : 'bg-red-50 border-red-200'
-                    }`}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
-                          Rollover from last month:
-                        </span>
-                        <span className={`font-bold ${
-                          totalRollover > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {totalRollover > 0 ? '+' : ''}${totalRollover.toFixed(0)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {totalRollover > 0 
-                          ? 'Extra budget from unused funds last month'
-                          : 'Reduced budget due to overspending last month'
-                        }
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Budget for {selectedMonth}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {currentBudget ? 'Manage your current budget' : 'Create a new budget to start tracking'}
                       </p>
                     </div>
-                  ) : null;
-                })()
-              )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {currentBudget ? (
+                      <>
+                        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Edit Budget for {selectedMonth}</DialogTitle>
+                            </DialogHeader>
+                            <BudgetForm
+                              initialData={currentBudget}
+                              onSubmit={handleUpdateBudget}
+                              onCancel={() => setShowEditDialog(false)}
+                              isEditing={true}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                        
+                        <Button variant="outline" size="sm" onClick={handleDeleteBudget}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                          <DialogTrigger asChild>
+                            <Button className="bg-primary hover:bg-primary/90">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create Budget
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
+                            </DialogHeader>
+                            <BudgetForm
+                              onSubmit={handleCreateBudget}
+                              onCancel={() => setShowCreateDialog(false)}
+                              yearMonth={selectedMonth}
+                            />
+                          </DialogContent>
+                        </Dialog>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {budgetSpending && Object.entries(budgetSpending.categories).map(([categoryId, data]) => (
-                  <BudgetSpendingCard
-                    key={categoryId}
-                    categoryData={data}
+                        {availableMonths.length > 0 && (
+                          <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline">
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copy from Previous
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Copy Budget</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-sm font-medium">Copy from month:</label>
+                                  <select
+                                    value={copyFromMonth}
+                                    onChange={(e) => setCopyFromMonth(e.target.value)}
+                                    className="w-full mt-1 p-2 border rounded-md"
+                                  >
+                                    <option value="">Select month</option>
+                                    {availableMonths.map(month => (
+                                      <option key={month} value={month}>{month}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setShowCopyDialog(false)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={handleCopyBudget}
+                                    disabled={!copyFromMonth}
+                                  >
+                                    Copy Budget
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Current Budget Content */}
+            {loading ? (
+              <Card className="bg-card">
+                <CardContent className="flex justify-center items-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-2 text-sm text-muted-foreground">Loading budget data...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : currentBudget ? (
+              <div className="space-y-4">
+                {/* Rollover Status Warning */}
+                {rolloverStatus && rolloverStatus.rollover_needs_recalc && (
+                  <Card className="bg-yellow-100 border-yellow-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-yellow-200 rounded-lg">
+                      <AlertTriangle className="h-5 w-5 text-yellow-700" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-yellow-900">Rollover amounts may be outdated</h4>
+                            <p className="text-sm text-yellow-800">
+                              Recent transaction changes may have affected rollover calculations.
+                            </p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={handleRecalculateRollover}
+                          disabled={rolloverRecalculating}
+                          className="text-yellow-800 border-yellow-400 hover:bg-yellow-200"
+                        >
+                          {rolloverRecalculating ? 'Updating...' : 'Update Now'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Rollover Summary */}
+                {budgetSpending && budgetSpending.categories && (
+                  (() => {
+                    const totalRollover = Object.values(budgetSpending.categories)
+                      .reduce((sum, cat) => sum + (cat.rollover_amount || 0), 0);
+                    const hasRollover = totalRollover !== 0;
+                    
+                    return hasRollover ? (
+                      <Card className={`bg-card border ${
+                        totalRollover > 0 
+                          ? 'border-green-200' 
+                          : 'border-red-200'
+                      }`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${
+                              totalRollover > 0 ? 'bg-green-100' : 'bg-red-100'
+                            }`}>
+                              <ArrowUpDown className={`h-5 w-5 ${
+                                totalRollover > 0 ? 'text-green-600' : 'text-red-600'
+                              }`} />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-foreground">Rollover from last month</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {totalRollover > 0 
+                                  ? 'Extra budget from unused funds last month'
+                                  : 'Reduced budget due to overspending last month'
+                                }
+                              </p>
+                            </div>
+                            <div className={`text-lg font-bold ${
+                              totalRollover > 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {totalRollover > 0 ? '+' : ''}${totalRollover.toFixed(0)}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : null;
+                  })()
+                )}
+
+                {/* Budget Categories Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {budgetSpending && Object.entries(budgetSpending.categories).map(([categoryId, data]) => (
+                    <BudgetSpendingCard
+                      key={categoryId}
+                      categoryData={data}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Card className="bg-card border">
+                <CardContent className="text-center py-12">
+                  <div className="p-3 bg-muted rounded-full w-fit mx-auto mb-4">
+                    <Target className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No Budget Found</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    You haven't created a budget for {selectedMonth} yet. Create your first budget to start tracking your spending goals.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-primary hover:bg-primary/90">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Budget
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
+                        </DialogHeader>
+                        <BudgetForm
+                          onSubmit={handleCreateBudget}
+                          onCancel={() => setShowCreateDialog(false)}
+                          yearMonth={selectedMonth}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                    {availableMonths.length > 0 && (
+                      <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline">
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy from Previous
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Copy Budget</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium">Copy from month:</label>
+                              <select
+                                value={copyFromMonth}
+                                onChange={(e) => setCopyFromMonth(e.target.value)}
+                                className="w-full mt-1 p-2 border rounded-md"
+                              >
+                                <option value="">Select month</option>
+                                {availableMonths.map(month => (
+                                  <option key={month} value={month}>{month}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => setShowCopyDialog(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleCopyBudget}
+                                disabled={!copyFromMonth}
+                              >
+                                Copy Budget
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Project Budgets Section */}
+        {activeSection === 'projects' && (
+          <div className="space-y-6">
+            {/* Project Budgets Header */}
+            <Card className="bg-card border">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <FolderOpen className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Project Budgets</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Manage multi-month project budgets and track long-term goals
+                      </p>
+                    </div>
+                  </div>
+                  <Dialog open={showCreateProjectDialog} onOpenChange={setShowCreateProjectDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Project Budget
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Create New Project Budget</DialogTitle>
+                      </DialogHeader>
+                      <ProjectBudgetForm
+                        onSubmit={handleCreateProjectBudget}
+                        onCancel={() => setShowCreateProjectDialog(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Project Budgets List */}
+            {projectBudgetsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map(i => (
+                  <Card key={i} className="animate-pulse bg-card">
+                    <CardHeader className="pb-2">
+                      <div className="h-3 bg-muted rounded w-3/4"></div>
+                      <div className="h-2 bg-muted rounded w-1/2"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="h-1.5 bg-muted rounded"></div>
+                        <div className="h-2 bg-muted rounded"></div>
+                        <div className="h-2 bg-muted rounded w-1/2 mx-auto"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : projectBudgets.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {projectBudgets.map(projectBudget => (
+                  <ProjectBudgetCard
+                    key={projectBudget.id}
+                    projectBudget={projectBudget}
+                    onEdit={handleEditProjectBudget}
+                    onDelete={handleDeleteProjectBudget}
+                    onRefresh={fetchProjectBudgets}
                   />
                 ))}
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Budget Found</h3>
-              <p className="text-gray-600 mb-4">
-                You haven't created a budget for {selectedMonth} yet.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            ) : (
+              <Card className="bg-card border">
+                <CardContent className="text-center py-12">
+                  <div className="p-3 bg-muted rounded-full w-fit mx-auto mb-4">
+                    <FolderOpen className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No Project Budgets</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    Create your first project budget to track spending across multiple months and achieve long-term financial goals.
+                  </p>
+                  <Button 
+                    onClick={() => setShowCreateProjectDialog(true)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Project Budget
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-        </TabsContent>
-
-        <TabsContent value="projects" className="space-y-6">
-          {/* Project Budgets Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Project Budgets</h2>
-              <p className="text-sm text-gray-600">Manage multi-month project budgets</p>
-            </div>
-            <Dialog open={showCreateProjectDialog} onOpenChange={setShowCreateProjectDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project Budget
-                </Button>
-              </DialogTrigger>
+            {/* Edit Project Budget Dialog */}
+            <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Create New Project Budget</DialogTitle>
+                  <DialogTitle>Edit Project Budget</DialogTitle>
                 </DialogHeader>
                 <ProjectBudgetForm
-                  onSubmit={handleCreateProjectBudget}
-                  onCancel={() => setShowCreateProjectDialog(false)}
+                  initialData={editingProjectBudget}
+                  onSubmit={handleUpdateProjectBudget}
+                  onCancel={() => {
+                    setShowEditProjectDialog(false);
+                    setEditingProjectBudget(null);
+                  }}
+                  isEditing={true}
                 />
               </DialogContent>
             </Dialog>
           </div>
+        )}
 
-          {/* Project Budgets List */}
-          {projectBudgetsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {[1, 2, 3, 4].map(i => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader className="pb-2">
-                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-2 bg-gray-200 rounded w-1/2"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="h-1.5 bg-gray-200 rounded"></div>
-                      <div className="h-2 bg-gray-200 rounded"></div>
-                      <div className="h-2 bg-gray-200 rounded w-1/2 mx-auto"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : projectBudgets.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {projectBudgets.map(projectBudget => (
-                <ProjectBudgetCard
-                  key={projectBudget.id}
-                  projectBudget={projectBudget}
-                  onEdit={handleEditProjectBudget}
-                  onDelete={handleDeleteProjectBudget}
-                  onRefresh={fetchProjectBudgets}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="text-center py-12">
-                <FolderOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Project Budgets</h3>
-                <p className="text-gray-600 mb-4">
-                  Create your first project budget to track spending across multiple months.
-                </p>
-                <Button onClick={() => setShowCreateProjectDialog(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project Budget
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Edit Project Budget Dialog */}
-          <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Edit Project Budget</DialogTitle>
-              </DialogHeader>
-              <ProjectBudgetForm
-                initialData={editingProjectBudget}
-                onSubmit={handleUpdateProjectBudget}
-                onCancel={() => {
-                  setShowEditProjectDialog(false);
-                  setEditingProjectBudget(null);
-                }}
-                isEditing={true}
-              />
-            </DialogContent>
-          </Dialog>
-        </TabsContent>
-      </Tabs>
-
-      {/* Budget Overlap Conflict Dialog */}
-      <BudgetOverlapDialog
-        isOpen={showOverlapDialog}
-        onClose={handleCloseOverlapDialog}
-        conflictData={overlapConflictData}
-        onEditExisting={handleEditExisting}
-      />
+        {/* Overlap Conflict Dialog */}
+        <BudgetOverlapDialog
+          open={showOverlapDialog}
+          onClose={handleCloseOverlapDialog}
+          overlapData={overlapConflictData}
+          pendingData={pendingBudgetData}
+          onEditExisting={handleEditExisting}
+        />
+      </div>
     </div>
   );
 }

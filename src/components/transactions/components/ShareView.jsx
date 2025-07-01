@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, DollarSign, Tag, Calculator, Percent, Users } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -95,30 +95,39 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="p-3">
+      <Card className="bg-gray-50 border-gray-200">
+        <CardContent className="p-6">
           <div className="flex justify-between items-start">
-            <div>
-              <div className="text-base font-semibold">{transaction.description}</div>
-              <Badge variant="outline" className="mt-1 text-xs">
-                {transaction.category.name}
-              </Badge>
+            <div className="flex-1 min-w-0 mr-6">
+              <div className="text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
+                  <Tag className="h-3 w-3 mr-1" />
+                  {transaction.category.name}
+                </Badge>
+              </div>
             </div>
-            <div className="text-xl font-bold text-gray-700">
-              ${Math.abs(transaction.amount).toFixed(2)}
+            <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+              <DollarSign className="h-6 w-6 inline mr-1" />
+              {Math.abs(transaction.amount).toFixed(2)}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Share Configuration</h3>
+        </div>
+
         {state.splitType === 'shares' ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Select
               value={state.splitType}
               onValueChange={(value) => dispatch({ type: 'UPDATE_SPLIT_TYPE', value })}
             >
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-12">
                 <SelectValue placeholder="Split Type" />
               </SelectTrigger>
               <SelectContent>
@@ -127,79 +136,111 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                 <SelectItem value="shares">Shares</SelectItem>
               </SelectContent>
             </Select>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                type="number"
-                value={state.yourShares}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  dispatch({ type: 'UPDATE_YOUR_SHARES', value });
-                  calculateShares('shares', value);
-                }}
-                placeholder="Your shares"
-                className="h-9"
-              />
-              <Input
-                type="number"
-                value={state.totalShares}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  dispatch({ type: 'UPDATE_TOTAL_SHARES', value });
-                  calculateShares('shares', state.yourShares, value);
-                }}
-                placeholder="Total shares"
-                className="h-9"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Your shares</label>
+                <Input
+                  type="number"
+                  value={state.yourShares}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    dispatch({ type: 'UPDATE_YOUR_SHARES', value });
+                    calculateShares('shares', value);
+                  }}
+                  placeholder="0"
+                  className="h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Total shares</label>
+                <Input
+                  type="number"
+                  value={state.totalShares}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    dispatch({ type: 'UPDATE_TOTAL_SHARES', value });
+                    calculateShares('shares', state.yourShares, value);
+                  }}
+                  placeholder="0"
+                  className="h-12"
+                />
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-[1fr,auto] gap-3">
-            <Input
-              type="number"
-              value={state.splitType === 'amount' ? state.personalShare : state.percentage}
-              onChange={(e) => calculateShares(state.splitType, e.target.value)}
-              placeholder={state.splitType === 'amount' ? "Enter your share ($)" : "Enter percentage (%)"}
-              className="h-9"
-            />
-            <Select
-              value={state.splitType}
-              onValueChange={(value) => dispatch({ type: 'UPDATE_SPLIT_TYPE', value })}
-            >
-              <SelectTrigger className="h-9 min-w-[140px]">
-                <SelectValue placeholder="Split Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="amount">Amount ($)</SelectItem>
-                <SelectItem value="percentage">Percentage (%)</SelectItem>
-                <SelectItem value="shares">Shares</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-4">
+            <div className="grid grid-cols-[1fr,auto] gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  {state.splitType === 'amount' ? 'Your share amount' : 'Your percentage'}
+                </label>
+                <Input
+                  type="number"
+                  value={state.splitType === 'amount' ? state.personalShare : state.percentage}
+                  onChange={(e) => calculateShares(state.splitType, e.target.value)}
+                  placeholder={state.splitType === 'amount' ? "0.00" : "0"}
+                  className="h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Split type</label>
+                <Select
+                  value={state.splitType}
+                  onValueChange={(value) => dispatch({ type: 'UPDATE_SPLIT_TYPE', value })}
+                >
+                  <SelectTrigger className="h-12 min-w-[140px]">
+                    <SelectValue placeholder="Split Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="amount">Amount ($)</SelectItem>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="shares">Shares</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         )}
 
-        <Card>
-          <CardContent className="p-3">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-500">Your Share:</span>
-                <span className="text-base">${state.personalShare.toFixed(2)}</span>
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Calculator className="h-5 w-5 text-blue-600" />
+                <h4 className="font-semibold text-gray-900">Share Summary</h4>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-500">Owed Share:</span>
-                <span className="text-base">${state.owedShare.toFixed(2)}</span>
-              </div>
-              {state.splitType === 'shares' && state.yourShares && state.totalShares && (
+              
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-500">Split Ratio:</span>
-                  <span className="text-base">
-                    {state.yourShares} : {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares}
+                  <span className="text-sm font-medium text-gray-600">Your Share:</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    <DollarSign className="h-4 w-4 inline mr-1" />
+                    {state.personalShare.toFixed(2)}
                   </span>
                 </div>
-              )}
-              <Separator className="my-2" />
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-500">Total Amount:</span>
-                <span className="text-base">${Math.abs(transaction.amount).toFixed(2)}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Owed Share:</span>
+                  <span className="text-lg font-bold text-blue-600">
+                    <DollarSign className="h-4 w-4 inline mr-1" />
+                    {state.owedShare.toFixed(2)}
+                  </span>
+                </div>
+                {state.splitType === 'shares' && state.yourShares && state.totalShares && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-600">Split Ratio:</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {state.yourShares} : {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares}
+                    </span>
+                  </div>
+                )}
+                <Separator className="my-3" />
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-900">Total Amount:</span>
+                  <span className="text-xl font-bold text-gray-900">
+                    <DollarSign className="h-5 w-5 inline mr-1" />
+                    {Math.abs(transaction.amount).toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -211,54 +252,93 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
 
 const SummaryStep = ({ state, transaction }) => {
   return (
-    <div className="space-y-4">
-      <div className="text-sm font-medium uppercase text-gray-500">
-        FINAL SHARES
+    <div className="space-y-6">
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-gray-900">Original Transaction</span>
+              <span className="font-bold text-gray-500 line-through">
+                <DollarSign className="h-5 w-5 inline mr-1" />
+                {Math.abs(transaction.amount).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-gray-900">Your Share</span>
+              <span className="font-bold text-blue-600">
+                <DollarSign className="h-5 w-5 inline mr-1" />
+                {state.personalShare.toFixed(2)}
+              </span>
+            </div>
+            <div className="text-sm text-gray-600">{transaction.description}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Share Details</h3>
+        
+        <Card className="border-gray-200">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-gray-600" />
+                  <span className="font-semibold text-gray-900">Your Share</span>
+                </div>
+                <span className="text-xl font-bold text-gray-900">
+                  <DollarSign className="h-5 w-5 inline mr-1" />
+                  {state.personalShare.toFixed(2)}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-gray-600" />
+                  <span className="font-semibold text-gray-900">Owed Share</span>
+                </div>
+                <span className="text-xl font-bold text-blue-600">
+                  <DollarSign className="h-5 w-5 inline mr-1" />
+                  {state.owedShare.toFixed(2)}
+                </span>
+              </div>
+              
+              {state.splitType === 'percentage' && state.percentage && (
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Percent className="h-5 w-5 text-gray-600" />
+                    <span className="font-semibold text-gray-900">Your Percentage</span>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">
+                    {state.percentage}%
+                  </span>
+                </div>
+              )}
+              
+              {state.splitType === 'shares' && state.yourShares && state.totalShares && (
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-gray-600" />
+                    <span className="font-semibold text-gray-900">Share Ratio</span>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">
+                    {state.yourShares} : {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares}
+                  </span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card className="bg-blue-50/50">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-sm font-medium text-gray-600">Your Share</span>
-            <span className="text-lg font-semibold">${state.personalShare.toFixed(2)}</span>
-          </div>
-          {state.splitType === 'percentage' && (
-            <span className="text-sm text-gray-500">
-              {((state.personalShare / transaction.amount) * 100).toFixed(1)}% of total
-            </span>
-          )}
-          {state.splitType === 'shares' && state.totalShares && (
-            <span className="text-sm text-gray-500">
-              {state.yourShares} of {state.totalShares} shares
-            </span>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="bg-green-50/50">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-sm font-medium text-gray-600">Owed Share</span>
-            <span className="text-lg font-semibold">${state.owedShare.toFixed(2)}</span>
-          </div>
-          {state.splitType === 'percentage' && (
-            <span className="text-sm text-gray-500">
-              {((state.owedShare / transaction.amount) * 100).toFixed(1)}% of total
-            </span>
-          )}
-          {state.splitType === 'shares' && state.totalShares && (
-            <span className="text-sm text-gray-500">
-              {parseFloat(state.totalShares) - parseFloat(state.yourShares)} of {state.totalShares} shares
-            </span>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
+      <Card className="bg-green-50 border-green-200">
+        <CardContent className="p-6">
           <div className="flex justify-between items-center">
-            <span className="font-medium">Total Amount:</span>
-            <span className="font-semibold">${Math.abs(transaction.amount).toFixed(2)}</span>
+            <span className="font-semibold text-gray-900">Total Transaction Amount</span>
+            <span className="text-2xl font-bold text-green-600">
+              <DollarSign className="h-6 w-6 inline mr-1" />
+              {Math.abs(transaction.amount).toFixed(2)}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -301,75 +381,52 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
   }, [transaction]);
 
   const handleSave = () => {
-    if (state.personalShare + state.owedShare !== transaction.amount) {
-      toast({
-        variant: "destructive",
-        description: "The shares don't add up! Check your math 🧮",
-      });
-      return;
-    }
-    
-    const shareData = {
-      personalShare: parseFloat(state.personalShare),
-      owedShare: parseFloat(state.owedShare),
-      shareMetadata: JSON.stringify({
-        splitType: state.splitType,
-        ...(state.splitType === 'percentage' && { 
-          percentage: parseFloat(state.percentage) 
-        }),
-        ...(state.splitType === 'shares' && { 
-          yourShares: parseFloat(state.yourShares),
-          totalShares: parseFloat(state.totalShares)
-        })
-      }),
-      refunded: transaction.refunded,
-      recurrence: transaction.recurrence,
-      amount: transaction.amount,
-      description: transaction.description,
-      category: transaction.category,
-      categoryId: transaction.categoryId,
-      occurredOn: transaction.occurredOn,
-      id: transaction.id,
-      is_deleted: transaction.is_deleted,
-      created_at: transaction.created_at,
+    const metadata = {
+      splitType: state.splitType,
+      ...(state.splitType === 'percentage' && { percentage: state.percentage }),
+      ...(state.splitType === 'shares' && { 
+        yourShares: state.yourShares,
+        totalShares: state.totalShares
+      })
     };
 
     onSave({
-      ...transaction,
-      ...shareData
+      personalShare: state.personalShare,
+      owedShare: state.owedShare,
+      metadata: JSON.stringify(metadata)
     });
   };
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 sm:p-6 flex-shrink-0">
+      <div className="p-6 flex-shrink-0 border-b border-gray-200">
         <DialogHeader>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-            <DialogTitle className="text-xl font-semibold">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <DialogTitle className="text-2xl font-bold text-gray-900">
               {state.step === 1 ? 'Adjust Shares' : 'Review Shares'}
             </DialogTitle>
             {state.step === 1 && (
-              <div className="text-xl font-semibold text-red-600">
-                ${Math.abs(transaction.amount).toFixed(2)}
+              <div className="text-2xl font-bold text-gray-900">
+                <DollarSign className="h-6 w-6 inline mr-1" />
+                {Math.abs(transaction.amount).toFixed(2)}
               </div>
             )}
           </div>
         </DialogHeader>
-        <Progress className="mt-2" value={state.step === 1 ? 50 : 100} />
+        <Progress className="mt-4" value={state.step === 1 ? 50 : 100} />
       </div>
 
-      <div className="p-4 sm:p-6 pt-2 flex-1 overflow-y-auto">
+      <div className="p-6 flex-1 overflow-y-auto">
         {state.step === 1 ? 
           <ShareEntryStep state={state} dispatch={dispatch} transaction={transaction} /> 
           : <SummaryStep state={state} transaction={transaction} />}
       </div>
 
-      <Separator />
-      <div className="p-6 flex-shrink-0">
-        <div className="flex w-full gap-2">
+      <div className="p-6 flex-shrink-0 border-t border-gray-200">
+        <div className="flex w-full gap-4">
           <Button 
             variant="outline" 
-            className="flex-1 h-10"
+            className="flex-1 h-12 text-base font-medium"
             onClick={() => {
               if (state.step === 1) {
                 onCancel();
@@ -382,7 +439,7 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
           </Button>
           <Button 
             variant="default"
-            className="flex-1 h-10 text-base font-medium"
+            className="flex-1 h-12 text-base font-medium gap-2"
             onClick={() => {
               if (state.step === 1) {
                 dispatch({ type: 'SET_STEP', step: 2 });
@@ -392,10 +449,10 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
             }}
           >
             {state.step === 1 ? (
-              <div className="flex items-center justify-center">
+              <>
                 Review
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </div>
+                <ArrowRight className="h-5 w-5" />
+              </>
             ) : (
               'Confirm Share'
             )}

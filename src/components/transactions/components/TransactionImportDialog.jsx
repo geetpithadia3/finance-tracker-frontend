@@ -47,7 +47,7 @@ const ImportTransactionTable = ({ data, categories, editMode, onDataChange }) =>
             </TableCell>
             <TableCell className="hidden sm:table-cell">
               <span className={`px-2 py-1 rounded-full text-xs font-medium
-              ${record.type?.toUpperCase() === 'CREDIT' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              ${record.type?.toUpperCase() === 'CREDIT' ? 'bg-green-100/50 text-green-700' : 'bg-red-100/50 text-red-700'}`}>
                 {record.type || 'Debit'}
               </span>
             </TableCell>
@@ -78,13 +78,13 @@ const ImportTransactionTable = ({ data, categories, editMode, onDataChange }) =>
                   </SelectContent>
                 </Select>
               ) : (
-                <span className="px-1 sm:px-2 py-1 rounded-full bg-gray-100 text-xs font-medium truncate max-w-[80px] sm:max-w-full block">
+                <span className="px-1 sm:px-2 py-1 rounded-full bg-muted text-xs font-medium truncate max-w-[80px] sm:max-w-full block">
                   {record.category?.name || 'Uncategorized'}
                 </span>
               )}
             </TableCell>
             <TableCell className="text-right text-xs sm:text-sm">
-              <span className={record.type?.toUpperCase() === 'CREDIT' ? 'text-green-600' : 'text-red-600'}>
+              <span className={record.type?.toUpperCase() === 'CREDIT' ? 'text-green-500' : 'text-destructive'}>
                 ${parseFloat(record.amount).toFixed(2)}
               </span>
             </TableCell>

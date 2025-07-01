@@ -101,13 +101,13 @@ const RecurringTransactionsList = ({ onBack }) => {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : recurringTransactions.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <Repeat className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No recurring transactions</h3>
-          <p className="mt-2 text-sm text-gray-500">
+        <div className="text-center py-12 bg-muted rounded-lg border">
+          <Repeat className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium text-foreground">No recurring transactions</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
             You don't have any recurring transactions set up yet.
           </p>
         </div>
@@ -115,7 +115,7 @@ const RecurringTransactionsList = ({ onBack }) => {
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50">
+              <TableRow className="bg-muted/50">
                 <TableHead className="w-[180px]">Description</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
@@ -129,7 +129,7 @@ const RecurringTransactionsList = ({ onBack }) => {
             </TableHeader>
             <TableBody>
               {recurringTransactions.map((transaction) => (
-                <TableRow key={transaction.id} className={transaction.isActive ? '' : 'bg-gray-100 text-gray-500'}>
+                <TableRow key={transaction.id} className={transaction.isActive ? '' : 'bg-muted/50 text-muted-foreground'}>
                   <TableCell className="font-medium">{transaction.description}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
@@ -143,7 +143,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center text-blue-600">
+                    <div className="flex items-center text-primary">
                       <Repeat className="h-3 w-3 mr-1" />
                       <span>{getFrequencyLabel(transaction.frequency)}</span>
                     </div>
@@ -156,7 +156,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                       {transaction.dateFlexibility === 'CUSTOM_RANGE' && 
                         transaction.rangeStart && 
                         transaction.rangeEnd && (
-                          <span className="ml-1 text-xs text-gray-500">
+                          <span className="ml-1 text-xs text-muted-foreground">
                             (Days {transaction.rangeStart}-{transaction.rangeEnd})
                           </span>
                       )}
@@ -172,10 +172,10 @@ const RecurringTransactionsList = ({ onBack }) => {
                       variant="outline" 
                       className={`text-xs ${
                         transaction.priority === 'HIGH' 
-                          ? 'bg-red-50 text-red-700 border-red-200' 
+                          ? 'bg-destructive/10 text-destructive border-destructive/20' 
                           : transaction.priority === 'MEDIUM'
-                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                            : 'bg-blue-50 text-blue-700 border-blue-200'
+                            ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                            : 'bg-primary/10 text-primary border-primary/20'
                       }`}
                     >
                       {getPriorityLabel(transaction.priority)}
@@ -186,8 +186,8 @@ const RecurringTransactionsList = ({ onBack }) => {
                       variant={transaction.isActive ? "default" : "outline"}
                       className={`text-xs ${
                         transaction.isActive 
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-green-500/10 text-green-500' 
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {transaction.isActive ? 'Active' : 'Paused'}
@@ -199,8 +199,8 @@ const RecurringTransactionsList = ({ onBack }) => {
                       size="sm"
                       onClick={() => handleToggleClick(transaction)}
                       className={transaction.isActive 
-                        ? "text-green-600 hover:text-green-800 hover:bg-green-50" 
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"}
+                        ? "text-green-500 hover:text-green-600 hover:bg-green-50/20" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/20"}
                     >
                       {transaction.isActive 
                         ? <ToggleRight className="h-4 w-4" /> 
@@ -231,7 +231,7 @@ const RecurringTransactionsList = ({ onBack }) => {
                 : "Are you sure you want to activate this recurring transaction?"}
             </p>
             {transactionToToggle && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-md">
+              <div className="mt-4 p-3 bg-muted rounded-md">
                 <p className="font-medium">{transactionToToggle.description}</p>
                 <div className="flex items-center mt-1 text-sm text-gray-500">
                   <span className="mr-2">{formatCurrency(Math.abs(transactionToToggle.amount))}</span>

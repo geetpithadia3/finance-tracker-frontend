@@ -4,6 +4,10 @@ import { Input } from '../../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Trash2, Plus, Calendar } from 'lucide-react';
 import { categoriesApi } from '../../../api/categories';
+import { Popover, PopoverTrigger, PopoverContent } from '../../ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '../../../lib/utils';
+import { format } from 'date-fns';
 
 export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing = false }) {
   const [categories, setCategories] = useState([]);
@@ -193,8 +197,8 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-red-800 text-sm">{errors.general}</p>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+          <p className="text-destructive text-sm">{errors.general}</p>
         </div>
       )}
 
@@ -207,61 +211,61 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Project Name *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Project Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => updateFormField('name', e.target.value)}
-              className={errors.name ? 'border-red-500' : ''}
+              className={errors.name ? 'border-destructive' : ''}
               placeholder="e.g., Home Renovation, Vacation"
             />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Total Budget ($) *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Total Budget ($) *</label>
             <Input
               type="number"
               step="0.01"
               min="0"
               value={formData.total_amount}
               onChange={(e) => updateFormField('total_amount', e.target.value)}
-              className={errors.total_amount ? 'border-red-500' : ''}
+              className={errors.total_amount ? 'border-destructive' : ''}
               placeholder="0.00"
             />
-            {errors.total_amount && <p className="text-red-500 text-xs mt-1">{errors.total_amount}</p>}
+            {errors.total_amount && <p className="text-destructive text-xs mt-1">{errors.total_amount}</p>}
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Start Date *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Start Date *</label>
             <Input
               type="date"
               value={formData.start_date}
               onChange={(e) => updateFormField('start_date', e.target.value)}
-              className={errors.start_date ? 'border-red-500' : ''}
+              className={errors.start_date ? 'border-destructive' : ''}
             />
-            {errors.start_date && <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>}
+            {errors.start_date && <p className="text-destructive text-xs mt-1">{errors.start_date}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">End Date *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">End Date *</label>
             <Input
               type="date"
               value={formData.end_date}
               onChange={(e) => updateFormField('end_date', e.target.value)}
-              className={errors.end_date ? 'border-red-500' : ''}
+              className={errors.end_date ? 'border-destructive' : ''}
             />
-            {errors.end_date && <p className="text-red-500 text-xs mt-1">{errors.end_date}</p>}
+            {errors.end_date && <p className="text-destructive text-xs mt-1">{errors.end_date}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Description</label>
           <textarea
             value={formData.description}
             onChange={(e) => updateFormField('description', e.target.value)}
-            className="w-full p-2 border rounded-md resize-none"
+            className="w-full p-2 border rounded-md resize-none bg-background text-foreground"
             rows="2"
             placeholder="Optional description..."
           />
@@ -279,8 +283,8 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
         </div>
 
         {formData.category_allocations.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-            <p className="text-gray-500 mb-4">No allocations added yet</p>
+          <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground mb-4">No allocations added yet</p>
             <Button type="button" onClick={addCategoryAllocation} variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               Add First Category
@@ -294,8 +298,8 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
                   <select
                     value={allocation.category_id}
                     onChange={(e) => updateCategoryAllocation(index, 'category_id', e.target.value)}
-                    className={`w-full p-2 border rounded-md ${
-                      errors[`allocation_${index}_category_id`] ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full p-2 border rounded-md bg-background text-foreground ${
+                      errors[`allocation_${index}_category_id`] ? 'border-destructive' : 'border-border'
                     }`}
                   >
                     <option value="">Select category</option>
@@ -310,7 +314,7 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
                     ))}
                   </select>
                   {errors[`allocation_${index}_category_id`] && (
-                    <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_category_id`]}</p>
+                    <p className="text-destructive text-xs mt-1">{errors[`allocation_${index}_category_id`]}</p>
                   )}
                 </div>
 
@@ -321,11 +325,11 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
                     min="0"
                     value={allocation.allocated_amount}
                     onChange={(e) => updateCategoryAllocation(index, 'allocated_amount', e.target.value)}
-                    className={errors[`allocation_${index}_allocated_amount`] ? 'border-red-500' : ''}
+                    className={errors[`allocation_${index}_allocated_amount`] ? 'border-destructive' : ''}
                     placeholder="0.00"
                   />
                   {errors[`allocation_${index}_allocated_amount`] && (
-                    <p className="text-red-500 text-xs mt-1">{errors[`allocation_${index}_allocated_amount`]}</p>
+                    <p className="text-destructive text-xs mt-1">{errors[`allocation_${index}_allocated_amount`]}</p>
                   )}
                 </div>
 
@@ -334,7 +338,7 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
                   onClick={() => removeCategoryAllocation(index)}
                   variant="ghost"
                   size="sm"
-                  className="text-red-600 hover:text-red-700"
+                  className="text-destructive hover:text-destructive/80"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -346,22 +350,22 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
 
       {/* Budget Summary */}
       {formData.category_allocations.length > 0 && (
-        <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+        <div className="p-4 bg-muted rounded-lg space-y-2">
           <div className="flex justify-between">
-            <span>Total Budget:</span>
-            <span className="font-bold text-blue-600">
+            <span className="text-foreground">Total Budget:</span>
+            <span className="font-bold text-primary">
               ${parseFloat(formData.total_amount || 0).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between">
-            <span>Allocated:</span>
-            <span className={`font-bold ${totalAllocated > parseFloat(formData.total_amount) ? 'text-red-600' : 'text-green-600'}`}>
+            <span className="text-foreground">Allocated:</span>
+            <span className={`font-bold ${totalAllocated > parseFloat(formData.total_amount) ? 'text-destructive' : 'text-green-500'}`}>
               ${totalAllocated.toFixed(2)}
             </span>
           </div>
-          <div className="flex justify-between border-t pt-2">
-            <span>Remaining:</span>
-            <span className={`font-bold ${(parseFloat(formData.total_amount) - totalAllocated) < 0 ? 'text-red-600' : 'text-blue-600'}`}>
+          <div className="flex justify-between border-t pt-2 border-border">
+            <span className="text-foreground">Remaining:</span>
+            <span className={`font-bold ${(parseFloat(formData.total_amount) - totalAllocated) < 0 ? 'text-destructive' : 'text-primary'}`}>
               ${(parseFloat(formData.total_amount) - totalAllocated).toFixed(2)}
             </span>
           </div>
