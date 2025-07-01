@@ -97,11 +97,7 @@ export const transactionsApi = {
     return toCamel(res);
   },
   
-  getDashboardData: async (yearMonth) => {
-    console.log(`Fetching dashboard data for yearMonth: ${yearMonth}`);
-    const res = await apiClient.get(`/dashboard?year_month=${yearMonth}`);
-    return toCamel(res);
-  },
+
 
   updateParentAndCreateSplits: async (parentTransaction, parentUpdate, newSplits) => {
     console.log(`Updating parent transaction: ${JSON.stringify(parentTransaction)}`);

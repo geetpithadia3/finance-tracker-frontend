@@ -1,81 +1,81 @@
 import { useState, useEffect } from 'react';
 import moment from 'moment';
-import { transactionsApi } from '../api/transactions';
+import { apiClient } from '../api/client';
 
 export const useDashboardData = (initialDate = moment().subtract(1, 'months')) => {
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const [expenses, setExpenses] = useState(0);
   const [savings, setSavings] = useState(0);
   const [income, setIncome] = useState(0);
-  const [transactions, setTransactions] = useState([]);
-  const [incomeTransactions, setIncomeTransactions] = useState([]);
-  const [savingsTransactions, setSavingsTransactions] = useState([]);
   const [expensesByCategory, setExpensesByCategory] = useState([]);
   const [budgets, setBudgets] = useState([]);
-
-  const formatTransactions = (data = []) => {
-    return data.map(item => ({
-      ...item,
-      key: item.id.toString(),
-      deleted: false,
-    }));
-  };
-
-  const calculateTotal = (transactions, type = 'expense') => {
-    return transactions.reduce((acc, item) => {
-      // Only use personalShare for expenses if it has a value
-      const amount = type === 'expense' && item.personalShare !== undefined && item.personalShare !== 0 ? 
-        parseFloat(item.personalShare) : 
-        parseFloat(item.amount);
-      return acc + amount;
-    }, 0).toFixed(2);
-  };
+  const [budgetCategories, setBudgetCategories] = useState([]);
+  const [spendingTrends, setSpendingTrends] = useState([]);
+  const [projectBudgets, setProjectBudgets] = useState([]);
+  const [netFlow, setNetFlow] = useState(0);
+  const [savingsRate, setSavingsRate] = useState(0);
+  const [budgetUtilization, setBudgetUtilization] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [avgDailySpending, setAvgDailySpending] = useState(0);
+  const [daysInMonth, setDaysInMonth] = useState(0);
+  const [financialStatus, setFinancialStatus] = useState({
+    status: "No Budget",
+    score: 0,
+    status_color: "gray",
+    details: ["No budget data available"]
+  });
 
   const fetchDashboardData = async () => {
     try {
-      const data = await transactionsApi.getDashboardData(selectedDate.format('YYYY-MM'));
-
-      const formattedExpenses = formatTransactions(data.expenses);
-      const formattedIncome = formatTransactions(data.income);
-      const formattedSavings = formatTransactions(data.savings);
-
-      setTransactions(formattedExpenses);
-      setIncomeTransactions(formattedIncome);
-      setSavingsTransactions(formattedSavings);
-
-      setExpenses(calculateTotal(formattedExpenses, 'expense'));
-      setIncome(calculateTotal(formattedIncome, 'income'));
-      setSavings(calculateTotal(formattedSavings, 'savings'));
-
-      // Calculate expenses by category using personalShare for consistency
-      const categoryTotals = formattedExpenses.reduce((acc, item) => {
-        const amount = item.personalShare !== undefined && item.personalShare !== 0 ? 
-          parseFloat(item.personalShare) : 
-          parseFloat(item.amount);
-        acc[item.category] = (acc[item.category] || 0) + amount;
-        return acc;
-      }, {});
-
-      setExpensesByCategory(
-        Object.entries(categoryTotals).map(([category, total]) => ({
-          category,
-          value: parseFloat(total.toFixed(2)),
-        }))
-      );
-
-      if (Array.isArray(data.budgets)) {
-        const budgetProgress = data.budgets.map(budget => ({
-          ...budget,
-          spent: formattedExpenses
-            .filter(expense => expense.category === budget.category)
-            .reduce((acc, expense) => {
-              const amount = expense.personalShare !== undefined && expense.personalShare !== 0 ? 
-                parseFloat(expense.personalShare) : 
-                parseFloat(expense.amount);
-              return acc + amount;
-            }, 0),
-        }));
-        setBudgets(budgetProgress);
+      // Fetch dashboard data from the updated endpoint
+      const response = await apiClient.get(`/dashboard?year_month=${selectedDate.format('YYYY-MM')}`);
+      const dashboardData = response;
+      console.log("dashboardData", response);
+      
+      if (dashboardData) {
+        // Set transaction-based stats as numbers
+        setExpenses(Number(dashboardData.total_expenses) || 0);
+        setIncome(Number(dashboardData.total_income) || 0);
+        setSavings(Number(dashboardData.total_savings) || 0);
+        
+        // Set expenses by category from transactions
+        if (dashboardData.expenses_by_category) {
+          setExpensesByCategory(
+            Object.entries(dashboardData.expenses_by_category).map(([category, value]) => ({
+              category,
+              value: parseFloat(value.toFixed(2)),
+            }))
+          );
+        }
+        
+        // Set budget data
+        if (dashboardData.budget_categories) {
+          setBudgetCategories(dashboardData.budget_categories);
+          setBudgets(dashboardData.budget_categories);
+        }
+        
+        // Set spending trends
+        if (dashboardData.spending_trends) {
+          setSpendingTrends(dashboardData.spending_trends);
+        }
+        
+        // Set project budgets
+        if (dashboardData.project_budgets) {
+          setProjectBudgets(dashboardData.project_budgets);
+        }
+        
+        // Set additional metrics
+        setNetFlow(Number(dashboardData.net_flow) || 0);
+        setSavingsRate(Number(dashboardData.savings_rate) || 0);
+        setBudgetUtilization(Number(dashboardData.budget_utilization) || 0);
+        setCategoryCount(Number(dashboardData.category_count) || 0);
+        setAvgDailySpending(Number(dashboardData.avg_daily_spending) || 0);
+        setDaysInMonth(Number(dashboardData.days_in_month) || 0);
+        
+        // Set financial status
+        if (dashboardData.financial_status) {
+          setFinancialStatus(dashboardData.financial_status);
+        }
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -95,11 +95,18 @@ export const useDashboardData = (initialDate = moment().subtract(1, 'months')) =
     expenses,
     savings,
     income,
-    transactions,
-    incomeTransactions,
-    savingsTransactions,
     expensesByCategory,
     budgets,
+    budgetCategories,
+    spendingTrends,
+    projectBudgets,
+    netFlow,
+    savingsRate,
+    budgetUtilization,
+    categoryCount,
+    avgDailySpending,
+    daysInMonth,
+    financialStatus,
     handleMonthChange,
   };
 }; 
