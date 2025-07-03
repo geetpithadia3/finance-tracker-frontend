@@ -208,7 +208,7 @@ export function BudgetSpendingCard({ categoryData }) {
           <div className="mt-3 p-2 bg-yellow-100/50 rounded-lg border border-yellow-200">
             <div className="flex items-center gap-2">
               <Target className="h-3 w-3 text-yellow-500" />
-              <span className="text-xs font-medium text-yellow-700">Monitor spending</span>
+              <span className="text-xs text-yellow-700">Monitor spending</span>
             </div>
           </div>
         )}

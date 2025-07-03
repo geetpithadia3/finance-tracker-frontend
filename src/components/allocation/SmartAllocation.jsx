@@ -169,7 +169,7 @@ const SmartAllocation = () => {
                 <span className="text-xl font-bold text-primary">墨</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Mindful Planning</h1>
+                <h1 className="text-2xl font-bold text-foreground">Money Planning</h1>
                 <p className="text-sm text-muted-foreground">
                   {selectedDate.format('MMMM YYYY')} • Balance your resources with wisdom
                 </p>
@@ -201,7 +201,7 @@ const SmartAllocation = () => {
                 <span className="text-xl font-bold text-primary">墨</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Mindful Planning</h1>
+                <h1 className="text-2xl font-bold text-foreground">Money Planning</h1>
                 <p className="text-sm text-muted-foreground">
                   {selectedDate.format('MMMM YYYY')} • Balance your resources with wisdom
                 </p>
@@ -218,7 +218,7 @@ const SmartAllocation = () => {
                 }}
                 size="default"
               />
-              <HelpButton title="The Art of Intentional Resources" buttonText="Philosophy" size="sm">
+              <HelpButton title="Money Planning Guide" buttonText="Guide" size="sm">
                 <SmartAllocationHowItWorks />
               </HelpButton>
             </div>
@@ -233,8 +233,8 @@ const SmartAllocation = () => {
                     <StatusIcon className={`h-6 w-6 ${statusConfig.text}`} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground">Resource Harmony</h2>
-                    <p className="text-sm text-muted-foreground">Your balance state for {selectedDate.format('MMMM YYYY')}</p>
+                    <h2 className="text-xl font-semibold text-foreground">Financial Health</h2>
+                    <p className="text-sm text-muted-foreground">Your money balance for {selectedDate.format('MMMM YYYY')}</p>
                   </div>
                 </div>
                 
@@ -245,12 +245,12 @@ const SmartAllocation = () => {
                         word.charAt(0).toUpperCase() + word.slice(1)
                       ).join(' ')}
                     </div>
-                    <div className="text-xs text-muted-foreground">Flow State</div>
+                    <div className="text-xs text-muted-foreground">Status</div>
                   </div>
                   <div className="w-px h-8 bg-border"></div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-foreground">{financialStatus.score}%</div>
-                    <div className="text-xs text-muted-foreground">Balance Score</div>
+                    <div className="text-xs text-muted-foreground">Health Score</div>
                   </div>
                 </div>
                 
@@ -267,9 +267,9 @@ const SmartAllocation = () => {
           {financialStatus.status === 'critical' && (
             <Alert className="border-red-200 bg-red-50 dark:bg-red-900/30 dark:border-red-700">
               <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertTitle className="text-red-800">Restore Balance</AlertTitle>
+              <AlertTitle className="text-red-800">Over Budget</AlertTitle>
               <AlertDescription className="text-red-700">
-                Your obligations exceed your resources. Like a master adjusting their brush, consider refining your approach.
+                Your bills exceed your income. Consider reducing expenses or increasing income.
               </AlertDescription>
             </Alert>
           )}
@@ -277,9 +277,9 @@ const SmartAllocation = () => {
           {financialStatus.status === 'warning' && (
             <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-900/30 dark:border-orange-700">
               <Target className="h-4 w-4 text-orange-600" />
-              <AlertTitle className="text-orange-800">Mindful Attention</AlertTitle>
+              <AlertTitle className="text-orange-800">Tight Budget</AlertTitle>
               <AlertDescription className="text-orange-700">
-                Your resources flow heavily toward obligations. Consider the balance between necessity and choice.
+                Most of your income goes to bills. Consider ways to increase your financial cushion.
               </AlertDescription>
             </Alert>
           )}
@@ -287,9 +287,9 @@ const SmartAllocation = () => {
           {financialStatus.status === 'excellent' && (
             <Alert className="border-green-200 bg-green-50 dark:bg-green-900/30 dark:border-green-700">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertTitle className="text-green-800">Harmonious Flow</AlertTitle>
+              <AlertTitle className="text-green-800">Healthy Budget</AlertTitle>
               <AlertDescription className="text-green-700">
-                Your resources flow with wisdom and intention. Like a master's perfect brushstroke, maintain this balance.
+                Your income comfortably covers expenses with room for savings. Great financial position!
               </AlertDescription>
             </Alert>
           )}
@@ -456,7 +456,7 @@ const SmartAllocation = () => {
                                           {expense.category}
                                         </Badge>
                                         <Badge variant={expense.isRecurring ? "secondary" : "outline"} className="text-xs">
-                                          {expense.isRecurring ? "Rhythmic" : "Single"}
+                                          {expense.isRecurring ? "Recurring" : "One-time"}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground flex items-center">
                                           <Calendar className="h-3 w-3 mr-1" />
@@ -482,7 +482,7 @@ const SmartAllocation = () => {
                           <Separator className="my-6" />
                           <div className="flex items-center gap-2 mb-2">
                             <Wallet className="h-5 w-5 text-primary" />
-                            <h4 className="font-medium text-foreground">Next Resource Stream</h4>
+                            <h4 className="font-medium text-foreground">Next Paycheck</h4>
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(paycheckAllocation.nextPaycheckDate), "MMMM d, yyyy")} 
@@ -506,14 +506,13 @@ const SmartAllocation = () => {
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <span className="text-2xl font-bold text-primary">墨</span>
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Mindful Planning</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-3">No Income Data</h3>
                 <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
-                  Like preparing your canvas before the first brushstroke, set up your resource streams and obligations 
-                  to see the full picture of your financial flow.
+                  Set up your paychecks and bills to see how your money flows throughout the month.
                 </p>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="rounded-full">Set Up Rhythmic Patterns</Button>
-                  <Button className="rounded-full">Add Resource Streams</Button>
+                  <Button variant="outline" className="rounded-full">Add Recurring Bills</Button>
+                  <Button className="rounded-full">Add Paychecks</Button>
                 </div>
                 <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
                   "The wise painter knows their materials before touching brush to paper"

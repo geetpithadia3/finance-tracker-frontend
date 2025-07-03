@@ -335,7 +335,7 @@ export function BudgetDashboard() {
               <span className="text-xl font-bold text-primary">墨</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Mindful Boundaries</h1>
+              <h1 className="text-2xl font-bold text-foreground">Budget</h1>
               <p className="text-sm text-muted-foreground">
                 Creating purposeful limits for intentional living
               </p>
@@ -344,7 +344,7 @@ export function BudgetDashboard() {
           
           <div className="flex items-center justify-center gap-4">
             <MonthSelector value={selectedMonth} onChange={setSelectedMonth} />
-            <HelpButton title="The Art of Conscious Limits" buttonText="Philosophy" size="sm">
+            <HelpButton title="Budget Philosophy" buttonText="Guide" size="sm">
               <BudgetHowItWorks />
             </HelpButton>
             <div onClick={() => setAlertsExpanded(!alertsExpanded)} className="cursor-pointer">
@@ -358,7 +358,7 @@ export function BudgetDashboard() {
           <Card className="bg-gradient-to-r from-muted/50 to-muted/20 border-muted/50">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Budget Mindfulness</h3>
+                <h3 className="text-lg font-semibold text-foreground">Budget Insights</h3>
                 <BudgetAlerts yearMonth={selectedMonth} compact={true} />
               </div>
             </CardContent>
@@ -378,7 +378,7 @@ export function BudgetDashboard() {
             >
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Monthly Rhythms
+                Monthly Budget
               </div>
             </button>
             <button
@@ -391,7 +391,7 @@ export function BudgetDashboard() {
             >
               <div className="flex items-center gap-2">
                 <FolderOpen className="h-4 w-4" />
-                Extended Visions
+                Project Budget
               </div>
             </button>
           </div>
@@ -401,9 +401,9 @@ export function BudgetDashboard() {
         {activeSection === 'monthly' && (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-foreground mb-2">Monthly Rhythms</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">Monthly Budget</h2>
               <p className="text-sm text-muted-foreground">
-                Setting mindful boundaries for the current cycle
+                Setting mindful spending limits for this month
               </p>
             </div>
             
@@ -416,9 +416,9 @@ export function BudgetDashboard() {
                       <Target className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground">Boundaries for {selectedMonth}</h3>
+                      <h3 className="text-lg font-semibold text-foreground">Budget for {selectedMonth}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {currentBudget ? 'Refine your mindful limits' : 'Set intentional spending boundaries to begin your practice'}
+                        {currentBudget ? 'Edit your budget categories and amounts' : 'Create spending limits for each category'}
                       </p>
                     </div>
                   </div>
@@ -429,12 +429,12 @@ export function BudgetDashboard() {
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="rounded-full">
                               <Edit className="h-4 w-4 mr-2" />
-                              Refine
+                              Edit Budget
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Refine Boundaries for {selectedMonth}</DialogTitle>
+                              <DialogTitle>Edit Budget for {selectedMonth}</DialogTitle>
                             </DialogHeader>
                             <BudgetForm
                               initialData={currentBudget}
@@ -447,7 +447,7 @@ export function BudgetDashboard() {
                         
                         <Button variant="outline" size="sm" onClick={handleDeleteBudget} className="rounded-full">
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Release
+                          Delete Budget
                         </Button>
                       </>
                     ) : (
@@ -456,12 +456,12 @@ export function BudgetDashboard() {
                           <DialogTrigger asChild>
                             <Button className="bg-primary hover:bg-primary/90 rounded-full">
                               <Plus className="h-4 w-4 mr-2" />
-                              Set Boundaries
+                              Create Budget
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Set Mindful Boundaries for {selectedMonth}</DialogTitle>
+                              <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
                             </DialogHeader>
                             <BudgetForm
                               onSubmit={handleCreateBudget}
@@ -476,16 +476,16 @@ export function BudgetDashboard() {
                             <DialogTrigger asChild>
                               <Button variant="outline" className="rounded-full">
                                 <Copy className="h-4 w-4 mr-2" />
-                                Adapt from Previous
+                                Copy from Previous
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Adapt Previous Boundaries</DialogTitle>
+                                <DialogTitle>Copy Previous Budget</DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4">
                                 <div>
-                                  <label className="text-sm font-medium">Adapt from month:</label>
+                                  <label className="text-sm font-medium">Copy from month:</label>
                                   <select
                                     value={copyFromMonth}
                                     onChange={(e) => setCopyFromMonth(e.target.value)}
@@ -509,7 +509,7 @@ export function BudgetDashboard() {
                                     disabled={!copyFromMonth}
                                     className="rounded-full"
                                   >
-                                    Adapt Boundaries
+                                    Copy Budget
                                   </Button>
                                 </div>
                               </div>
@@ -624,22 +624,21 @@ export function BudgetDashboard() {
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <span className="text-2xl font-bold text-primary">墨</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Mindful Practice</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">No Budget Set</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                    Like setting the boundaries of your canvas, establish mindful spending limits for {selectedMonth} 
-                    to create space for intentional choices.
+                    Create your budget for {selectedMonth} to track spending and stay within your financial goals.
                   </p>
                   <div className="flex items-center justify-center gap-3">
                     <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                       <DialogTrigger asChild>
                         <Button className="bg-primary hover:bg-primary/90 rounded-full">
                           <Plus className="h-4 w-4 mr-2" />
-                          Set First Boundaries
+                          Create First Budget
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Set Mindful Boundaries for {selectedMonth}</DialogTitle>
+                          <DialogTitle>Create Budget for {selectedMonth}</DialogTitle>
                         </DialogHeader>
                         <BudgetForm
                           onSubmit={handleCreateBudget}
@@ -653,16 +652,16 @@ export function BudgetDashboard() {
                         <DialogTrigger asChild>
                           <Button variant="outline" className="rounded-full">
                             <Copy className="h-4 w-4 mr-2" />
-                            Adapt from Previous
+                            Copy from Previous
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Adapt Previous Boundaries</DialogTitle>
+                            <DialogTitle>Copy Previous Budget</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <label className="text-sm font-medium">Adapt from month:</label>
+                              <label className="text-sm font-medium">Copy from month:</label>
                               <select
                                 value={copyFromMonth}
                                 onChange={(e) => setCopyFromMonth(e.target.value)}
@@ -687,7 +686,7 @@ export function BudgetDashboard() {
                                 disabled={!copyFromMonth}
                                 className="rounded-full"
                               >
-                                Adapt Boundaries
+                                Copy Budget
                               </Button>
                             </div>
                           </div>
@@ -708,9 +707,9 @@ export function BudgetDashboard() {
         {activeSection === 'projects' && (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-foreground mb-2">Extended Visions</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">Project Budget</h2>
               <p className="text-sm text-muted-foreground">
-                Long-term aspirations that span multiple cycles
+                Multi-month budgets for specific goals and projects
               </p>
             </div>
             
@@ -720,12 +719,12 @@ export function BudgetDashboard() {
                 <DialogTrigger asChild>
                   <Button className="bg-primary hover:bg-primary/90 rounded-full shadow-lg">
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Extended Vision
+                    Create Project Budget
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Create New Extended Vision</DialogTitle>
+                    <DialogTitle>Create New Project Budget</DialogTitle>
                   </DialogHeader>
                   <ProjectBudgetForm
                     onSubmit={handleCreateProjectBudget}
@@ -772,17 +771,16 @@ export function BudgetDashboard() {
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                     <span className="text-2xl font-bold text-primary">墨</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Envision Extended Aspirations</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">No Project Budgets</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                    Like planning a multi-panel painting, create boundaries that span multiple months 
-                    to support your most meaningful aspirations.
+                    Create multi-month budgets for specific projects, goals, or major purchases.
                   </p>
                   <Button 
                     onClick={() => setShowCreateProjectDialog(true)}
                     className="bg-primary hover:bg-primary/90 rounded-full"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Paint Extended Vision
+                    Create Project Budget
                   </Button>
                   <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
                     "Great works require sustained intention across time"
@@ -795,7 +793,7 @@ export function BudgetDashboard() {
             <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Refine Extended Vision</DialogTitle>
+                  <DialogTitle>Edit Project Budget</DialogTitle>
                 </DialogHeader>
                 <ProjectBudgetForm
                   initialData={editingProjectBudget}
@@ -822,7 +820,7 @@ export function BudgetDashboard() {
 
         {/* Sumi Wisdom Footer */}
         <div className="text-center py-8 border-t border-muted/30 mt-16">
-          <p className="text-sm text-muted-foreground italic">
+          <p className="text-xs sm:text-sm text-muted-foreground italic">
             "True freedom comes not from unlimited choice, but from conscious boundaries that guide our intentions."
           </p>
         </div>

@@ -93,7 +93,7 @@ export function BudgetOverlapDialog({
                           variant="outline"
                           size="sm"
                           onClick={() => onEditExisting(conflict)}
-                          className="mt-1 text-xs"
+                          className="mt-1 text-xs h-7 px-2"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Edit

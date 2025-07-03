@@ -96,11 +96,11 @@ const MainNav = ({ collapsed, className, onNavClick, ...props }) => {
 
   return (
     <nav className={cn("flex flex-col gap-2", className)} {...props}>
-      <NavItem icon={LayoutDashboard} to="/">Canvas</NavItem>
-      <NavItem icon={ListOrdered} to="/transactions">Brushstrokes</NavItem>
-      <NavItem icon={PiggyBank} to="/budget">Boundaries</NavItem>
-      <NavItem icon={Target} to="/goals">Aspirations</NavItem>
-      <NavItem icon={Calculator} to="/allocation">Mindful Flow</NavItem>
+      <NavItem icon={LayoutDashboard} to="/">Dashboard</NavItem>
+      <NavItem icon={ListOrdered} to="/transactions">Transactions</NavItem>
+      <NavItem icon={PiggyBank} to="/budget">Budget</NavItem>
+      <NavItem icon={Target} to="/goals">Goals</NavItem>
+      <NavItem icon={Calculator} to="/allocation">Money Planning</NavItem>
     </nav>
   );
 };

@@ -65,12 +65,12 @@ const TransactionDetailsView = ({
       
       if (willBeRefunded && hasRecurrence) {
         toast({
-          description: "Brushstroke marked as refunded and rhythmic pattern removed.",
+          description: "Transaction marked as refunded and recurring schedule removed.",
         });
       } else {
         toast({
           description: updatedTransaction.refunded 
-            ? "Brushstroke marked as refunded." 
+            ? "Transaction marked as refunded." 
             : "Refund status removed.",
         });
       }
@@ -89,14 +89,14 @@ const TransactionDetailsView = ({
         <TooltipTrigger asChild>
           <Button
             variant={variant}
-            className="h-auto min-h-[120px] flex-col gap-3 p-4 text-sm transition-all duration-200 hover:shadow-md"
+            className="h-auto min-h-[100px] sm:min-h-[120px] flex-col gap-2 sm:gap-3 p-3 sm:p-4 text-sm transition-all duration-200 hover:shadow-md"
             onClick={onClick}
             disabled={disabled}
           >
-            <Icon className="h-8 w-8 flex-shrink-0" />
-            <div className="w-full text-center space-y-2">
-              <div className="font-semibold text-sm leading-tight">{title}</div>
-              <div className="text-xs text-gray-500 leading-tight">{description}</div>
+            <Icon className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0" />
+            <div className="w-full text-center space-y-1 sm:space-y-2">
+              <div className="font-semibold text-xs sm:text-sm leading-tight">{title}</div>
+              <div className="text-xs text-gray-500 leading-tight hidden">{description}</div>
             </div>
           </Button>
         </TooltipTrigger>
@@ -114,7 +114,7 @@ const TransactionDetailsView = ({
       onClick={onClick} 
       disabled={disabled}
     >
-      <Icon className="h-5 w-5 mr-3" /> {title}
+      <Icon className="h-4 w-4 mr-2" /> {title}
     </Button>
   );
 
@@ -150,10 +150,10 @@ const TransactionDetailsView = ({
 
   const TransactionSummary = () => (
     <Card className={`${localTransaction.refunded ? "bg-yellow-50 border-yellow-200" : "bg-white border-gray-200"} shadow-sm`}>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0 mr-6">
-            <div className="text-xl font-semibold text-gray-900 mb-2">{localTransaction.description}</div>
+            <div className="text-base sm:text-xl font-semibold text-gray-900 mb-2">{localTransaction.description}</div>
             
             <div className="flex items-center text-sm text-gray-500 mb-3">
               <CalendarDays className="h-4 w-4 mr-2" />
@@ -192,8 +192,8 @@ const TransactionDetailsView = ({
             )}
           </div>
           
-          <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-            <DollarSign className="h-6 w-6 inline mr-1" />
+          <div className="text-lg sm:text-2xl font-bold text-gray-900 whitespace-nowrap">
+            <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
             {Math.abs(localTransaction.amount).toFixed(2)}
           </div>
         </div>
@@ -246,11 +246,11 @@ const TransactionDetailsView = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-6 flex-shrink-0 border-b border-gray-200">
+      <div className="p-4 sm:p-6 flex-shrink-0 border-b border-gray-200">
         <DialogHeader>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <DialogTitle className="text-2xl font-bold text-gray-900">
-              Brushstroke Details
+            <DialogTitle className="text-base sm:text-2xl font-bold text-gray-900">
+              Transaction Details
             </DialogTitle>
             <RefundButton />
           </div>
@@ -258,7 +258,7 @@ const TransactionDetailsView = ({
       </div>
 
       {/* Content */}
-      <div className="p-6 flex-1 overflow-y-auto">
+      <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
         <div className="space-y-6 max-w-4xl">
           {/* Transaction Summary */}
           <TransactionSummary />
@@ -269,46 +269,46 @@ const TransactionDetailsView = ({
             <MobileActionButton 
               onClick={onSplitStart} 
               icon={Split} 
-              title="Refine Brushstroke" 
+              title="Split Transaction" 
               disabled={localTransaction.refunded}
             />
             <MobileActionButton 
               onClick={onShareStart} 
               icon={Share2} 
-              title="Mindful Sharing" 
+              title="Share Transaction" 
               disabled={localTransaction.refunded}
             />
             <MobileActionButton 
               onClick={onRecurrenceStart} 
               icon={Repeat} 
-              title={localTransaction.recurrence ? "Edit Rhythm" : "Create Rhythm"} 
+              title={localTransaction.recurrence ? "Edit Recurring" : "Make Recurring"} 
               disabled={localTransaction.refunded}
             />
           </div>
           
           {/* Desktop Action Grid */}
           <div className="hidden sm:block">
-            <div className="text-lg font-semibold text-gray-900 mb-4">Actions</div>
+            <div className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Actions</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <ActionButton
                 onClick={onSplitStart}
                 icon={Split}
-                title="Refine Brushstroke"
-                description="Separate into mindful intentions"
+                title="Split Transaction"
+                description="Divide into categories"
                 disabled={localTransaction.refunded}
               />
               <ActionButton
                 onClick={onShareStart}
                 icon={Share2}
-                title="Mindful Sharing"
-                description="Share with others mindfully"
+                title="Share Transaction"
+                description="Split with someone else"
                 disabled={localTransaction.refunded}
               />
               <ActionButton
                 onClick={onRecurrenceStart}
                 icon={Repeat}
-                title={localTransaction.recurrence ? "Edit Rhythm" : "Create Rhythm"}
-                description={localTransaction.recurrence ? "Adjust flow" : "Establish mindful pattern"}
+                title={localTransaction.recurrence ? "Edit Recurring" : "Make Recurring"}
+                description={localTransaction.recurrence ? "Update schedule" : "Set up recurring payments"}
                 variant={localTransaction.recurrence ? "secondary" : "outline"}
                 disabled={localTransaction.refunded}
               />
@@ -318,10 +318,10 @@ const TransactionDetailsView = ({
       </div>
 
       {/* Footer */}
-      <div className="p-6 flex-shrink-0 border-t border-gray-200">
+      <div className="p-4 sm:p-6 flex-shrink-0 border-t border-gray-200">
         <Button
           variant="outline"
-          className="w-full h-12 text-base font-medium"
+          className="w-full h-9 sm:h-12 text-sm sm:text-base font-medium"
           onClick={onClose}
         >
           Close

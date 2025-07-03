@@ -76,34 +76,34 @@ const GoalList = () => {
         <SumiCard className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <SumiCardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-primary">{activeGoals}</div>
-            <div className="text-xs text-muted-foreground">Active Intentions</div>
+            <div className="text-xs text-muted-foreground">Active Goals</div>
           </SumiCardContent>
         </SumiCard>
         <SumiCard className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
           <SumiCardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-green-600 dark:text-green-400">{completedGoals}</div>
-            <div className="text-xs text-muted-foreground">Realized Dreams</div>
+            <div className="text-xs text-muted-foreground">Completed</div>
           </SumiCardContent>
         </SumiCard>
         <SumiCard className="border-muted/50 bg-muted/20">
           <SumiCardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-foreground">${totalTarget.toFixed(0)}</div>
-            <div className="text-xs text-muted-foreground">Total Vision</div>
+            <div className="text-xs text-muted-foreground">Total Target</div>
           </SumiCardContent>
         </SumiCard>
         <SumiCard className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800/30">
           <SumiCardContent className="p-6 text-center">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">${totalSaved.toFixed(0)}</div>
-            <div className="text-xs text-muted-foreground">Current Progress</div>
+            <div className="text-xs text-muted-foreground">Total Saved</div>
           </SumiCardContent>
         </SumiCard>
       </div>
       {/* Aspiration Canvas */}
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground mb-2">Your Aspiration Canvas</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Your Goals</h2>
           <p className="text-sm text-muted-foreground">
-            Each intention painted with purpose, progress with mindfulness
+            Track progress toward your financial dreams with mindful saving
           </p>
         </div>
         
@@ -113,7 +113,7 @@ const GoalList = () => {
           <SumiCard className="bg-gradient-to-br from-muted/30 to-muted/10 border-muted/50">
             <SumiCardContent className="text-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <div className="text-muted-foreground italic">Gathering your aspirations...</div>
+              <div className="text-muted-foreground italic">Loading your goals...</div>
             </SumiCardContent>
           </SumiCard>
         ) : goals.length === 0 ? (
@@ -122,13 +122,12 @@ const GoalList = () => {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-primary">墨</span>
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Begin Your Intentional Journey</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">No Goals Set</h3>
               <div className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
-                Like preparing your canvas before the first brushstroke, set your first aspiration 
-                and watch it take shape through mindful action.
+                Create your first savings goal and watch it take shape through mindful action.
               </div>
               <SumiButton onClick={handleAdd} className="rounded-full">
-                Paint Your First Intention
+                Create First Goal
               </SumiButton>
               <p className="text-xs text-muted-foreground italic mt-6 border-t border-muted pt-4">
                 "Every master began with a single, purposeful stroke"
@@ -139,7 +138,7 @@ const GoalList = () => {
           <>
             <div className="flex justify-center">
               <SumiButton onClick={handleAdd} className="rounded-full shadow-lg">
-                + Paint New Intention
+                + Add New Goal
               </SumiButton>
             </div>
             

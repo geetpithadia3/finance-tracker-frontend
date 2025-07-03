@@ -96,10 +96,10 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
   return (
     <div className="space-y-6">
       <Card className="bg-gray-50 border-gray-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 mr-6">
-              <div className="text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
+              <div className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
                   <Tag className="h-3 w-3 mr-1" />
@@ -107,8 +107,8 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                 </Badge>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-              <DollarSign className="h-6 w-6 inline mr-1" />
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 whitespace-nowrap">
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
               {Math.abs(transaction.amount).toFixed(2)}
             </div>
           </div>
@@ -118,7 +118,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Share Configuration</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Share Configuration</h3>
         </div>
 
         {state.splitType === 'shares' ? (
@@ -127,7 +127,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
               value={state.splitType}
               onValueChange={(value) => dispatch({ type: 'UPDATE_SPLIT_TYPE', value })}
             >
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-10 sm:h-12">
                 <SelectValue placeholder="Split Type" />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +148,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                     calculateShares('shares', value);
                   }}
                   placeholder="0"
-                  className="h-12"
+                  className="h-10 sm:h-12"
                 />
               </div>
               <div className="space-y-2">
@@ -162,7 +162,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                     calculateShares('shares', state.yourShares, value);
                   }}
                   placeholder="0"
-                  className="h-12"
+                  className="h-10 sm:h-12"
                 />
               </div>
             </div>
@@ -179,7 +179,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                   value={state.splitType === 'amount' ? state.personalShare : state.percentage}
                   onChange={(e) => calculateShares(state.splitType, e.target.value)}
                   placeholder={state.splitType === 'amount' ? "0.00" : "0"}
-                  className="h-12"
+                  className="h-10 sm:h-12"
                 />
               </div>
               <div className="space-y-2">
@@ -188,7 +188,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                   value={state.splitType}
                   onValueChange={(value) => dispatch({ type: 'UPDATE_SPLIT_TYPE', value })}
                 >
-                  <SelectTrigger className="h-12 min-w-[140px]">
+                  <SelectTrigger className="h-10 sm:h-12 min-w-[140px]">
                     <SelectValue placeholder="Split Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -203,7 +203,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
         )}
 
         <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <Calculator className="h-5 w-5 text-blue-600" />
@@ -213,14 +213,14 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">Your Share:</span>
-                  <span className="text-lg font-bold text-gray-900">
+                  <span className="text-base sm:text-lg font-bold text-gray-900">
                     <DollarSign className="h-4 w-4 inline mr-1" />
                     {state.personalShare.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">Owed Share:</span>
-                  <span className="text-lg font-bold text-blue-600">
+                  <span className="text-base sm:text-lg font-bold text-blue-600">
                     <DollarSign className="h-4 w-4 inline mr-1" />
                     {state.owedShare.toFixed(2)}
                   </span>
@@ -236,7 +236,7 @@ const ShareEntryStep = ({ state, dispatch, transaction }) => {
                 <Separator className="my-3" />
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Total Amount:</span>
-                  <span className="text-xl font-bold text-gray-900">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900">
                     <DollarSign className="h-5 w-5 inline mr-1" />
                     {Math.abs(transaction.amount).toFixed(2)}
                   </span>
@@ -254,7 +254,7 @@ const SummaryStep = ({ state, transaction }) => {
   return (
     <div className="space-y-6">
       <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-900">Original Transaction</span>
@@ -276,17 +276,17 @@ const SummaryStep = ({ state, transaction }) => {
       </Card>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Share Details</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">Share Details</h3>
         
         <Card className="border-gray-200">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-gray-600" />
                   <span className="font-semibold text-gray-900">Your Share</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-lg sm:text-xl font-bold text-gray-900">
                   <DollarSign className="h-5 w-5 inline mr-1" />
                   {state.personalShare.toFixed(2)}
                 </span>
@@ -297,7 +297,7 @@ const SummaryStep = ({ state, transaction }) => {
                   <Users className="h-5 w-5 text-gray-600" />
                   <span className="font-semibold text-gray-900">Owed Share</span>
                 </div>
-                <span className="text-xl font-bold text-blue-600">
+                <span className="text-lg sm:text-xl font-bold text-blue-600">
                   <DollarSign className="h-5 w-5 inline mr-1" />
                   {state.owedShare.toFixed(2)}
                 </span>
@@ -332,11 +332,11 @@ const SummaryStep = ({ state, transaction }) => {
       </div>
 
       <Card className="bg-green-50 border-green-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center">
             <span className="font-semibold text-gray-900">Total Transaction Amount</span>
-            <span className="text-2xl font-bold text-green-600">
-              <DollarSign className="h-6 w-6 inline mr-1" />
+            <span className="text-lg sm:text-xl font-bold text-green-600">
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
               {Math.abs(transaction.amount).toFixed(2)}
             </span>
           </div>
@@ -399,15 +399,15 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-shrink-0 border-b border-gray-200">
+      <div className="p-4 sm:p-6 flex-shrink-0 border-b border-gray-200">
         <DialogHeader>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <DialogTitle className="text-2xl font-bold text-gray-900">
+            <DialogTitle className="text-base sm:text-2xl font-bold text-gray-900">
               {state.step === 1 ? 'Adjust Shares' : 'Review Shares'}
             </DialogTitle>
             {state.step === 1 && (
-              <div className="text-2xl font-bold text-gray-900">
-                <DollarSign className="h-6 w-6 inline mr-1" />
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
                 {Math.abs(transaction.amount).toFixed(2)}
               </div>
             )}
@@ -416,17 +416,17 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
         <Progress className="mt-4" value={state.step === 1 ? 50 : 100} />
       </div>
 
-      <div className="p-6 flex-1 overflow-y-auto">
+      <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
         {state.step === 1 ? 
           <ShareEntryStep state={state} dispatch={dispatch} transaction={transaction} /> 
           : <SummaryStep state={state} transaction={transaction} />}
       </div>
 
-      <div className="p-6 flex-shrink-0 border-t border-gray-200">
+      <div className="p-4 sm:p-6 flex-shrink-0 border-t border-gray-200">
         <div className="flex w-full gap-4">
           <Button 
             variant="outline" 
-            className="flex-1 h-12 text-base font-medium"
+            className="flex-1 h-10 sm:h-12 text-sm sm:text-base font-medium"
             onClick={() => {
               if (state.step === 1) {
                 onCancel();
@@ -439,7 +439,7 @@ const ShareView = ({ transaction, onSave, onCancel }) => {
           </Button>
           <Button 
             variant="default"
-            className="flex-1 h-12 text-base font-medium gap-2"
+            className="flex-1 h-10 sm:h-12 text-sm sm:text-base font-medium gap-2"
             onClick={() => {
               if (state.step === 1) {
                 dispatch({ type: 'SET_STEP', step: 2 });

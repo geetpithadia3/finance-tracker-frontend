@@ -121,7 +121,7 @@ const BudgetHowItWorks = () => {
           </div>
           
           <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-            <h4 className="font-semibold text-sm mb-2 text-amber-800 dark:text-amber-200">
+            <h4 className="font-semibold text-sm sm:text-base mb-2 text-amber-800 dark:text-amber-200">
               ⚠️ Common Budget Mistakes to Avoid
             </h4>
             <ul className="text-xs text-amber-700 dark:text-amber-300 space-y-1">

@@ -250,7 +250,7 @@ export function BudgetForm({ initialData, onSubmit, onCancel, isEditing = false,
       {categoryLimits.length > 0 && (
         <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
           <span className="font-medium text-foreground">Total Budget:</span>
-          <span className="text-xl font-bold text-primary">
+          <span className="text-lg sm:text-xl font-bold text-primary">
             ${totalBudget.toFixed(2)}
           </span>
         </div>

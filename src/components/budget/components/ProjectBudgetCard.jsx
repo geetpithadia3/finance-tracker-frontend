@@ -247,7 +247,7 @@ export function ProjectBudgetCard({ projectBudget, onEdit, onDelete, onRefresh }
             )}
             
             {isUrgent && !isOverBudget && (
-              <div className="text-center text-xs text-amber-600 italic bg-amber-50/50 rounded-full py-2 px-3">
+              <div className="text-center text-xs sm:text-sm text-amber-600 italic bg-amber-50/50 rounded-full py-2 px-3">
                 "The completion draws near, maintain mindful pace"
               </div>
             )}

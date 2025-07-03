@@ -364,7 +364,7 @@ export function ProjectBudgetForm({ initialData, onSubmit, onCancel, isEditing =
             </span>
           </div>
           <div className="flex justify-between border-t pt-2 border-border">
-            <span className="text-foreground">Remaining:</span>
+            <span className="text-foreground text-sm">Remaining:</span>
             <span className={`font-bold ${(parseFloat(formData.total_amount) - totalAllocated) < 0 ? 'text-destructive' : 'text-primary'}`}>
               ${(parseFloat(formData.total_amount) - totalAllocated).toFixed(2)}
             </span>

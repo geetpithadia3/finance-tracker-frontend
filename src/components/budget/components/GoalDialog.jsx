@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
 import { SumiButton } from '../../ui/sumi-button';
 import { Input } from '../../ui/input';
 import { goalsApi } from '@/api/goals';
@@ -11,18 +11,70 @@ import { cn } from '@/lib/utils';
 
 const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
   const isEdit = !!initialGoal;
-  const [form, setForm] = useState(
-    initialGoal || {
+  console.log('initialGoal', initialGoal);
+  // Helper function to format date for input
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().slice(0, 10); // YYYY-MM-DD format
+    } catch {
+      return '';
+    }
+  };
+  
+  const [form, setForm] = useState(() => {
+    if (initialGoal) {
+      return {
+        name: initialGoal.name || '',
+        description: initialGoal.description || '',
+        target_amount: initialGoal.targetAmount?.toString() || '',
+        current_amount: initialGoal.currentAmount?.toString() || '',
+        deadline: formatDateForInput(initialGoal.deadline),
+        create_temporary_category: false,
+        temporary_category_name: '',
+      };
+    }
+    return {
       name: '',
       description: '',
       target_amount: '',
+      current_amount: '',
       deadline: '',
       create_temporary_category: false,
       temporary_category_name: '',
-    }
-  );
+    };
+  });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Reset form when dialog opens or initialGoal changes
+  useEffect(() => {
+    if (open) {
+      if (initialGoal) {
+        setForm({
+          name: initialGoal.name || '',
+          description: initialGoal.description || '',
+          target_amount: initialGoal.targetAmount?.toString() || '',
+          current_amount: initialGoal.currentAmount?.toString() || '',
+          deadline: formatDateForInput(initialGoal.deadline),
+          create_temporary_category: false,
+          temporary_category_name: '',
+        });
+      } else {
+        setForm({
+          name: '',
+          description: '',
+          target_amount: '',
+          current_amount: '',
+          deadline: '',
+          create_temporary_category: false,
+          temporary_category_name: '',
+        });
+      }
+    }
+  }, [open, initialGoal]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,6 +93,7 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
       const payload = {
         ...form,
         target_amount: Number(form.target_amount),
+        current_amount: Number(form.current_amount || 0),
         deadline: deadlineValue,
       };
       if (isEdit) {
@@ -64,6 +117,9 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Goal' : 'Add New Goal'}</DialogTitle>
+          <DialogDescription>
+            {isEdit ? 'Update your savings goal details below.' : 'Fill out the form to create a new savings goal.'}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -79,6 +135,10 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
             <Input name="target_amount" type="number" value={form.target_amount} onChange={handleChange} required min={1} />
           </div>
           <div>
+            <label className="block text-sm font-medium mb-1">Current Amount Saved</label>
+            <Input name="current_amount" type="number" value={form.current_amount} onChange={handleChange} min={0} max={form.target_amount} placeholder="0" />
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">Deadline</label>
             <Popover>
               <PopoverTrigger asChild>
@@ -90,13 +150,29 @@ const GoalDialog = ({ open, onClose, initialGoal, onSaved }) => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {form.deadline ? form.deadline : <span>Pick a date</span>}
+                  {form.deadline ? 
+                    (() => {
+                      try {
+                        const date = new Date(form.deadline);
+                        return isNaN(date.getTime()) ? 'Pick a date' : date.toLocaleDateString();
+                      } catch {
+                        return 'Pick a date';
+                      }
+                    })() : <span>Pick a date</span>
+                  }
                 </SumiButton>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={form.deadline ? new Date(form.deadline) : undefined}
+                  selected={form.deadline ? (() => {
+                    try {
+                      const date = new Date(form.deadline);
+                      return isNaN(date.getTime()) ? undefined : date;
+                    } catch {
+                      return undefined;
+                    }
+                  })() : undefined}
                   onSelect={(date) => setForm(f => ({ ...f, deadline: date ? date.toISOString().slice(0, 10) : '' }))}
                   initialFocus
                 />

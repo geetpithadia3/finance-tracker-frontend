@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, Target } from 'lucide-react';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { MonthSelector } from '@/components/ui/MonthSelector';
 import FinancialDistributionChart from './FinancialDistributionChart';
@@ -9,7 +8,6 @@ import SpendingTrendsChart from './SpendingTrendsChart';
 import BudgetWidgets from './BudgetWidgets';
 // import GoalList from '../../budget/components/GoalList';
 import GoalsStats from '../../budget/components/GoalsStats';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import HelpButton from '@/components/ui/HelpButton';
 import DashboardHowItWorks from './DashboardHowItWorks';
 
@@ -51,7 +49,7 @@ const Dashboard = () => {
               <span className="text-xl font-bold text-primary">墨</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Your Financial Canvas</h1>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
               <p className="text-sm text-muted-foreground">
                 {selectedDate.format('MMMM YYYY')} • Where intention meets insight
               </p>
@@ -68,7 +66,7 @@ const Dashboard = () => {
               }}
               size="default"
             />
-            <HelpButton title="Understanding Your Canvas" buttonText="Philosophy" size="sm">
+            <HelpButton title="Dashboard Guide" buttonText="Guide" size="sm">
               <DashboardHowItWorks />
             </HelpButton>
           </div>
@@ -80,12 +78,12 @@ const Dashboard = () => {
           <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 sm:col-span-1">
             <CardContent className="p-6 text-center">
               <div className="space-y-2">
-                <div className="text-xs text-primary font-medium tracking-wide uppercase">Flow State</div>
+                <div className="text-xs text-primary font-medium tracking-wide uppercase">Net Income</div>
                 <div className={`text-3xl font-bold ${netFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   ${Math.abs(netFlow)?.toFixed(0) || '0'}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {netFlow >= 0 ? 'Positive Flow' : 'Outflow Exceeds'}
+                  {netFlow >= 0 ? 'Money Left Over' : 'Spending Over Income'}
                 </div>
               </div>
             </CardContent>
@@ -96,7 +94,7 @@ const Dashboard = () => {
             <Card className="border-green-200/50 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800/30">
               <CardContent className="p-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-xs text-green-700 dark:text-green-400 font-medium">Inflow</div>
+                  <div className="text-xs text-green-700 dark:text-green-400 font-medium">Income</div>
                   <div className="text-xl font-semibold text-green-800 dark:text-green-300">${income?.toFixed(0) || '0'}</div>
                 </div>
               </CardContent>
@@ -104,7 +102,7 @@ const Dashboard = () => {
             <Card className="border-blue-200/50 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800/30">
               <CardContent className="p-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-xs text-blue-700 dark:text-blue-400 font-medium">Outflow</div>
+                  <div className="text-xs text-blue-700 dark:text-blue-400 font-medium">Expenses</div>
                   <div className="text-xl font-semibold text-blue-800 dark:text-blue-300">${expenses?.toFixed(0) || '0'}</div>
                 </div>
               </CardContent>
@@ -117,7 +115,7 @@ const Dashboard = () => {
           <CardContent className="p-6">
             <div className="text-center space-y-4">
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">Financial Harmony</h3>
+                <h3 className="text-lg font-semibold text-foreground">Financial Health</h3>
                 <div className="flex items-center justify-center space-x-6">
                   <div className="text-center">
                     <div className={`text-2xl font-bold ${
@@ -130,19 +128,19 @@ const Dashboard = () => {
                     }`}>
                       {financialStatus.status}
                     </div>
-                    <div className="text-xs text-muted-foreground">Balance State</div>
+                    <div className="text-xs text-muted-foreground">Status</div>
                   </div>
                   <div className="w-px h-8 bg-border"></div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-foreground">{budgetUtilization.toFixed(0)}%</div>
-                    <div className="text-xs text-muted-foreground">Budget Flow</div>
+                    <div className="text-xs text-muted-foreground">Budget Used</div>
                   </div>
                 </div>
               </div>
               
               {financialStatus.details && financialStatus.details.length > 0 && (
                 <div className="text-sm text-muted-foreground italic border-t border-muted pt-3">
-                  "{financialStatus.details[0]}"
+                  &quot;{financialStatus.details[0]}&quot;
                 </div>
               )}
             </div>
@@ -153,13 +151,13 @@ const Dashboard = () => {
         <div className="space-y-8">
           {/* Primary Focus: Financial Distribution */}
           <div className="text-center space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">Your Financial Flow</h2>
+            <h2 className="text-lg font-semibold text-foreground">Money Overview</h2>
             <div className="max-w-2xl mx-auto">
               {hasNoData ? (
                 <EmptyChartState 
-                  title="Begin Your Journey" 
-                  emoji="🎋" 
-                  description="Like the first brushstroke on rice paper, add your first transaction to create your financial story"
+                  title="No Data Yet" 
+                  emoji="📊" 
+                  description="Add some transactions to see your income and expense breakdown"
                 />
               ) : (
                 <FinancialDistributionChart income={income} expenses={expenses} savings={savings} />
@@ -168,48 +166,52 @@ const Dashboard = () => {
           </div>
 
           {/* Secondary Insights: Category & Trends */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="space-y-4">
-              <h3 className="text-center font-medium text-foreground">Spending Patterns</h3>
-              {hasNoData ? (
-                <EmptyChartState 
-                  title="Mindful Categories" 
-                  emoji="🌸" 
-                  description="Categorize spending to understand your financial habits"
-                />
-              ) : (
-                <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
-              )}
+              <h3 className="text-center font-medium text-foreground">Spending by Category</h3>
+              <div className="h-[450px]">
+                {hasNoData ? (
+                  <EmptyChartState 
+                    title="No Spending Data" 
+                    emoji="💳" 
+                    description="Add transactions with categories to see your spending breakdown"
+                  />
+                ) : (
+                  <ExpensesByCategoryChart expensesByCategory={expensesByCategory} />
+                )}
+              </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-center font-medium text-foreground">Flow Over Time</h3>
-              <SpendingTrendsChart spendingTrends={spendingTrends} />
+              <h3 className="text-center font-medium text-foreground">Spending Trends</h3>
+              <div className="h-[450px]">
+                <SpendingTrendsChart spendingTrends={spendingTrends} />
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Budget & Goals: Intentional Planning */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-center font-medium text-foreground">Budget Mindfulness</h3>
-              <BudgetWidgets budgetData={budgetCategories} selectedDate={selectedDate} />
-            </div>
+        {/* Budget & Goals: Intentional Planning */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-16">
+          <div className="space-y-4">
+            <h3 className="text-center font-medium text-foreground">Budget Status</h3>
+            <BudgetWidgets budgetData={budgetCategories} selectedDate={selectedDate} />
+          </div>
 
-            <div className="space-y-4">
-              <h3 className="text-center font-medium text-foreground">Intentional Goals</h3>
-              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-                <CardContent className="p-6">
-                  <GoalsStats />
-                </CardContent>
-              </Card>
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-center font-medium text-foreground">Savings Goals</h3>
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <CardContent className="p-6">
+                <GoalsStats />
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         {/* Sumi Wisdom Footer */}
         <div className="text-center py-8 border-t border-muted/30">
           <p className="text-sm text-muted-foreground italic">
-            "The master's canvas reveals not just what is painted, but the wisdom of what is left untouched."
+            &quot;The master&apos;s canvas reveals not just what is painted, but the wisdom of what is left untouched.&quot;
           </p>
         </div>
       </div>

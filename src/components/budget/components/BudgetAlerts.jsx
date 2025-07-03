@@ -257,7 +257,7 @@ export function BudgetAlerts({ yearMonth = null, compact = false, badge = false 
 
         {summary && summary.recommendations && (
           <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-            <h4 className="font-medium text-primary mb-2">Recommendations</h4>
+            <h4 className="font-medium text-primary mb-2 text-sm">Recommendations</h4>
             <ul className="text-sm text-primary space-y-1">
               {summary.recommendations.filter(Boolean).map((rec, index) => (
                 <li key={index} className="flex items-start gap-2">

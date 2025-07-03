@@ -19,10 +19,10 @@ const SplitEntryStep = ({ transaction, categories }) => {
     <div className="space-y-6">
       {/* Original Transaction Card */}
       <Card className="bg-gray-50 border-gray-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 mr-6">
-              <div className="text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
+              <div className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{transaction.description}</div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
                   <Tag className="h-3 w-3 mr-1" />
@@ -30,8 +30,8 @@ const SplitEntryStep = ({ transaction, categories }) => {
                 </Badge>
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-              <DollarSign className="h-6 w-6 inline mr-1" />
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 whitespace-nowrap">
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
               {Math.abs(transaction.amount).toFixed(2)}
             </div>
           </div>
@@ -41,7 +41,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
       {/* Split Items */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Split Details</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Split Details</h3>
           <span className="text-sm text-gray-500">
             {state.splits.length} split{state.splits.length !== 1 ? 's' : ''}
           </span>
@@ -60,7 +60,7 @@ const SplitEntryStep = ({ transaction, categories }) => {
       {/* Add Split Button */}
       <Button
         variant="outline"
-        className="w-full h-12 text-base font-medium gap-2"
+        className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium gap-2"
         onClick={() => dispatch({
           type: 'ADD_SPLIT',
           category: transaction.category
@@ -72,13 +72,13 @@ const SplitEntryStep = ({ transaction, categories }) => {
 
       {/* Remaining Amount Card */}
       <Card className={`${calculations.remainingAmount < 0 ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Calculator className="h-5 w-5 text-gray-600" />
               <span className="font-semibold text-gray-900">Remaining Amount:</span>
             </div>
-            <span className={`text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-blue-600'}`}>
+            <span className={`text-lg sm:text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-blue-600'}`}>
               <DollarSign className="h-5 w-5 inline mr-1" />
               {calculations.remainingAmount.toFixed(2)}
             </span>
@@ -101,7 +101,7 @@ const SummaryStep = ({ transaction }) => {
     <div className="space-y-6">
       {/* Summary Header */}
       <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-900">Original Transaction</span>
@@ -124,7 +124,7 @@ const SummaryStep = ({ transaction }) => {
 
       {/* Split Summary */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Split Summary</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">Split Summary</h3>
         {state.splits.map((split, index) => (
           <Card key={index} className="border-gray-200">
             <CardContent className="p-4">
@@ -151,10 +151,10 @@ const SummaryStep = ({ transaction }) => {
 
       {/* Final Remaining Amount */}
       <Card className={`${calculations.remainingAmount < 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center">
             <span className="font-semibold text-gray-900">Remaining Amount</span>
-            <span className={`text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <span className={`text-lg sm:text-xl font-bold ${calculations.remainingAmount < 0 ? 'text-red-600' : 'text-green-600'}`}>
               <DollarSign className="h-5 w-5 inline mr-1" />
               {calculations.remainingAmount.toFixed(2)}
             </span>
@@ -196,15 +196,15 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
     <SplitViewContext.Provider value={{ state, dispatch, calculations }}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-6 flex-shrink-0 border-b border-gray-200">
+        <div className="p-4 sm:p-6 flex-shrink-0 border-b border-gray-200">
           <DialogHeader>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <DialogTitle className="text-2xl font-bold text-gray-900">
+              <DialogTitle className="text-base sm:text-2xl font-bold text-gray-900">
                 {state.step === 1 ? 'Split Transaction' : 'Review Split'}
               </DialogTitle>
               {state.step === 1 && (
-                <div className="text-2xl font-bold text-gray-900">
-                  <DollarSign className="h-6 w-6 inline mr-1" />
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 inline mr-1" />
                   {Math.abs(transaction.amount).toFixed(2)}
                 </div>
               )}
@@ -214,7 +214,7 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {state.step === 1 ? (
             <SplitEntryStep transaction={transaction} categories={categories} />
           ) : (
@@ -223,11 +223,11 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 flex-shrink-0 border-t border-gray-200">
+        <div className="p-4 sm:p-6 flex-shrink-0 border-t border-gray-200">
           <div className="flex w-full gap-4">
             <Button
               variant="outline"
-              className="flex-1 h-12 text-base font-medium"
+              className="flex-1 h-10 sm:h-12 text-sm sm:text-base font-medium"
               onClick={() => {
                 if (state.step === 1) {
                   onCancel();
@@ -240,7 +240,7 @@ const SplitView = ({ transaction, onSave, onCancel, categories }) => {
             </Button>
             <Button
               variant="default"
-              className="flex-1 h-12 text-base font-medium gap-2"
+              className="flex-1 h-10 sm:h-12 text-sm sm:text-base font-medium gap-2"
               onClick={() => {
                 if (state.step === 1) {
                   dispatch({ type: 'SET_STEP', step: 2 });

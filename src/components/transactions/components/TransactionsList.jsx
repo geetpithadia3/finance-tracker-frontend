@@ -105,9 +105,9 @@ const TransactionsList = () => {
               <span className="text-xl font-bold text-primary">墨</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Financial Brushstrokes</h1>
+              <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
               <p className="text-sm text-muted-foreground">
-                {selectedDate.format('MMMM YYYY')} • Every transaction tells your story
+                {selectedDate.format('MMMM YYYY')} • Every expense tells your story
               </p>
             </div>
           </div>
@@ -122,7 +122,7 @@ const TransactionsList = () => {
               }}
               size="default"
             />
-            <HelpButton title="The Art of Mindful Spending" buttonText="Philosophy" size="sm">
+            <HelpButton title="Transaction Philosophy" buttonText="Guide" size="sm">
               <TransactionsHowItWorks />
             </HelpButton>
           </div>
@@ -138,7 +138,7 @@ const TransactionsList = () => {
               className="rounded-full"
             >
               <Filter className="h-4 w-4 mr-2" />
-              Focus
+              Filter
             </Button>
             <div className="w-px h-6 bg-border"></div>
             <Button
@@ -199,8 +199,8 @@ const TransactionsList = () => {
             <h2 className="text-lg font-semibold text-foreground mb-2">Your Financial Journey</h2>
             <p className="text-sm text-muted-foreground">
               {filteredTransactions.length === 0 
-                ? "Awaiting your first intentional brushstroke"
-                : `${filteredTransactions.length} mindful actions${selectedCategory && selectedCategory !== 'all' ? ` in ${selectedCategory}` : ''}`
+                ? "No transactions yet • Start your mindful spending journey"
+                : `${filteredTransactions.length} transactions this month${selectedCategory && selectedCategory !== 'all' ? ` in ${selectedCategory}` : ''}`
               }
             </p>
           </div>
@@ -213,7 +213,7 @@ const TransactionsList = () => {
                 <div className="p-4 bg-primary/5 flex justify-between items-center border-b border-primary/20">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                    <span className="text-sm text-foreground font-medium">Refining Your Story</span>
+                    <span className="text-sm text-foreground font-medium">Edit Transactions</span>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="ghost" onClick={() => setEditMode(false)} className="rounded-full">
@@ -246,7 +246,7 @@ const TransactionsList = () => {
                     className="rounded-full text-muted-foreground hover:text-foreground"
                   >
                     <Pencil className="h-4 w-4 mr-2" />
-                    Refine Your Story
+                    Edit Transactions
                   </Button>
                 </div>
               )}
@@ -274,40 +274,6 @@ const TransactionsList = () => {
             }}
           />
         )}
-
-        {/* Mindful Action - Add New Brushstroke */}
-        <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end space-y-3">
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full border border-muted/30">
-              Add a mindful action
-            </p>
-          </div>
-          <Button
-            variant="default"
-            size="icon"
-            className="shadow-lg rounded-full w-16 h-16 bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 border border-primary/20"
-            onClick={() => {
-              const generalCategory = categories.find(cat => cat.name === 'General') || categories[0] || { id: '', name: 'General' };
-              setSelectedTransaction({
-                id: `new-${Date.now()}`,
-                description: '',
-                amount: '',
-                type: 'DEBIT',
-                occurredOn: selectedDate.clone().startOf('month').format('YYYY-MM-DD'),
-                category: generalCategory,
-                categoryId: generalCategory.id,
-                personalShare: 0,
-                owedShare: 0,
-                shareMetadata: '',
-                isNew: true
-              });
-              setTransactionModalOpen(true);
-            }}
-            title="Record Mindful Transaction"
-          >
-            <Plus className="w-8 h-8" />
-          </Button>
-        </div>
 
         {/* Sumi Wisdom Footer */}
         <div className="text-center py-8 border-t border-muted/30 mt-16">

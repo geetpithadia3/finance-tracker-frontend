@@ -14,7 +14,7 @@ const GoalDashboard = () => {
               <span className="text-xl font-bold text-primary">墨</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Intentional Aspirations</h1>
+              <h1 className="text-2xl font-bold text-foreground">Goals</h1>
               <p className="text-sm text-muted-foreground">
                 Where dreams take shape through mindful commitment
               </p>
@@ -22,7 +22,7 @@ const GoalDashboard = () => {
           </div>
           
           <div className="flex items-center justify-center gap-4">
-            <HelpButton title="The Art of Purposeful Saving" buttonText="Philosophy" size="sm">
+            <HelpButton title="Goal Philosophy" buttonText="Guide" size="sm">
               <GoalsHowItWorks />
             </HelpButton>
           </div>
